@@ -1,0 +1,20 @@
+name: WhitelistByTime
+main: ru.nightmirror.wlbytime.main.WhitelistByTime
+version: 1.0
+author: NightMirror
+description: Adding a player to the whitelist for a time
+api-version: 1.16
+commands:
+  whitelist:
+    usage: /whitelist [add, remove, check, reload]
+permissions:
+  whitelistbytime.add:
+    default: op
+  whitelistbytime.remove:
+    default: op
+  whitelistbytime.check:
+    default: op
+  whitelistbytime.reload:
+    default: op
+  whitelistbytime.getall:
+    default: op
