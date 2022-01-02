@@ -3,7 +3,7 @@
 ## Features
 - Full customization
 - Memorizing players by nickname case-sensitive
-- Storing data in SQLite
+- Storing data in SQLite or MySQL
 - Executing the /whitelist command both in the console and in the game
 - Convenience of specifying the time and checking how much is left
 
@@ -20,6 +20,17 @@
   
 ## Config
 ```
+# Database
+is-mysql-enabled: false
+
+# If MySQL is disabled, plugin using SQLite
+database-file-name: data.db
+
+# If MySQL is enabled
+mysql-connection: mysuperdomain.com/database_name
+mysql-user: user
+mysql-password: qwerty123
+
 plugin-reloaded: '&6Plugin reloaded!'
 not-permission: '&cYou do not have permission!'
 
@@ -51,7 +62,7 @@ help:
   - '&a| &fExample: 2d 3h 10m'
   - '&a| &fLeave this value empty if you want to add player forever'
 
-timeform:
+time-units:
   year: 'y'
   month: 'mo'
   week: 'w'
