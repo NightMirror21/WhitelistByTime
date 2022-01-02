@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.main.SQLite;
+import ru.nightmirror.wlbytime.main.Database;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +16,7 @@ public class WhitelistTabCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> args = new ArrayList<>();
 
-        SQLite sqLite = SQLite.getInstance();
+        Database database = Database.getInstance();
 
         if (strings.length == 1) {
             if (commandSender.hasPermission("whitelistbytime.add")) args.add("add");
@@ -26,10 +26,10 @@ public class WhitelistTabCompleter implements TabCompleter {
             if (commandSender.hasPermission("whitelistbytime.getall")) args.add("getall");
         } else if (strings.length == 2) {
             List<String> notInWhitelist = new ArrayList<>();
-            List<String> inWhitelist = sqLite.getAll();
+            List<String> inWhitelist = database.getAll();
 
             for (Player player : commandSender.getServer().getOnlinePlayers()) {
-                if (!sqLite.checkPlayer(player.getName())) notInWhitelist.add(player.getName());
+                if (!database.checkPlayer(player.getName())) notInWhitelist.add(player.getName());
             }
 
             switch (strings[0]) {

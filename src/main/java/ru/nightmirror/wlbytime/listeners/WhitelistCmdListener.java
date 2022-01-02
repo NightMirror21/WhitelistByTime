@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.main.SQLite;
+import ru.nightmirror.wlbytime.main.Database;
 import ru.nightmirror.wlbytime.main.Util;
 import ru.nightmirror.wlbytime.main.WhitelistByTime;
 
@@ -30,7 +30,7 @@ public class WhitelistCmdListener implements Listener {
 
             final Player sender = event.getPlayer();
             final Config config = Config.getInstance();
-            final SQLite sqLite = SQLite.getInstance();
+            final Database database = Database.getInstance();
 
             final String[] strings = event.getMessage()
                     .replaceAll("/whitelist", " ")
@@ -51,7 +51,7 @@ public class WhitelistCmdListener implements Listener {
                 if (sender.hasPermission("whitelistbytime.add")) {
                     String addNickname = strings[1];
 
-                    if (!sqLite.checkPlayer(addNickname)) {
+                    if (!database.checkPlayer(addNickname)) {
                         List<String> timeArguments = new ArrayList<>();
 
                         long current = System.currentTimeMillis()+1000L;
@@ -65,7 +65,7 @@ public class WhitelistCmdListener implements Listener {
 
                         if (until == current) until = -1L;
 
-                        sqLite.addPlayer(addNickname, until);
+                        database.addPlayer(addNickname, until);
 
                         if (until == -1L) {
                             sender.sendMessage(config.getLine("successfully-added")
@@ -89,8 +89,8 @@ public class WhitelistCmdListener implements Listener {
                 if (sender.hasPermission("whitelistbytime.remove")) {
                     String removeNickname = strings[1];
 
-                    if (sqLite.checkPlayer(removeNickname)) {
-                        sqLite.removePlayer(removeNickname);
+                    if (database.checkPlayer(removeNickname)) {
+                        database.removePlayer(removeNickname);
 
                         sender.sendMessage(config.getLine("player-removed-from-whitelist")
                                     .replaceAll("%player%", removeNickname));
@@ -108,9 +108,9 @@ public class WhitelistCmdListener implements Listener {
                 if (sender.hasPermission("whitelistbytime.check")) {
                     String checkNickname = strings[1];
 
-                    if (sqLite.checkPlayer(checkNickname)) {
+                    if (database.checkPlayer(checkNickname)) {
 
-                        long until = sqLite.getUntil(checkNickname);
+                        long until = database.getUntil(checkNickname);
 
                         if (until == -1L) {
                             sender.sendMessage(config.getLine("still-in-whitelist")
@@ -135,7 +135,7 @@ public class WhitelistCmdListener implements Listener {
             // Reload
             if (strings[0].equals("reload")) {
                 if (sender.hasPermission("whitelistbytime.reload")) {
-                    sqLite.init(plugin);
+                    database.init(plugin);
                     config.checkConfig(plugin);
 
                     sender.sendMessage(config.getLine("plugin-reloaded"));
@@ -147,13 +147,13 @@ public class WhitelistCmdListener implements Listener {
             // Get all
             if (strings[0].equals("getall")) {
                 if (sender.hasPermission("whitelistbytime.getall")) {
-                    List<String> list = sqLite.getAll();
+                    List<String> list = database.getAll();
                     if (list != null && !list.isEmpty()) {
                         sender.sendMessage(config.getLine("list-title"));
 
                         for (String nickname : list) {
                             String time;
-                            long util = sqLite.getUntil(nickname);
+                            long util = database.getUntil(nickname);
 
                             if (util == -1L) {
                                 time = "forever";
@@ -183,7 +183,7 @@ public class WhitelistCmdListener implements Listener {
 
             final CommandSender sender = event.getSender();
             final Config config = Config.getInstance();
-            final SQLite sqLite = SQLite.getInstance();
+            final Database database = Database.getInstance();
 
             final String[] strings = event.getCommand()
                     .replaceAll("/whitelist", " ")
@@ -203,7 +203,7 @@ public class WhitelistCmdListener implements Listener {
             if (strings.length > 1 && strings[0].equals("add")) {
                 String addNickname = strings[1];
 
-                if (!sqLite.checkPlayer(addNickname)) {
+                if (!database.checkPlayer(addNickname)) {
                     List<String> timeArguments = new ArrayList<>();
 
                     long current = System.currentTimeMillis()+1000L;
@@ -217,7 +217,7 @@ public class WhitelistCmdListener implements Listener {
 
                     if (until == current) until = -1L;
 
-                    sqLite.addPlayer(addNickname, until);
+                    database.addPlayer(addNickname, until);
 
                     if (until == -1L) {
                         sender.sendMessage(config.getLine("successfully-added")
@@ -237,8 +237,8 @@ public class WhitelistCmdListener implements Listener {
             if (strings.length > 1 && strings[0].equals("remove")) {
                 String removeNickname = strings[1];
 
-                if (sqLite.checkPlayer(removeNickname)) {
-                    sqLite.removePlayer(removeNickname);
+                if (database.checkPlayer(removeNickname)) {
+                    database.removePlayer(removeNickname);
 
                     sender.sendMessage(config.getLine("player-removed-from-whitelist")
                             .replaceAll("%player%", removeNickname));
@@ -252,9 +252,9 @@ public class WhitelistCmdListener implements Listener {
             if (strings.length > 1 && strings[0].equals("check")) {
                 String checkNickname = strings[1];
 
-                if (sqLite.checkPlayer(checkNickname)) {
+                if (database.checkPlayer(checkNickname)) {
 
-                    long until = sqLite.getUntil(checkNickname);
+                    long until = database.getUntil(checkNickname);
 
                     if (until == -1L) {
                         sender.sendMessage(config.getLine("still-in-whitelist")
@@ -275,7 +275,7 @@ public class WhitelistCmdListener implements Listener {
 
             // Reload
             if (strings[0].equals("reload")) {
-                sqLite.init(plugin);
+                database.init(plugin);
                 config.checkConfig(plugin);
 
                 sender.sendMessage(config.getLine("plugin-reloaded"));
@@ -283,13 +283,13 @@ public class WhitelistCmdListener implements Listener {
 
             // Get all
             if (strings[0].equals("getall")) {
-                List<String> list = sqLite.getAll();
+                List<String> list = database.getAll();
                 if (list != null && !list.isEmpty()) {
                     sender.sendMessage(config.getLine("list-title"));
 
                     for (String nickname : list) {
                         String time;
-                        long util = sqLite.getUntil(nickname);
+                        long util = database.getUntil(nickname);
 
                         if (util == -1L) {
                             time = "forever";

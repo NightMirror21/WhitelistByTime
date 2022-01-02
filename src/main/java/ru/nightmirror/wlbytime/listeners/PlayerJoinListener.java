@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.main.SQLite;
+import ru.nightmirror.wlbytime.main.Database;
 
 public class PlayerJoinListener implements Listener {
 
@@ -13,7 +13,7 @@ public class PlayerJoinListener implements Listener {
     public void onJoin(PlayerLoginEvent event) {
         Player player = event.getPlayer();
 
-        if (!SQLite.getInstance().checkPlayer(player.getName())) {
+        if (!Database.getInstance().checkPlayer(player.getName())) {
             event.setResult(PlayerLoginEvent.Result.KICK_WHITELIST);
             event.setKickMessage(Config.getInstance().getLine("you-not-in-whitelist"));
         }

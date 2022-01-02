@@ -11,42 +11,66 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class SQLite {
+public class Database {
 
-    private static SQLite instance;
-    private String con_str;
+    private static Database instance;
+    private Boolean mySQLEnabled;
+    private String conStr;
+    private String user;
+    private String password;
     private WhitelistByTime plugin;
     private final Logger log = Logger.getLogger("WhitelistByTime");
 
-    public static SQLite getInstance() {
-        if (instance == null) instance = new SQLite();
+    public static Database getInstance() {
+        if (instance == null) instance = new Database();
         return instance;
     }
 
+    private Connection getConnection() {
+        try {
+            return mySQLEnabled ? DriverManager.getConnection(conStr, user, password) : DriverManager.getConnection(conStr);
+        } catch (Exception e) {
+            log.severe(e.getMessage());
+        }
+        return null;
+    }
+
     public void init(WhitelistByTime plugin) {
+        Config config = Config.getInstance();
+
         this.plugin = plugin;
 
-        try {
-            File directory = new File(plugin.getDataFolder().getAbsolutePath());
+        if (config.getLine("is-mysql-enabled").equalsIgnoreCase("true")) {
+            mySQLEnabled = true;
+            conStr = "jdbc:mysql://" + config.getLine("mysql-connection");
+            user = config.getLine("mysql-user");
+            password = config.getLine("mysql-password");
+        } else {
+            mySQLEnabled = false;
+            conStr = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + File.separator + config.getLine("database-file-name");
 
-            if (!directory.exists()) {
-                directory.mkdirs();
-                new File(plugin.getDataFolder().getAbsolutePath() + "/data.db").createNewFile();
+            try {
+                File directory = new File(plugin.getDataFolder().getAbsolutePath());
+
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                    new File(plugin.getDataFolder().getAbsolutePath() + File.separator + config.getLine("database-file-name")).createNewFile();
+                }
+            } catch (Exception e) {
+                log.severe(e.getMessage());
             }
+        }
 
-            con_str = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + "/data.db";
+        try (
+                Connection connection = getConnection();
+                Statement statement = connection.createStatement();
+        ) {
+            String sql = "CREATE TABLE IF NOT EXISTS whitelist (\n"
+                    + " `nickname` TEXT,\n"
+                    + " `until` INTEGER\n"
+                    + ");";
 
-            try (
-                    Connection connection = DriverManager.getConnection(con_str);
-                    Statement statement = connection.createStatement();
-            ) {
-                String sql = "CREATE TABLE IF NOT EXISTS whitelist (\n"
-                        + " `nickname` TEXT,\n"
-                        + " `until` INTEGER\n"
-                        + ");";
-                statement.execute(sql);
-            }
-
+            statement.execute(sql);
         } catch (Exception e) {
             log.severe(e.getMessage());
         }
@@ -54,11 +78,11 @@ public class SQLite {
 
     public void addPlayer(String nickname, long until) {
         try (
-                Connection connection = DriverManager.getConnection(con_str);
+                Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
 
-            final String query = "INSERT INTO whitelist (`nickname`, `until`)" +
+            final String query = "INSERT INTO whitelist ( nickname`, `until`)" +
                     "VALUES ('"+nickname+"', '"+until+"');";
 
             statement.executeUpdate(query);
@@ -75,7 +99,7 @@ public class SQLite {
 
     private Boolean checkPlayerInWhitelist(String nickname) {
         try (
-                Connection connection = DriverManager.getConnection(con_str);
+                Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
             final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
@@ -112,7 +136,7 @@ public class SQLite {
 
     public long getUntil(String nickname) {
         try (
-                Connection connection = DriverManager.getConnection(con_str);
+                Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
             final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
@@ -132,7 +156,7 @@ public class SQLite {
 
     public void removePlayer(String nickname) {
         try (
-                Connection connection = DriverManager.getConnection(con_str);
+                Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
             final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
@@ -147,7 +171,7 @@ public class SQLite {
 
     public List<String> getAll() {
         try (
-                Connection connection = DriverManager.getConnection(con_str);
+                Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
             final String query = "SELECT * FROM whitelist;";

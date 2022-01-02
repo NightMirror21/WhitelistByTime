@@ -15,8 +15,10 @@ public class WhitelistByTime extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        SQLite.getInstance().init(this);
-        Config.getInstance().checkConfig(this);
+        Config config = Config.getInstance();
+        config.checkConfig(this);
+
+        Database.getInstance().init(this);
 
         Bukkit.getPluginManager().registerEvents(new WhitelistCmdListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
