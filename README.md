@@ -73,3 +73,47 @@ time-units:
   second: 's'
 ```
 
+## API
+
+For usage API download .jar and add it to your project.
+
+**Main API class**:\
+WhitelistByTimeAPI\
+\
+**Events:**\
+PlayerAddedToWhitelistEvent\
+PlayerRemovedFromWhitelist
+
+###Example WhitelistByTimeAPI usage:
+```
+public class RemoveAllFromWhitelistCmd implements CommandExecutor {
+    
+    @Override
+    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+        for (String nickname : WhitelistByTimeAPI.getAllPlayers()) {
+            WhitelistByTimeAPI.removePlayer(nickname);
+        }
+        
+        commandSender.sendMessage("Success!");
+        return true;
+    }
+}
+```
+
+###Example PlayerAddedToWhitelistEvent usage:
+
+```
+public class EventHandler implements Listener {
+    
+    private final Logger log = Logger.getLogger("MySuperPlugin");
+
+    @org.bukkit.event.EventHandler
+    public void onPlayerRemoved(PlayerRemovedFromWhitelistEvent event) {
+        if (event.getNickname().equals("Notch")) {
+            log.warning("Someone tried to remove Notch from whitelist!");
+
+            event.setCancelled(true);
+        }
+    }
+}
+```

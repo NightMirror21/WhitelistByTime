@@ -9,8 +9,6 @@ import ru.nightmirror.wlbytime.listeners.PlayerJoinListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistTabCompleter;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class WhitelistByTime extends JavaPlugin {

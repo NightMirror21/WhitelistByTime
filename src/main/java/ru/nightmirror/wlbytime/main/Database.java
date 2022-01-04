@@ -1,6 +1,9 @@
 package ru.nightmirror.wlbytime.main;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import ru.nightmirror.wlbytime.api.events.PlayerAddedToWhitelistEvent;
+import ru.nightmirror.wlbytime.api.events.PlayerRemovedFromWhitelistEvent;
 
 import java.io.File;
 import java.sql.Connection;
@@ -77,6 +80,10 @@ public class Database {
     }
 
     public void addPlayer(String nickname, long until) {
+        PlayerAddedToWhitelistEvent event = new PlayerAddedToWhitelistEvent(nickname, until);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
@@ -116,7 +123,6 @@ public class Database {
     }
 
     public Boolean checkPlayer(String nickname) {
-
         Boolean inWhitelist = checkPlayerInWhitelist(nickname);
 
         if (inWhitelist) {
@@ -155,6 +161,10 @@ public class Database {
     }
 
     public void removePlayer(String nickname) {
+        PlayerRemovedFromWhitelistEvent event = new PlayerRemovedFromWhitelistEvent(nickname);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) return;
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();

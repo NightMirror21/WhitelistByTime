@@ -17,6 +17,5 @@ public class PlayerJoinListener implements Listener {
             event.setResult(PlayerLoginEvent.Result.KICK_WHITELIST);
             event.setKickMessage(Config.getInstance().getLine("you-not-in-whitelist"));
         }
-
     }
 }
