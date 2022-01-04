@@ -84,7 +84,7 @@ WhitelistByTimeAPI\
 PlayerAddedToWhitelistEvent\
 PlayerRemovedFromWhitelist
 
-###Example WhitelistByTimeAPI usage:
+### Example WhitelistByTimeAPI usage:
 ```
 public class RemoveAllFromWhitelistCmd implements CommandExecutor {
     
@@ -100,7 +100,7 @@ public class RemoveAllFromWhitelistCmd implements CommandExecutor {
 }
 ```
 
-###Example PlayerAddedToWhitelistEvent usage:
+### Example PlayerAddedToWhitelistEvent usage:
 
 ```
 public class EventHandler implements Listener {
