@@ -3,6 +3,7 @@
 ## Features
 - Working at 1.12.2 - 1.18.1
 - Full customization
+- API
 - Memorizing players by nickname case-sensitive
 - Storing data in SQLite or MySQL
 - Executing the /whitelist command both in the console and in the game
