@@ -82,7 +82,7 @@ public class Database {
                 Statement statement = connection.createStatement();
         ) {
 
-            final String query = "INSERT INTO whitelist ( nickname`, `until`)" +
+            final String query = "INSERT INTO whitelist (`nickname`, `until`)" +
                     "VALUES ('"+nickname+"', '"+until+"');";
 
             statement.executeUpdate(query);

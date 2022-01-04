@@ -1,6 +1,7 @@
 # WhitelistByTime
 
 ## Features
+- Working at 1.12.2 - 1.18.1
 - Full customization
 - Memorizing players by nickname case-sensitive
 - Storing data in SQLite or MySQL
@@ -27,7 +28,7 @@ is-mysql-enabled: false
 database-file-name: data.db
 
 # If MySQL is enabled
-mysql-connection: mysuperdomain.com/database_name
+mysql-connection: mysuperdomain.com/database_name:3306
 mysql-user: user
 mysql-password: qwerty123
 

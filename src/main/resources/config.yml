@@ -5,7 +5,7 @@ is-mysql-enabled: false
 database-file-name: data.db
 
 # If MySQL is enabled
-mysql-connection: mysuperdomain.com/database_name
+mysql-connection: mysuperdomain.com/database_name:3306
 mysql-user: user
 mysql-password: qwerty123
 
