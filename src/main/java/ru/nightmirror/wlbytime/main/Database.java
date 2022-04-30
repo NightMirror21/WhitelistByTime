@@ -64,16 +64,16 @@ public class Database {
             }
         }
 
+        final String query = "CREATE TABLE IF NOT EXISTS whitelist (\n"
+                + " `nickname` TEXT,\n"
+                + " `until` INTEGER\n"
+                + ");";
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
-            String sql = "CREATE TABLE IF NOT EXISTS whitelist (\n"
-                    + " `nickname` TEXT,\n"
-                    + " `until` INTEGER\n"
-                    + ");";
-
-            statement.execute(sql);
+            statement.execute(query);
         } catch (Exception e) {
             log.severe(e.getMessage());
         }
@@ -84,14 +84,13 @@ public class Database {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
 
+        final String query = "INSERT INTO whitelist (`nickname`, `until`)" +
+                "VALUES ('"+nickname+"', '"+until+"');";
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
-
-            final String query = "INSERT INTO whitelist (`nickname`, `until`)" +
-                    "VALUES ('"+nickname+"', '"+until+"');";
-
             statement.executeUpdate(query);
 
             if (until == -1L) {
@@ -105,17 +104,14 @@ public class Database {
     }
 
     private Boolean checkPlayerInWhitelist(String nickname) {
+        final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(query);
         ) {
-            final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
-
-            final ResultSet resultSet = statement.executeQuery(query);
-
-            while (resultSet.next()) {
-                return true;
-            }
+            if (resultSet.next()) return true;
         } catch (Exception e) {
             log.severe(e.getMessage());
         }
@@ -141,17 +137,15 @@ public class Database {
     }
 
     public long getUntil(String nickname) {
+        final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(query);
         ) {
-            final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
-
-            final ResultSet resultSet = statement.executeQuery(query);
-
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 long until = resultSet.getLong("until");
-
                 return until;
             }
         } catch (Exception e) {
@@ -165,12 +159,12 @@ public class Database {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
 
+        final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
-            final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
-
             statement.executeUpdate(query);
 
             log.info(ChatColor.YELLOW + "Player " + nickname + " removed from whitelist");
@@ -180,14 +174,13 @@ public class Database {
     }
 
     public List<String> getAll() {
+        final String query = "SELECT * FROM whitelist;";
+
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery(query);
         ) {
-            final String query = "SELECT * FROM whitelist;";
-
-            final ResultSet resultSet = statement.executeQuery(query);
-
             List<String> nicknames = new ArrayList<>();
 
             while (resultSet.next()) {
