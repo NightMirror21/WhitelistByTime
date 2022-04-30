@@ -1,7 +1,6 @@
 package ru.nightmirror.wlbytime.main;
 
 import org.bstats.bukkit.Metrics;
-import org.bstats.charts.DrilldownPie;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -27,6 +26,9 @@ public class WhitelistByTime extends JavaPlugin {
 
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter());
 
+        if (Config.getInstance().getLine("checker-thread").equalsIgnoreCase("true"))
+            new Thread(new Checker(this)).start();
+
         Metrics metrics = new Metrics(this, 13834);
 
         log.info(ChatColor.GREEN + "Enabled!");
@@ -34,6 +36,7 @@ public class WhitelistByTime extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Checker.stop();
         log.info(ChatColor.GOLD + "Disabled");
     }
 }

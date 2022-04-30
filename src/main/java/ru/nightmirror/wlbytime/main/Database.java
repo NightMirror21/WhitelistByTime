@@ -2,8 +2,10 @@ package ru.nightmirror.wlbytime.main;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import ru.nightmirror.wlbytime.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.api.events.PlayerRemovedFromWhitelistEvent;
+import ru.nightmirror.wlbytime.util.Util;
 
 import java.io.File;
 import java.sql.Connection;
@@ -94,9 +96,12 @@ public class Database {
             statement.executeUpdate(query);
 
             if (until == -1L) {
-                log.info(ChatColor.GREEN + "Player " + nickname + " added to whitelist forever");
+                log.info(Config.getInstance().getLine("minecraft-commands.successfully-added")
+                        .replaceAll("%player%", nickname));
             } else {
-                log.info(ChatColor.GREEN + "Player " + nickname + " added to whitelist for " + Util.getTimeLine(until - System.currentTimeMillis()));
+                log.info(Config.getInstance().getLine("minecraft-commands.successfully-added-time")
+                        .replaceAll("%player%", nickname)
+                        .replaceAll("%time%", Util.getTimeLine(until - System.currentTimeMillis())));
             }
         } catch (Exception e) {
             log.severe(e.getMessage());
@@ -128,8 +133,14 @@ public class Database {
                 inWhitelist = true;
             } else {
                 removePlayer(nickname);
-
                 inWhitelist = false;
+            }
+        }
+
+        if (!inWhitelist) {
+            Player player = plugin.getServer().getPlayer(nickname);
+            if (player != null && player.isOnline()) {
+                player.kickPlayer(Config.getInstance().getLine("minecraft-commands.you-not-in-whitelist"));
             }
         }
 
@@ -167,7 +178,8 @@ public class Database {
         ) {
             statement.executeUpdate(query);
 
-            log.info(ChatColor.YELLOW + "Player " + nickname + " removed from whitelist");
+            log.info(Config.getInstance().getLine("minecraft-commands.player-removed-from-whitelist")
+                    .replaceAll("%player%", nickname));
         } catch (Exception e) {
             log.severe(e.getMessage());
         }

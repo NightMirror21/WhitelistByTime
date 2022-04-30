@@ -1,4 +1,6 @@
-package ru.nightmirror.wlbytime.main;
+package ru.nightmirror.wlbytime.util;
+
+import ru.nightmirror.wlbytime.main.Config;
 
 public class Util {
 

@@ -1,7 +1,7 @@
 package ru.nightmirror.wlbytime.api;
 
 import ru.nightmirror.wlbytime.main.Database;
-import ru.nightmirror.wlbytime.main.Util;
+import ru.nightmirror.wlbytime.util.Util;
 
 import java.util.List;
 

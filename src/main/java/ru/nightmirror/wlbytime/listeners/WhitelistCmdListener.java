@@ -8,7 +8,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import ru.nightmirror.wlbytime.main.Config;
 import ru.nightmirror.wlbytime.main.Database;
-import ru.nightmirror.wlbytime.main.Util;
+import ru.nightmirror.wlbytime.util.Util;
 import ru.nightmirror.wlbytime.main.WhitelistByTime;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class WhitelistCmdListener implements Listener {
 
             // Help (..me, please)
             if (strings.length == 0 || strings[0].equals("")) {
-                for (String line : config.getList("help")) {
+                for (String line : config.getList("minecraft-commands.help")) {
                     sender.sendMessage(line);
                 }
 
@@ -68,19 +68,19 @@ public class WhitelistCmdListener implements Listener {
                         database.addPlayer(addNickname, until);
 
                         if (until == -1L) {
-                            sender.sendMessage(config.getLine("successfully-added")
+                            sender.sendMessage(config.getLine("minecraft-commands.successfully-added")
                                     .replaceAll("%player%", addNickname));
                         } else {
-                            sender.sendMessage(config.getLine("successfully-added-time")
+                            sender.sendMessage(config.getLine("minecraft-commands.successfully-added-time")
                                     .replaceAll("%player%", addNickname)
                                     .replaceAll("%time%", Util.getTimeLine(until - System.currentTimeMillis())));
                         }
                     } else {
-                        sender.sendMessage(config.getLine("player-already-in-whitelist")
+                        sender.sendMessage(config.getLine("minecraft-commands.player-already-in-whitelist")
                                 .replaceAll("%player%", addNickname));
                     }
                 } else {
-                    sender.sendMessage(config.getLine("not-permission"));
+                    sender.sendMessage(config.getLine("minecraft-commands.not-permission"));
                 }
             }
 
@@ -92,10 +92,10 @@ public class WhitelistCmdListener implements Listener {
                     if (database.checkPlayer(removeNickname)) {
                         database.removePlayer(removeNickname);
 
-                        sender.sendMessage(config.getLine("player-removed-from-whitelist")
+                        sender.sendMessage(config.getLine("minecraft-commands.player-removed-from-whitelist")
                                     .replaceAll("%player%", removeNickname));
                     } else {
-                        sender.sendMessage(config.getLine("player-not-in-whitelist")
+                        sender.sendMessage(config.getLine("minecraft-commands.player-not-in-whitelist")
                                 .replaceAll("%player%", removeNickname));
                     }
                 } else {
@@ -113,22 +113,22 @@ public class WhitelistCmdListener implements Listener {
                         long until = database.getUntil(checkNickname);
 
                         if (until == -1L) {
-                            sender.sendMessage(config.getLine("still-in-whitelist")
+                            sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist")
                                     .replaceAll("%player%", checkNickname));
                         } else {
                             String time = Util.getTimeLine((until - System.currentTimeMillis()));
 
-                            sender.sendMessage(config.getLine("still-in-whitelist-time")
+                            sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist-time")
                                     .replaceAll("%player%", checkNickname)
                                     .replaceAll("%time%", time));
                         }
 
                     } else {
-                        sender.sendMessage(config.getLine("player-not-in-whitelist")
+                        sender.sendMessage(config.getLine("minecraft-commands.player-not-in-whitelist")
                                 .replaceAll("%player%", checkNickname));
                     }
                 } else {
-                    sender.sendMessage(config.getLine("not-permission"));
+                    sender.sendMessage(config.getLine("minecraft-commands.not-permission"));
                 }
             }
 
@@ -138,9 +138,9 @@ public class WhitelistCmdListener implements Listener {
                     database.init(plugin);
                     config.checkConfig(plugin);
 
-                    sender.sendMessage(config.getLine("plugin-reloaded"));
+                    sender.sendMessage(config.getLine("minecraft-commands.plugin-reloaded"));
                 } else {
-                    sender.sendMessage(config.getLine("not-permission"));
+                    sender.sendMessage(config.getLine("minecraft-commands.not-permission"));
                 }
             }
 
@@ -149,27 +149,27 @@ public class WhitelistCmdListener implements Listener {
                 if (sender.hasPermission("whitelistbytime.getall")) {
                     List<String> list = database.getAll();
                     if (list != null && !list.isEmpty()) {
-                        sender.sendMessage(config.getLine("list-title"));
+                        sender.sendMessage(config.getLine("minecraft-commands.list-title"));
 
                         for (String nickname : list) {
                             String time;
                             long util = database.getUntil(nickname);
 
                             if (util == -1L) {
-                                time = "forever";
+                                time = config.getLine("minecraft-commands.forever");
                             } else {
                                 time = Util.getTimeLine(util - System.currentTimeMillis());
                             }
 
-                            sender.sendMessage(config.getLine("list-player")
+                            sender.sendMessage(config.getLine("minecraft-commands.list-player")
                                     .replaceAll("%player%", nickname)
                                     .replaceAll("%time%", time.trim()));
                         }
                     } else {
-                        sender.sendMessage(config.getLine("list-empty"));
+                        sender.sendMessage(config.getLine("minecraft-commands.list-empty"));
                     }
                 } else {
-                    sender.sendMessage(config.getLine("not-permission"));
+                    sender.sendMessage(config.getLine("minecraft-commands.not-permission"));
                 }
             }
         }
@@ -193,7 +193,7 @@ public class WhitelistCmdListener implements Listener {
 
             // Help (..me, please)
             if (strings.length == 0 || strings[0].equals("")) {
-                for (String line : config.getList("help")) {
+                for (String line : config.getList("minecraft-commands.help")) {
                     sender.sendMessage(line);
                 }
 
@@ -220,15 +220,15 @@ public class WhitelistCmdListener implements Listener {
                     database.addPlayer(addNickname, until);
 
                     if (until == -1L) {
-                        sender.sendMessage(config.getLine("successfully-added")
+                        sender.sendMessage(config.getLine("minecraft-commands.successfully-added")
                                 .replaceAll("%player%", addNickname));
                     } else {
-                        sender.sendMessage(config.getLine("successfully-added-time")
+                        sender.sendMessage(config.getLine("minecraft-commands.successfully-added-time")
                                 .replaceAll("%player%", addNickname)
                                 .replaceAll("%time%", Util.getTimeLine(until - System.currentTimeMillis())));
                     }
                 } else {
-                    sender.sendMessage(config.getLine("player-already-in-whitelist")
+                    sender.sendMessage(config.getLine("minecraft-commands.player-already-in-whitelist")
                             .replaceAll("%player%", addNickname));
                 }
             }
@@ -240,10 +240,10 @@ public class WhitelistCmdListener implements Listener {
                 if (database.checkPlayer(removeNickname)) {
                     database.removePlayer(removeNickname);
 
-                    sender.sendMessage(config.getLine("player-removed-from-whitelist")
+                    sender.sendMessage(config.getLine("minecraft-commands.player-removed-from-whitelist")
                             .replaceAll("%player%", removeNickname));
                 } else {
-                    sender.sendMessage(config.getLine("player-not-in-whitelist")
+                    sender.sendMessage(config.getLine("minecraft-commands.player-not-in-whitelist")
                             .replaceAll("%player%", removeNickname));
                 }
             }
@@ -257,18 +257,18 @@ public class WhitelistCmdListener implements Listener {
                     long until = database.getUntil(checkNickname);
 
                     if (until == -1L) {
-                        sender.sendMessage(config.getLine("still-in-whitelist")
+                        sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist")
                                 .replaceAll("%player%", checkNickname));
                     } else {
                         String time = Util.getTimeLine((until - System.currentTimeMillis()));
 
-                        sender.sendMessage(config.getLine("still-in-whitelist-time")
+                        sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist-time")
                                 .replaceAll("%player%", checkNickname)
                                 .replaceAll("%time%", time));
                     }
 
                 } else {
-                    sender.sendMessage(config.getLine("player-not-in-whitelist")
+                    sender.sendMessage(config.getLine("minecraft-commands.player-not-in-whitelist")
                             .replaceAll("%player%", checkNickname));
                 }
             }
@@ -278,31 +278,31 @@ public class WhitelistCmdListener implements Listener {
                 database.init(plugin);
                 config.checkConfig(plugin);
 
-                sender.sendMessage(config.getLine("plugin-reloaded"));
+                sender.sendMessage(config.getLine("minecraft-commands.plugin-reloaded"));
             }
 
             // Get all
             if (strings[0].equals("getall")) {
                 List<String> list = database.getAll();
                 if (list != null && !list.isEmpty()) {
-                    sender.sendMessage(config.getLine("list-title"));
+                    sender.sendMessage(config.getLine("minecraft-commands.list-title"));
 
                     for (String nickname : list) {
                         String time;
                         long util = database.getUntil(nickname);
 
                         if (util == -1L) {
-                            time = "forever";
+                            time = config.getLine("minecraft-commands.forever");
                         } else {
                             time = Util.getTimeLine(util - System.currentTimeMillis());
                         }
 
-                        sender.sendMessage(config.getLine("list-player")
+                        sender.sendMessage(config.getLine("minecraft-commands.list-player")
                                 .replaceAll("%player%", nickname)
                                 .replaceAll("%time%", time.trim()));
                     }
                 } else {
-                    sender.sendMessage(config.getLine("list-empty"));
+                    sender.sendMessage(config.getLine("minecraft-commands.list-empty"));
                 }
             }
         }

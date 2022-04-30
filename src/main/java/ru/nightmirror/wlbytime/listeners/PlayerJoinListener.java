@@ -15,7 +15,7 @@ public class PlayerJoinListener implements Listener {
 
         if (!Database.getInstance().checkPlayer(player.getName())) {
             event.setResult(PlayerLoginEvent.Result.KICK_WHITELIST);
-            event.setKickMessage(Config.getInstance().getLine("you-not-in-whitelist"));
+            event.setKickMessage(Config.getInstance().getLine("minecraft-commands.you-not-in-whitelist"));
         }
     }
 }
