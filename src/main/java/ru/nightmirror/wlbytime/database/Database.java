@@ -74,6 +74,7 @@ public class Database implements IDatabase {
         return null;
     }
 
+    @Override
     public void addPlayer(String nickname, long until) {
         PlayerAddedToWhitelistEvent event = new PlayerAddedToWhitelistEvent(nickname, until);
         Bukkit.getPluginManager().callEvent(event);
@@ -116,6 +117,7 @@ public class Database implements IDatabase {
         return false;
     }
 
+    @Override
     public Boolean checkPlayer(String nickname) {
         Boolean inWhitelist = checkPlayerInWhitelist(nickname);
 
@@ -140,6 +142,7 @@ public class Database implements IDatabase {
         return inWhitelist;
     }
 
+    @Override
     public long getUntil(String nickname) {
         final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
 
@@ -157,6 +160,7 @@ public class Database implements IDatabase {
         return -1L;
     }
 
+    @Override
     public void removePlayer(String nickname) {
         PlayerRemovedFromWhitelistEvent event = new PlayerRemovedFromWhitelistEvent(nickname);
         Bukkit.getPluginManager().callEvent(event);
@@ -176,6 +180,7 @@ public class Database implements IDatabase {
         }
     }
 
+    @Override
     public List<String> getAll() {
         final String query = "SELECT * FROM whitelist;";
 
