@@ -1,11 +1,13 @@
-package ru.nightmirror.wlbytime.main;
+package ru.nightmirror.wlbytime.database;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.api.events.PlayerRemovedFromWhitelistEvent;
-import ru.nightmirror.wlbytime.util.Util;
+import ru.nightmirror.wlbytime.convertors.ColorsConvertor;
+import ru.nightmirror.wlbytime.main.Config;
+import ru.nightmirror.wlbytime.convertors.TimeConvertor;
 
 import java.io.File;
 import java.sql.Connection;
@@ -16,56 +18,38 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class Database {
+public class Database implements IDatabase {
+    private final Boolean mySQLEnabled;
+    private final String conStr;
+    private final Plugin plugin;
+    private final static Logger LOG = Logger.getLogger("WhitelistByTime");
 
-    private static Database instance;
-    private Boolean mySQLEnabled;
-    private String conStr;
-    private String user;
-    private String password;
-    private WhitelistByTime plugin;
-    private final Logger log = Logger.getLogger("WhitelistByTime");
-
-    public static Database getInstance() {
-        if (instance == null) instance = new Database();
-        return instance;
-    }
-
-    private Connection getConnection() {
-        try {
-            return mySQLEnabled ? DriverManager.getConnection(conStr, user, password) : DriverManager.getConnection(conStr);
-        } catch (Exception e) {
-            log.severe(e.getMessage());
-        }
-        return null;
-    }
-
-    public void init(WhitelistByTime plugin) {
-        Config config = Config.getInstance();
-
+    public Database(Plugin plugin) {
         this.plugin = plugin;
 
-        if (config.getLine("is-mysql-enabled").equalsIgnoreCase("true")) {
+        if (plugin.getConfig().getBoolean("is-mysql-enabled", false)) {
             mySQLEnabled = true;
-            conStr = "jdbc:mysql://" + config.getLine("mysql-connection");
-            user = config.getLine("mysql-user");
-            password = config.getLine("mysql-password");
+            conStr = "jdbc:mysql://" + plugin.getConfig().getString("mysql-connection");
         } else {
             mySQLEnabled = false;
-            conStr = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + File.separator + config.getLine("database-file-name");
+            conStr = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + File.separator + plugin.getConfig().getString("database-file-name", "database.dat");
 
             try {
                 File directory = new File(plugin.getDataFolder().getAbsolutePath());
 
                 if (!directory.exists()) {
                     directory.mkdirs();
-                    new File(plugin.getDataFolder().getAbsolutePath() + File.separator + config.getLine("database-file-name")).createNewFile();
+                    new File(plugin.getDataFolder().getAbsolutePath() + File.separator + plugin.getConfig().getString("database-file-name", "database.dat")).createNewFile();
                 }
             } catch (Exception e) {
-                log.severe(e.getMessage());
+                LOG.severe(e.getMessage());
             }
         }
 
+        createTable();
+    }
+
+    private void createTable() {
         final String query = "CREATE TABLE IF NOT EXISTS whitelist (\n"
                 + " `nickname` TEXT,\n"
                 + " `until` INTEGER\n"
@@ -76,9 +60,18 @@ public class Database {
                 Statement statement = connection.createStatement();
         ) {
             statement.execute(query);
-        } catch (Exception e) {
-            log.severe(e.getMessage());
+        } catch (Exception exception) {
+            LOG.severe("Can't create table: " + exception.getMessage());
         }
+    }
+
+    private Connection getConnection() {
+        try {
+            return mySQLEnabled ? DriverManager.getConnection(conStr, plugin.getConfig().getString("mysql-user"), plugin.getConfig().getString("mysql-password")) : DriverManager.getConnection(conStr);
+        } catch (Exception exception) {
+            LOG.severe("Can't create connection: " + exception.getMessage());
+        }
+        return null;
     }
 
     public void addPlayer(String nickname, long until) {
@@ -96,15 +89,15 @@ public class Database {
             statement.executeUpdate(query);
 
             if (until == -1L) {
-                log.info(Config.getInstance().getLine("minecraft-commands.successfully-added")
+                LOG.info(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added", "null"))
                         .replaceAll("%player%", nickname));
             } else {
-                log.info(Config.getInstance().getLine("minecraft-commands.successfully-added-time")
+                LOG.info(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-time", "null"))
                         .replaceAll("%player%", nickname)
-                        .replaceAll("%time%", Util.getTimeLine(until - System.currentTimeMillis())));
+                        .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis())));
             }
-        } catch (Exception e) {
-            log.severe(e.getMessage());
+        } catch (Exception exception) {
+            LOG.warning("Can't add player: " + exception.getMessage());
         }
     }
 
@@ -117,8 +110,8 @@ public class Database {
                 ResultSet resultSet = statement.executeQuery(query);
         ) {
             if (resultSet.next()) return true;
-        } catch (Exception e) {
-            log.severe(e.getMessage());
+        } catch (Exception exception) {
+            LOG.warning("Can't check player: " + exception.getMessage());
         }
         return false;
     }
@@ -140,7 +133,7 @@ public class Database {
         if (!inWhitelist) {
             Player player = plugin.getServer().getPlayer(nickname);
             if (player != null && player.isOnline()) {
-                player.kickPlayer(Config.getInstance().getLine("minecraft-commands.you-not-in-whitelist"));
+                player.kickPlayer(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.you-not-in-whitelist", "null")));
             }
         }
 
@@ -156,11 +149,10 @@ public class Database {
                 ResultSet resultSet = statement.executeQuery(query);
         ) {
             if (resultSet.next()) {
-                long until = resultSet.getLong("until");
-                return until;
+                return resultSet.getLong("until");
             }
-        } catch (Exception e) {
-            log.severe(e.getMessage());
+        } catch (Exception exception) {
+            LOG.warning("Can't get until: " + exception.getMessage());
         }
         return -1L;
     }
@@ -171,17 +163,16 @@ public class Database {
         if (event.isCancelled()) return;
 
         final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
-
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
         ) {
             statement.executeUpdate(query);
 
-            log.info(Config.getInstance().getLine("minecraft-commands.player-removed-from-whitelist")
+            LOG.info(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.you-not-in-whitelist", "null"))
                     .replaceAll("%player%", nickname));
-        } catch (Exception e) {
-            log.severe(e.getMessage());
+        } catch (Exception exception) {
+            LOG.warning("Can't remove player: " + exception.getMessage());
         }
     }
 
@@ -204,8 +195,8 @@ public class Database {
             }
 
             return nicknames;
-        } catch (Exception e) {
-            log.severe(e.getMessage());
+        } catch (Exception exception) {
+            LOG.warning("Can't get all players: " + exception.getMessage());
         }
         return null;
     }

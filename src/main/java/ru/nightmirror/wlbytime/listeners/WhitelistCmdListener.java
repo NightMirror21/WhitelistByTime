@@ -7,8 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.main.Database;
-import ru.nightmirror.wlbytime.util.Util;
+import ru.nightmirror.wlbytime.database.Database;
+import ru.nightmirror.wlbytime.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.main.WhitelistByTime;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class WhitelistCmdListener implements Listener {
 
                         if (strings.length > 2) {
                             for (int i = 2; i < strings.length; i++) {
-                                until += Util.getTimeMs(strings[i]);
+                                until += TimeConvertor.getTimeMs(plugin, strings[i]);
                             }
                         }
 
@@ -73,7 +73,7 @@ public class WhitelistCmdListener implements Listener {
                         } else {
                             sender.sendMessage(config.getLine("minecraft-commands.successfully-added-time")
                                     .replaceAll("%player%", addNickname)
-                                    .replaceAll("%time%", Util.getTimeLine(until - System.currentTimeMillis())));
+                                    .replaceAll("%time%", TimeConvertor.getTimeLine(until - System.currentTimeMillis())));
                         }
                     } else {
                         sender.sendMessage(config.getLine("minecraft-commands.player-already-in-whitelist")
@@ -116,7 +116,7 @@ public class WhitelistCmdListener implements Listener {
                             sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist")
                                     .replaceAll("%player%", checkNickname));
                         } else {
-                            String time = Util.getTimeLine((until - System.currentTimeMillis()));
+                            String time = TimeConvertor.getTimeLine((until - System.currentTimeMillis()));
 
                             sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist-time")
                                     .replaceAll("%player%", checkNickname)
@@ -158,7 +158,7 @@ public class WhitelistCmdListener implements Listener {
                             if (util == -1L) {
                                 time = config.getLine("minecraft-commands.forever");
                             } else {
-                                time = Util.getTimeLine(util - System.currentTimeMillis());
+                                time = TimeConvertor.getTimeLine(util - System.currentTimeMillis());
                             }
 
                             sender.sendMessage(config.getLine("minecraft-commands.list-player")
@@ -211,7 +211,7 @@ public class WhitelistCmdListener implements Listener {
 
                     if (strings.length > 2) {
                         for (int i = 2; i < strings.length; i++) {
-                            until += Util.getTimeMs(strings[i]);
+                            until += TimeConvertor.getTimeMs(strings[i]);
                         }
                     }
 
@@ -225,7 +225,7 @@ public class WhitelistCmdListener implements Listener {
                     } else {
                         sender.sendMessage(config.getLine("minecraft-commands.successfully-added-time")
                                 .replaceAll("%player%", addNickname)
-                                .replaceAll("%time%", Util.getTimeLine(until - System.currentTimeMillis())));
+                                .replaceAll("%time%", TimeConvertor.getTimeLine(until - System.currentTimeMillis())));
                     }
                 } else {
                     sender.sendMessage(config.getLine("minecraft-commands.player-already-in-whitelist")
@@ -260,7 +260,7 @@ public class WhitelistCmdListener implements Listener {
                         sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist")
                                 .replaceAll("%player%", checkNickname));
                     } else {
-                        String time = Util.getTimeLine((until - System.currentTimeMillis()));
+                        String time = TimeConvertor.getTimeLine((until - System.currentTimeMillis()));
 
                         sender.sendMessage(config.getLine("minecraft-commands.still-in-whitelist-time")
                                 .replaceAll("%player%", checkNickname)
@@ -294,7 +294,7 @@ public class WhitelistCmdListener implements Listener {
                         if (util == -1L) {
                             time = config.getLine("minecraft-commands.forever");
                         } else {
-                            time = Util.getTimeLine(util - System.currentTimeMillis());
+                            time = TimeConvertor.getTimeLine(util - System.currentTimeMillis());
                         }
 
                         sender.sendMessage(config.getLine("minecraft-commands.list-player")

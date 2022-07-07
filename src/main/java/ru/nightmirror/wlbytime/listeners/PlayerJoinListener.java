@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.main.Database;
+import ru.nightmirror.wlbytime.database.Database;
 
 public class PlayerJoinListener implements Listener {
 

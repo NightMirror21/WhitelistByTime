@@ -1,6 +1,7 @@
 package ru.nightmirror.wlbytime.main;
 
 import org.bukkit.entity.Player;
+import ru.nightmirror.wlbytime.database.Database;
 
 public class Checker implements Runnable {
 

@@ -1,7 +1,7 @@
 package ru.nightmirror.wlbytime.api;
 
-import ru.nightmirror.wlbytime.main.Database;
-import ru.nightmirror.wlbytime.util.Util;
+import ru.nightmirror.wlbytime.database.Database;
+import ru.nightmirror.wlbytime.convertors.TimeConvertor;
 
 import java.util.List;
 
@@ -27,7 +27,7 @@ public class WhitelistByTimeAPI {
     }
 
     public static String getUntilString(String nickname) {
-        return Util.getTimeLine(database.getUntil(nickname) - System.currentTimeMillis());
+        return TimeConvertor.getTimeLine(database.getUntil(nickname) - System.currentTimeMillis());
     }
 
     public static void removePlayer(String nickname) {

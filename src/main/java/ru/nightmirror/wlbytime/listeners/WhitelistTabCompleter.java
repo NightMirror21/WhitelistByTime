@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.main.Database;
+import ru.nightmirror.wlbytime.database.Database;
 
 import java.util.ArrayList;
 import java.util.List;

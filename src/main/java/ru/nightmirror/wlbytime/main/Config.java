@@ -28,18 +28,18 @@ public class Config {
         config = plugin.getConfig();
     }
 
-    public List<String> getList(String id) {
-        List<String> result = new ArrayList<>();
-
-        for (String str : config.getStringList(id)) {
-            result.add(str.replaceAll("&", "§"));
-        }
-
-        return result;
-    }
-
-    public String getLine(String id) {
-        return config.getString(id, "null").replaceAll("&", "§");
-    }
+//    public List<String> getList(String id) {
+//        List<String> result = new ArrayList<>();
+//
+//        for (String str : config.getStringList(id)) {
+//            result.add(str.replaceAll("&", "§"));
+//        }
+//
+//        return result;
+//    }
+//
+//    public String getLine(String id) {
+//        return config.getString(id, "null").replaceAll("&", "§");
+//    }
 
 }
