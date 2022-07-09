@@ -147,6 +147,30 @@ public class Database implements IDatabase {
         return inWhitelist;
     }
 
+    private Boolean checkPlayer(String nickname, Connection connection) {
+        Boolean inWhitelist = checkPlayerInWhitelist(nickname);
+
+        if (inWhitelist) {
+            long until = getUntil(nickname);
+
+            if (until == -1L || until > System.currentTimeMillis()) {
+                inWhitelist = true;
+            } else {
+                removePlayer(nickname, connection);
+                inWhitelist = false;
+            }
+        }
+
+        if (!inWhitelist) {
+            Player player = plugin.getServer().getPlayer(nickname);
+            if (player != null && player.isOnline()) {
+                player.kickPlayer(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.you-not-in-whitelist", "null")));
+            }
+        }
+
+        return inWhitelist;
+    }
+
     @Override
     public long getUntil(String nickname) {
         final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
@@ -189,11 +213,30 @@ public class Database implements IDatabase {
     public void removePlayer(String nickname) {
         PlayerRemovedFromWhitelistEvent event = new PlayerRemovedFromWhitelistEvent(nickname);
         Bukkit.getPluginManager().callEvent(event);
+
         if (event.isCancelled()) return;
 
         final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
         try (
                 Connection connection = getConnection();
+                Statement statement = connection.createStatement();
+        ) {
+            statement.executeUpdate(query);
+
+            LOG.info("Player "+nickname+" removed");
+        } catch (Exception exception) {
+            LOG.warning("Can't remove player: " + exception.getMessage());
+        }
+    }
+
+    private void removePlayer(String nickname, Connection connection) {
+        PlayerRemovedFromWhitelistEvent event = new PlayerRemovedFromWhitelistEvent(nickname);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return;
+
+        final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
+        try (
                 Statement statement = connection.createStatement();
         ) {
             statement.executeUpdate(query);
@@ -218,7 +261,7 @@ public class Database implements IDatabase {
             while (resultSet.next()) {
                 String nickname = resultSet.getString("nickname");
 
-                if (checkPlayer(nickname)) {
+                if (checkPlayer(nickname, connection)) {
                     nicknames.add(nickname);
                 }
             }
