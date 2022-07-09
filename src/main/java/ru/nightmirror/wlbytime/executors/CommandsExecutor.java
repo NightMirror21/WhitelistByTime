@@ -157,10 +157,6 @@ public class CommandsExecutor implements ICommandsExecutor {
 
     @Override
     public void execute(CommandSender sender, String[] strings) {
-        System.out.println("------");
-        for (String str : strings) {
-            System.out.println(str);
-        }
         if (strings.length == 0 || strings[0].equals("")) {
             help(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("add")) {
