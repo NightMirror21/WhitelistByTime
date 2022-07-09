@@ -22,9 +22,9 @@ public class WhitelistCmdListener implements Listener {
     private final IDatabase database;
     private final Plugin plugin;
 
-    private final ICommandsExecutor executor = new CommandsExecutor(database, plugin);
+    private final ICommandsExecutor executor;
 
-    private final static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist", "/wl", "wl");
+    private final static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist");
 
     @EventHandler
     private void onPlayerWhitelistCommand(PlayerCommandPreprocessEvent event) {
@@ -42,7 +42,7 @@ public class WhitelistCmdListener implements Listener {
                     .trim()
                     .split(" ");
 
-            doCommand(sender, strings);
+            executor.execute(sender, strings);
         }
     }
 
@@ -60,11 +60,7 @@ public class WhitelistCmdListener implements Listener {
                     .trim()
                     .split(" ");
 
-            doCommand(sender, strings);
+            executor.execute(sender, strings);
         }
-    }
-
-    private void doCommand(CommandSender sender, String[] strings) {
-        WhitelistCommandExecutor.doCommand(sender, strings, executor);
     }
 }

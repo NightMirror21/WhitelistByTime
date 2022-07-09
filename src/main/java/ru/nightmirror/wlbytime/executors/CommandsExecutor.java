@@ -154,4 +154,27 @@ public class CommandsExecutor implements ICommandsExecutor {
                     .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis())));
         }
     }
+
+    @Override
+    public void execute(CommandSender sender, String[] strings) {
+        System.out.println("------");
+        for (String str : strings) {
+            System.out.println(str);
+        }
+        if (strings.length == 0 || strings[0].equals("")) {
+            help(sender, strings);
+        } else if (strings.length > 1 && strings[0].equals("add")) {
+            add(sender, strings);
+        } else if (strings.length > 1 && strings[0].equals("remove")) {
+            remove(sender, strings);
+        } else if (strings.length > 1 && strings[0].equals("check")) {
+            check(sender, strings);
+        } else if (strings[0].equals("reload")) {
+            reload(sender, strings);
+        } else if (strings[0].equals("getall")) {
+            getAll(sender, strings);
+        } else {
+            help(sender, strings);
+        }
+    }
 }

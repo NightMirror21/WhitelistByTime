@@ -6,8 +6,9 @@ description: Adding a player to the whitelist for a time
 api-version: 1.16
 commands:
   whitelist:
-    usage: /whitelist [add, remove, check, reload]
-    aliases: [wl, whitelist]
+    usage: /whitelist help
+  wl:
+    usage: /wl help
 permissions:
   whitelistbytime.add:
     default: op

@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.listeners;
+package ru.nightmirror.wlbytime.executors.minecraft;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.command.Command;
@@ -54,17 +54,12 @@ public class WhitelistTabCompleter implements TabCompleter {
                     break;
             }
         } else if (strings.length == 3) {
-            if (commandSender.hasPermission("whitelistbytime.add") && strings[1].equals("add")) {
+            if (commandSender.hasPermission("whitelistbytime.add") && strings[0].equals("add")) {
                 // :D
-                args.add("1"+plugin.getConfig().getString("month"));
-                args.add("1"+plugin.getConfig().getString("week"));
-                args.add("3"+plugin.getConfig().getString("day"));
-                args.add("1"+plugin.getConfig().getString("day"));
-                args.add("12"+plugin.getConfig().getString("hour"));
-                args.add("8"+plugin.getConfig().getString("hour"));
-                args.add("1"+plugin.getConfig().getString("hour"));
-                args.add("30"+plugin.getConfig().getString("minute"));
-                args.add("15"+plugin.getConfig().getString("minute"));
+                args.add("1"+plugin.getConfig().getString("time-units.month"));
+                args.add("1"+plugin.getConfig().getString("time-units.week"));
+                args.add("1"+plugin.getConfig().getString("time-units.day"));
+                args.add("12"+plugin.getConfig().getString("time-units.hour"));
             }
         }
 
