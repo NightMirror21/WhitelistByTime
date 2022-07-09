@@ -5,11 +5,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.checkerframework.checker.units.qual.A;
 import ru.nightmirror.wlbytime.api.API;
 import ru.nightmirror.wlbytime.api.IAPI;
+import ru.nightmirror.wlbytime.common.Checker;
 import ru.nightmirror.wlbytime.config.ConfigUtils;
+import ru.nightmirror.wlbytime.database.Database;
 import ru.nightmirror.wlbytime.database.IDatabase;
+import ru.nightmirror.wlbytime.executors.CommandsExecutor;
+import ru.nightmirror.wlbytime.executors.minecraft.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.listeners.PlayerJoinListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistTabCompleter;
@@ -28,9 +31,12 @@ public class WhitelistByTime extends JavaPlugin {
     public void onEnable() {
         ConfigUtils.checkConfig(this);
 
+        database = new Database(this);
+
         Bukkit.getPluginManager().registerEvents(new WhitelistCmdListener(database, this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(database, this), this);
 
+        getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
 
         if (getConfig().getBoolean("checker-thread", true)) {

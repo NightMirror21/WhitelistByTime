@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.main;
+package ru.nightmirror.wlbytime.common;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
@@ -7,6 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import ru.nightmirror.wlbytime.database.Database;
 import ru.nightmirror.wlbytime.database.IDatabase;
+import ru.nightmirror.wlbytime.main.WhitelistByTime;
 
 @RequiredArgsConstructor
 public class Checker {
