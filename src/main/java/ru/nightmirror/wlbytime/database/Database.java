@@ -98,12 +98,9 @@ public class Database implements IDatabase {
             statement.executeUpdate(query);
 
             if (until == -1L) {
-                LOG.info(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added", "null"))
-                        .replaceAll("%player%", nickname));
+                LOG.info("Player "+nickname+" added to whitelist forever");
             } else {
-                LOG.info(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-time", "null"))
-                        .replaceAll("%player%", nickname)
-                        .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis())));
+                LOG.info("Player "+nickname+" added to whitelist for "+TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()));
             }
         } catch (Exception exception) {
             LOG.warning("Can't add player: " + exception.getMessage());
@@ -169,6 +166,26 @@ public class Database implements IDatabase {
     }
 
     @Override
+    public void setUntil(String nickname, long until) {
+        final String query = "UPDATE whitelist SET until = '"+until+"' WHERE nickname = '"+nickname+"';";
+
+        try (
+                Connection connection = getConnection();
+                Statement statement = connection.createStatement();
+                ) {
+            statement.executeUpdate(query);
+
+            if (until == -1L) {
+                LOG.info("Set time for "+nickname+" forever");
+            } else {
+                LOG.info("Set time for "+nickname+" "+TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()));
+            }
+        } catch (Exception exception) {
+            LOG.warning("Can't set time for player: " + nickname);
+        }
+    }
+
+    @Override
     public void removePlayer(String nickname) {
         PlayerRemovedFromWhitelistEvent event = new PlayerRemovedFromWhitelistEvent(nickname);
         Bukkit.getPluginManager().callEvent(event);
@@ -181,8 +198,7 @@ public class Database implements IDatabase {
         ) {
             statement.executeUpdate(query);
 
-            LOG.info(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.you-not-in-whitelist", "null"))
-                    .replaceAll("%player%", nickname));
+            LOG.info("Player "+nickname+" removed");
         } catch (Exception exception) {
             LOG.warning("Can't remove player: " + exception.getMessage());
         }

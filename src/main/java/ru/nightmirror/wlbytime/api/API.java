@@ -46,4 +46,11 @@ public class API implements IAPI {
     public List<String> getAllPlayers() {
         return database.getAll();
     }
+
+    @Override
+    public boolean setUntil(String nickname, long until) {
+        if (!database.checkPlayer(nickname)) return false;
+        database.setUntil(nickname, until);
+        return true;
+    }
 }

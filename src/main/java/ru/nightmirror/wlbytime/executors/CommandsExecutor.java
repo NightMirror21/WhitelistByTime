@@ -105,7 +105,7 @@ public class CommandsExecutor implements ICommandsExecutor {
             } else {
                 String time = TimeConvertor.getTimeLine(plugin, (until - System.currentTimeMillis()));
 
-                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.still-in-whitelist-time"))
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.still-in-whitelist-for-time"))
                         .replaceAll("%player%", checkNickname)
                         .replaceAll("%time%", time));
             }
@@ -149,9 +149,70 @@ public class CommandsExecutor implements ICommandsExecutor {
             sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added"))
                     .replaceAll("%player%", addNickname));
         } else {
-            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-time"))
+            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-for-time"))
                     .replaceAll("%player%", addNickname)
                     .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis())));
+        }
+    }
+
+    @Override
+    public void time(CommandSender sender, String[] strings) {
+        String nickname = strings[2];
+        boolean playerExists = database.checkPlayer(nickname);
+
+        long current = System.currentTimeMillis()+1000L;
+        long until = current;
+
+        for (int i = 3; i < strings.length; i++) {
+            until += TimeConvertor.getTimeMs(plugin, strings[i]);
+        }
+
+        switch (strings[1]) {
+            case "set":
+                if (playerExists) {
+                    sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.set-time"))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()))
+                            .replaceAll("%player%", nickname));
+                    database.setUntil(nickname, until);
+                } else {
+                    sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-for-time"))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()-1000L))
+                            .replaceAll("%player%", nickname));
+                    database.addPlayer(nickname, until);
+                }
+                break;
+            case "add":
+                if (playerExists) {
+                    sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.add-time"))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()-1000L))
+                            .replaceAll("%player%", nickname));
+                    database.setUntil(nickname, (database.getUntil(nickname) + (until-System.currentTimeMillis())));
+                } else {
+                    sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-for-time"))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()))
+                            .replaceAll("%player%", nickname));
+                    database.addPlayer(nickname, until);
+                }
+                break;
+            case "remove":
+                if (playerExists) {
+                    if ((database.getUntil(nickname) - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
+                        sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.remove-time"))
+                                .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis()))
+                                .replaceAll("%player%", nickname));
+                        database.setUntil(nickname, (database.getUntil(nickname) - (until - System.currentTimeMillis())));
+                    } else {
+                        sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.player-removed-from-whitelist"))
+                                .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis()))
+                                .replaceAll("%player%", nickname));
+                        database.removePlayer(nickname);
+                    }
+                } else {
+                    sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.player-not-in-whitelist"))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()))
+                            .replaceAll("%player%", nickname));
+                }
+                break;
         }
     }
 
@@ -167,6 +228,8 @@ public class CommandsExecutor implements ICommandsExecutor {
             check(sender, strings);
         } else if (strings[0].equals("reload")) {
             reload(sender, strings);
+        } else if (strings.length > 3 && strings[0].equals("time")) {
+            time(sender, strings);
         } else if (strings[0].equals("getall")) {
             getAll(sender, strings);
         } else {

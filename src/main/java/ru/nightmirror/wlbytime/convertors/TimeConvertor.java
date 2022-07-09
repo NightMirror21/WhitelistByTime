@@ -39,7 +39,7 @@ public class TimeConvertor {
 
         if (ms != 0L) line = line + (ms/1000L) + plugin.getConfig().getString("time-units.second") + " ";
 
-        return line;
+        return line.trim();
     }
 
     public static long getTimeMs(Plugin plugin, String line) {

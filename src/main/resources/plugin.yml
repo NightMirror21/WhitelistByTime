@@ -20,3 +20,5 @@ permissions:
     default: op
   whitelistbytime.getall:
     default: op
+  whitelistbytime.time:
+    default: op
