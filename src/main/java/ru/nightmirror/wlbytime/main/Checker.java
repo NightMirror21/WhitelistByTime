@@ -1,29 +1,27 @@
 package ru.nightmirror.wlbytime.main;
 
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import ru.nightmirror.wlbytime.database.Database;
+import ru.nightmirror.wlbytime.database.IDatabase;
 
-public class Checker implements Runnable {
+@RequiredArgsConstructor
+public class Checker {
 
-    private static Boolean flag = true;
     private final WhitelistByTime plugin;
-    private final Database database = Database.getInstance();
+    private final IDatabase database;
 
-    public Checker(WhitelistByTime plugin) {
-        this.plugin = plugin;
-    }
-
-    @Override
-    public void run() {
-        while (flag) {
-            try { Thread.sleep(1000); } catch (Exception exception) { }
-            for (Player player : plugin.getServer().getOnlinePlayers()) {
-                database.checkPlayer(player.getName());
+    public BukkitTask start(final int delaySeconds) {
+        return new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : plugin.getServer().getOnlinePlayers()) {
+                    database.checkPlayer(player.getName());
+                }
             }
-        }
-    }
-
-    public static void stop() {
-        flag = false;
+        }.runTaskTimerAsynchronously(plugin, 20L * delaySeconds, 20L * delaySeconds);
     }
 }

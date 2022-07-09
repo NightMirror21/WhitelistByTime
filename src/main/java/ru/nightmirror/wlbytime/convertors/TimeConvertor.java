@@ -1,7 +1,6 @@
 package ru.nightmirror.wlbytime.convertors;
 
 import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.main.Config;
 
 public class TimeConvertor {
 
@@ -44,7 +43,6 @@ public class TimeConvertor {
     }
 
     public static long getTimeMs(Plugin plugin, String line) {
-        Config config = Config.getInstance();
         long time = 0;
 
         for (String timeStr : line.split(" ")) {

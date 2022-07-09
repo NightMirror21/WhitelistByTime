@@ -4,7 +4,12 @@ import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.nightmirror.wlbytime.database.Database;
+import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.units.qual.A;
+import ru.nightmirror.wlbytime.api.API;
+import ru.nightmirror.wlbytime.api.IAPI;
+import ru.nightmirror.wlbytime.config.ConfigUtils;
+import ru.nightmirror.wlbytime.database.IDatabase;
 import ru.nightmirror.wlbytime.listeners.PlayerJoinListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistTabCompleter;
@@ -14,21 +19,25 @@ import java.util.logging.Logger;
 public class WhitelistByTime extends JavaPlugin {
 
     private final Logger log = Logger.getLogger("WhitelistByTime");
+    private IDatabase database;
+    private static IAPI api;
+
+    private BukkitTask checker;
 
     @Override
     public void onEnable() {
-        Config config = Config.getInstance();
-        config.checkConfig(this);
+        ConfigUtils.checkConfig(this);
 
-        Database.getInstance().init(this);
+        Bukkit.getPluginManager().registerEvents(new WhitelistCmdListener(database, this), this);
+        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(database, this), this);
 
-        Bukkit.getPluginManager().registerEvents(new WhitelistCmdListener(this), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerJoinListener(), this);
+        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
 
-        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter());
+        if (getConfig().getBoolean("checker-thread", true)) {
+            checker = new Checker(this, database).start(getConfig().getInt("checker-thread", 1));
+        }
 
-        if (Config.getInstance().getLine("checker-thread").equalsIgnoreCase("true"))
-            new Thread(new Checker(this)).start();
+        api = new API(database, this);
 
         Metrics metrics = new Metrics(this, 13834);
 
@@ -37,7 +46,14 @@ public class WhitelistByTime extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        Checker.stop();
+        if (checker != null) {
+            checker.cancel();
+        }
+
         log.info(ChatColor.GOLD + "Disabled");
+    }
+
+    public static IAPI getAPI() {
+        return api;
     }
 }

@@ -1,7 +1,9 @@
 ####### SETTINGS #######
 
-# Checks the player in the whitelist every second
+# Checks the player in the whitelist
 checker-thread: true
+# The delay through which the thread will check players. In seconds
+checker-delay: 1
 
 
 ####### DATABASE #######

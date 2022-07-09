@@ -23,21 +23,20 @@
 
 For usage API download .jar and add it to your project.
 
-**Main API class**:\
-WhitelistByTimeAPI\
-\
 **Events:**\
 PlayerAddedToWhitelistEvent\
 PlayerRemovedFromWhitelist
 
-### Example WhitelistByTimeAPI usage:
+### Example API usage:
 ```java
 public class Command implements CommandExecutor {
+    
+    private final IAPI api = WhitelistByTime.getAPI();
     
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         for (String nickname : WhitelistByTimeAPI.getAllPlayers()) {
-            WhitelistByTimeAPI.removePlayer(nickname);
+            api.removePlayer(nickname);
         }
         
         commandSender.sendMessage("Success!");

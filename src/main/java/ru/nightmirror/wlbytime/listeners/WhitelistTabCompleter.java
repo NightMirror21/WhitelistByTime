@@ -1,22 +1,25 @@
 package ru.nightmirror.wlbytime.listeners;
 
+import lombok.RequiredArgsConstructor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import ru.nightmirror.wlbytime.main.Config;
-import ru.nightmirror.wlbytime.database.Database;
+import org.bukkit.plugin.Plugin;
+import ru.nightmirror.wlbytime.database.IDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 public class WhitelistTabCompleter implements TabCompleter {
+
+    private final IDatabase database;
+    private final Plugin plugin;
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         List<String> args = new ArrayList<>();
-
-        Database database = Database.getInstance();
 
         if (strings.length == 1) {
             if (commandSender.hasPermission("whitelistbytime.add")) args.add("add");
@@ -52,18 +55,16 @@ public class WhitelistTabCompleter implements TabCompleter {
             }
         } else if (strings.length == 3) {
             if (commandSender.hasPermission("whitelistbytime.add") && strings[1].equals("add")) {
-                Config config = Config.getInstance();
-
                 // :D
-                args.add("1"+config.getLine("month"));
-                args.add("1"+config.getLine("week"));
-                args.add("3"+config.getLine("day"));
-                args.add("1"+config.getLine("day"));
-                args.add("12"+config.getLine("hour"));
-                args.add("8"+config.getLine("hour"));
-                args.add("1"+config.getLine("hour"));
-                args.add("30"+config.getLine("minute"));
-                args.add("15"+config.getLine("minute"));
+                args.add("1"+plugin.getConfig().getString("month"));
+                args.add("1"+plugin.getConfig().getString("week"));
+                args.add("3"+plugin.getConfig().getString("day"));
+                args.add("1"+plugin.getConfig().getString("day"));
+                args.add("12"+plugin.getConfig().getString("hour"));
+                args.add("8"+plugin.getConfig().getString("hour"));
+                args.add("1"+plugin.getConfig().getString("hour"));
+                args.add("30"+plugin.getConfig().getString("minute"));
+                args.add("15"+plugin.getConfig().getString("minute"));
             }
         }
 

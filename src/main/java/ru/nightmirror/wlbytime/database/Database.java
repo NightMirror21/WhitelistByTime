@@ -6,7 +6,6 @@ import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.api.events.PlayerRemovedFromWhitelistEvent;
 import ru.nightmirror.wlbytime.convertors.ColorsConvertor;
-import ru.nightmirror.wlbytime.main.Config;
 import ru.nightmirror.wlbytime.convertors.TimeConvertor;
 
 import java.io.File;
@@ -19,14 +18,17 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class Database implements IDatabase {
-    private final Boolean mySQLEnabled;
-    private final String conStr;
+    private Boolean mySQLEnabled;
+    private String conStr;
     private final Plugin plugin;
     private final static Logger LOG = Logger.getLogger("WhitelistByTime");
 
     public Database(Plugin plugin) {
         this.plugin = plugin;
+        enable();
+    }
 
+    private void enable() {
         if (plugin.getConfig().getBoolean("is-mysql-enabled", false)) {
             mySQLEnabled = true;
             conStr = "jdbc:mysql://" + plugin.getConfig().getString("mysql-connection");
@@ -47,6 +49,12 @@ public class Database implements IDatabase {
         }
 
         createTable();
+    }
+
+    @Override
+    public void reload() {
+        LOG.info("Reloading database...");
+        enable();
     }
 
     private void createTable() {
