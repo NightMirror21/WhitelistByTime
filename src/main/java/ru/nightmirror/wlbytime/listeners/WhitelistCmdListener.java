@@ -24,7 +24,7 @@ public class WhitelistCmdListener implements Listener {
 
     private final ICommandsExecutor executor;
 
-    private final static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist");
+    private final static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist", "/wl", "wl");
 
     @EventHandler
     private void onPlayerWhitelistCommand(PlayerCommandPreprocessEvent event) {
@@ -56,7 +56,9 @@ public class WhitelistCmdListener implements Listener {
             final CommandSender sender = event.getSender();
             final String[] strings = event.getCommand()
                     .replaceAll("/whitelist", " ")
+                    .replaceAll("/wl", " ")
                     .replaceAll("whitelist", " ")
+                    .replaceAll("wl", " ")
                     .trim()
                     .split(" ");
 
