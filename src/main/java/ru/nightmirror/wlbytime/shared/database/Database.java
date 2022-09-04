@@ -1,12 +1,12 @@
-package ru.nightmirror.wlbytime.database;
+package ru.nightmirror.wlbytime.shared.database;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.api.events.PlayerAddedToWhitelistEvent;
-import ru.nightmirror.wlbytime.api.events.PlayerRemovedFromWhitelistEvent;
-import ru.nightmirror.wlbytime.convertors.ColorsConvertor;
-import ru.nightmirror.wlbytime.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
+import ru.nightmirror.wlbytime.shared.api.events.PlayerRemovedFromWhitelistEvent;
+import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
+import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 
 import java.io.File;
@@ -66,7 +66,7 @@ public class Database implements IDatabase {
 
         try (
                 Connection connection = getConnection();
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement()
         ) {
             statement.execute(query);
         } catch (Exception exception) {
@@ -94,7 +94,7 @@ public class Database implements IDatabase {
 
         try (
                 Connection connection = getConnection();
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement()
         ) {
             statement.executeUpdate(query);
 
@@ -114,7 +114,7 @@ public class Database implements IDatabase {
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(query);
+                ResultSet resultSet = statement.executeQuery(query)
         ) {
             if (resultSet.next()) return true;
         } catch (Exception exception) {
@@ -125,14 +125,12 @@ public class Database implements IDatabase {
 
     @Override
     public Boolean checkPlayer(String nickname) {
-        Boolean inWhitelist = checkPlayerInWhitelist(nickname);
+        boolean inWhitelist = checkPlayerInWhitelist(nickname);
 
         if (inWhitelist) {
             long until = getUntil(nickname);
 
-            if (until == -1L || until > System.currentTimeMillis()) {
-                inWhitelist = true;
-            } else {
+            if (until != -1L && until < System.currentTimeMillis()) {
                 removePlayer(nickname);
                 inWhitelist = false;
             }
@@ -149,7 +147,7 @@ public class Database implements IDatabase {
     }
 
     private Boolean checkPlayer(String nickname, Connection connection) {
-        Boolean inWhitelist = checkPlayerInWhitelist(nickname);
+        boolean inWhitelist = checkPlayerInWhitelist(nickname);
 
         if (inWhitelist) {
             long until = getUntil(nickname);
@@ -179,7 +177,7 @@ public class Database implements IDatabase {
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(query);
+                ResultSet resultSet = statement.executeQuery(query)
         ) {
             if (resultSet.next()) {
                 return resultSet.getLong("until");
@@ -196,7 +194,7 @@ public class Database implements IDatabase {
 
         try (
                 Connection connection = getConnection();
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement()
                 ) {
             statement.executeUpdate(query);
 
@@ -220,7 +218,7 @@ public class Database implements IDatabase {
         final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
         try (
                 Connection connection = getConnection();
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement()
         ) {
             statement.executeUpdate(query);
 
@@ -238,7 +236,7 @@ public class Database implements IDatabase {
 
         final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
         try (
-                Statement statement = connection.createStatement();
+                Statement statement = connection.createStatement()
         ) {
             statement.executeUpdate(query);
 
@@ -255,7 +253,7 @@ public class Database implements IDatabase {
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery(query);
+                ResultSet resultSet = statement.executeQuery(query)
         ) {
             List<String> nicknames = new ArrayList<>();
 

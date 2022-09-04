@@ -1,8 +1,8 @@
-package ru.nightmirror.wlbytime.api;
+package ru.nightmirror.wlbytime.shared.api;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.interfaces.api.IAPI;
 

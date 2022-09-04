@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.convertors;
+package ru.nightmirror.wlbytime.misc.convertors;
 
 import java.util.List;
 

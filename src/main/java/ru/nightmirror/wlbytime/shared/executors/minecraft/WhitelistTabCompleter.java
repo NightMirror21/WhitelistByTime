@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.executors.minecraft;
+package ru.nightmirror.wlbytime.shared.executors.minecraft;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.command.Command;

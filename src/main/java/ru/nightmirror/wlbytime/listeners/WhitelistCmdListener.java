@@ -7,18 +7,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.interfaces.executors.ICommandsExecutor;
-import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 
 import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class WhitelistCmdListener implements Listener {
-
-    private final IDatabase database;
-    private final Plugin plugin;
 
     private final ICommandsExecutor executor;
 
