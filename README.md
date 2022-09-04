@@ -49,11 +49,11 @@ public class Command implements CommandExecutor {
 ### Example PlayerAddedToWhitelistEvent usage:
 
 ```java
-public class EventHandler implements Listener {
+public class EventListener implements Listener {
     
     private final Logger log = Logger.getLogger("MySuperPlugin");
 
-    @org.bukkit.event.EventHandler
+    @EventHandler
     public void onPlayerRemoved(PlayerRemovedFromWhitelistEvent event) {
         if (event.getNickname().equals("Notch")) {
             log.warning("Someone tried to remove Notch from whitelist!");
