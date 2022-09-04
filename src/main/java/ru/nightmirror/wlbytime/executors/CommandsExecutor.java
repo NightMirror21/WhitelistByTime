@@ -7,7 +7,8 @@ import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.config.ConfigUtils;
 import ru.nightmirror.wlbytime.convertors.ColorsConvertor;
 import ru.nightmirror.wlbytime.convertors.TimeConvertor;
-import ru.nightmirror.wlbytime.database.IDatabase;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
+import ru.nightmirror.wlbytime.interfaces.executors.ICommandsExecutor;
 
 import java.util.List;
 

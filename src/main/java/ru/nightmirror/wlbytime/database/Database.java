@@ -7,6 +7,7 @@ import ru.nightmirror.wlbytime.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.api.events.PlayerRemovedFromWhitelistEvent;
 import ru.nightmirror.wlbytime.convertors.ColorsConvertor;
 import ru.nightmirror.wlbytime.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 
 import java.io.File;
 import java.sql.Connection;

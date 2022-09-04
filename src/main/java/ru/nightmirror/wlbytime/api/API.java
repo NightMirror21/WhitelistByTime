@@ -3,7 +3,8 @@ package ru.nightmirror.wlbytime.api;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.convertors.TimeConvertor;
-import ru.nightmirror.wlbytime.database.IDatabase;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
+import ru.nightmirror.wlbytime.interfaces.api.IAPI;
 
 import java.util.List;
 

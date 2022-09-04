@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.database;
+package ru.nightmirror.wlbytime.interfaces.database;
 
 import java.util.List;
 

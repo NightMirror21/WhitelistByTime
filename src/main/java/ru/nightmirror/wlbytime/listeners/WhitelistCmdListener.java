@@ -8,10 +8,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.executors.CommandsExecutor;
-import ru.nightmirror.wlbytime.executors.ICommandsExecutor;
-import ru.nightmirror.wlbytime.database.IDatabase;
-import ru.nightmirror.wlbytime.executors.minecraft.WhitelistCommandExecutor;
+import ru.nightmirror.wlbytime.interfaces.executors.ICommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 
 import java.util.Arrays;
 import java.util.List;
