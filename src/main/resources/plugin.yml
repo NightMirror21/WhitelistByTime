@@ -1,5 +1,5 @@
 name: WhitelistByTime
-main: ru.nightmirror.wlbytime.main.WhitelistByTime
+main: ru.nightmirror.wlbytime.shared.WhitelistByTime
 version: 3.0
 author: NightMirror
 description: Adding a player to the whitelist for a time

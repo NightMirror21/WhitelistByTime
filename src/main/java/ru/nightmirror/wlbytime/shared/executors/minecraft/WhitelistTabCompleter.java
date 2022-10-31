@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.executors.minecraft;
+package ru.nightmirror.wlbytime.shared.executors.minecraft;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.command.Command;
@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.database.IDatabase;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 
 import java.util.ArrayList;
 import java.util.Arrays;

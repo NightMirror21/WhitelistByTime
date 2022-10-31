@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.config;
+package ru.nightmirror.wlbytime.misc.utils;
 
 import org.bukkit.plugin.Plugin;
 

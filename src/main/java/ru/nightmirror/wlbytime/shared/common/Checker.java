@@ -1,10 +1,10 @@
-package ru.nightmirror.wlbytime.common;
+package ru.nightmirror.wlbytime.shared.common;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import ru.nightmirror.wlbytime.database.IDatabase;
-import ru.nightmirror.wlbytime.main.WhitelistByTime;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
+import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 
 @RequiredArgsConstructor
 public class Checker {

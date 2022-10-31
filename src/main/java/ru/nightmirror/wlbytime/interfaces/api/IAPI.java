@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.api;
+package ru.nightmirror.wlbytime.interfaces.api;
 
 import java.util.List;
 
