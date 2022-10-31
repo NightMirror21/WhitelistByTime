@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class Database implements IDatabase {
-    private Boolean mySQLEnabled;
+    private Boolean useUserAndPassword;
     private String conStr;
     private final Plugin plugin;
     private final static Logger LOG = Logger.getLogger("WhitelistByTime");
@@ -29,19 +29,17 @@ public class Database implements IDatabase {
     }
 
     private void enable() {
-        if (plugin.getConfig().getBoolean("is-mysql-enabled", false)) {
-            mySQLEnabled = true;
-            conStr = "jdbc:mysql://" + plugin.getConfig().getString("mysql-connection");
-        } else {
-            mySQLEnabled = false;
-            conStr = "jdbc:sqlite:" + plugin.getDataFolder().getAbsolutePath() + File.separator + plugin.getConfig().getString("database-file-name", "database.dat");
+        conStr = plugin.getConfig().getString("database-url-connection", "jdbc:sqlite://database.dat");
+        useUserAndPassword = plugin.getConfig().getBoolean("use-user-and-password", false);
 
+        String[] splintedConStr = conStr.split(":");
+        if (splintedConStr[1].trim().equalsIgnoreCase("sqlite") && splintedConStr.length == 3) {
             try {
                 File directory = new File(plugin.getDataFolder().getAbsolutePath());
 
                 if (!directory.exists()) {
                     directory.mkdirs();
-                    new File(plugin.getDataFolder().getAbsolutePath() + File.separator + plugin.getConfig().getString("database-file-name", "database.dat")).createNewFile();
+                    new File(plugin.getDataFolder().getAbsolutePath() + File.separator + splintedConStr[2]).createNewFile();
                 }
             } catch (Exception e) {
                 LOG.severe(e.getMessage());
@@ -75,7 +73,7 @@ public class Database implements IDatabase {
 
     private Connection getConnection() {
         try {
-            return mySQLEnabled ? DriverManager.getConnection(conStr, plugin.getConfig().getString("mysql-user"), plugin.getConfig().getString("mysql-password")) : DriverManager.getConnection(conStr);
+            return useUserAndPassword ? DriverManager.getConnection(conStr, plugin.getConfig().getString("user"), plugin.getConfig().getString("password")) : DriverManager.getConnection(conStr);
         } catch (Exception exception) {
             LOG.severe("Can't create connection: " + exception.getMessage());
         }

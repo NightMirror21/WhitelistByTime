@@ -8,15 +8,17 @@ checker-delay: 1
 
 ####### DATABASE #######
 
-is-mysql-enabled: false
+# Examples:
+# MySQL - jdbc:mysql://mysuperdomain.com/database_name:3306
+# SQLite - jdbc:sqlite://database.dat
+#
+# In case with SQLite you file will be located in path:
+# server/plugins/WhitelistByTime/database.dat
+database-url-connection: jdbc:type://url
 
-# If MySQL is disabled, plugin using SQLite
-database-file-name: data.db
-
-# If MySQL is enabled
-mysql-connection: mysuperdomain.com/database_name:3306
-mysql-user: user
-mysql-password: qwerty123
+use-user-and-password: false
+user: user
+password: qwerty123
 
 
 

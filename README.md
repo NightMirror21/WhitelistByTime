@@ -1,7 +1,7 @@
 # WhitelistByTime
 
 ## Features
-- Working at 1.12.2 - 1.19
+- Working at 1.12.2 - 1.19.2
 - Full customization
 - API
 - Memorizing players by nickname case-sensitive
