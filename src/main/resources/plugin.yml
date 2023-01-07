@@ -1,6 +1,6 @@
 name: WhitelistByTime
 main: ru.nightmirror.wlbytime.shared.WhitelistByTime
-version: 3.1
+version: 3.2
 author: NightMirror
 description: Adding a player to the whitelist for a time
 api-version: 1.16

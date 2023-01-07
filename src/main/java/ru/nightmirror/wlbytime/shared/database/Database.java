@@ -3,11 +3,11 @@ package ru.nightmirror.wlbytime.shared.database;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
-import ru.nightmirror.wlbytime.shared.api.events.PlayerRemovedFromWhitelistEvent;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
 import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
-import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
+import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
+import ru.nightmirror.wlbytime.shared.api.events.PlayerRemovedFromWhitelistEvent;
 
 import java.io.File;
 import java.sql.Connection;
@@ -30,22 +30,8 @@ public class Database implements IDatabase {
     }
 
     private void enable() {
-        conStr = plugin.getConfig().getString("database-url-connection", "jdbc:sqlite://database.dat");
-        useUserAndPassword = plugin.getConfig().getBoolean("use-user-and-password", false);
-
-        String[] splintedConStr = conStr.split(":");
-        if (splintedConStr[1].trim().equalsIgnoreCase("sqlite") && splintedConStr.length == 3) {
-            try {
-                File directory = new File(plugin.getDataFolder().getAbsolutePath());
-
-                if (!directory.exists()) {
-                    directory.mkdirs();
-                    new File(plugin.getDataFolder().getAbsolutePath() + File.separator + splintedConStr[2]).createNewFile();
-                }
-            } catch (Exception e) {
-                LOG.severe(e.getMessage());
-            }
-        }
+        conStr = getStringSource();
+        useUserAndPassword = getConfigBoolean("use-user-and-password", false);
 
         createTable();
     }
@@ -72,9 +58,17 @@ public class Database implements IDatabase {
         }
     }
 
+    private String getStringSource() {
+        final String type = getConfigString("type", "sqlite");
+        if (type.equalsIgnoreCase("sqlite") || type.equalsIgnoreCase("h2"))
+            return "jdbc:" + type + ":" + new File(plugin.getDataFolder(), "database.db").getAbsolutePath();
+
+        return "jdbc:" + type + "://" + getConfigString("address") + File.separator + getConfigString("name");
+    }
+
     private Connection getConnection() {
         try {
-            return useUserAndPassword ? DriverManager.getConnection(conStr, plugin.getConfig().getString("user"), plugin.getConfig().getString("password")) : DriverManager.getConnection(conStr);
+            return useUserAndPassword ? DriverManager.getConnection(conStr, getConfigString("user"), getConfigString("password")) : DriverManager.getConnection(conStr);
         } catch (Exception exception) {
             LOG.severe("Can't create connection: " + exception.getMessage());
         }
@@ -268,5 +262,21 @@ public class Database implements IDatabase {
             LOG.warning("Can't get all players: " + exception.getMessage());
         }
         return null;
+    }
+
+    private String getConfigString(String path) {
+        return getConfigString(path, "null");
+    }
+
+    private String getConfigString(String path, String def) {
+        return plugin.getConfig().getString(path, def);
+    }
+
+    private Boolean getConfigBoolean(String path) {
+        return getConfigBoolean(path, false);
+    }
+
+    private Boolean getConfigBoolean(String path, Boolean def) {
+        return plugin.getConfig().getBoolean(path, def);
     }
 }

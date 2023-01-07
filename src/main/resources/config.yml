@@ -8,17 +8,16 @@ checker-delay: 1
 
 ####### DATABASE #######
 
-# Examples:
-# MySQL - jdbc:mysql://mysuperdomain.com/database_name:3306
-# SQLite - jdbc:sqlite://database.dat
-#
-# In case with SQLite you file will be located in path:
-# server/plugins/WhitelistByTime/database.dat
-database-url-connection: jdbc:type://url
+type: 'sqlite'
 
+# If not sqlite or h2
+address: 'localhost:3030'
+name: 'minecraft'
+
+# If using user and password
 use-user-and-password: false
-user: user
-password: qwerty123
+user: 'user'
+password: 'qwerty123'
 
 
 
