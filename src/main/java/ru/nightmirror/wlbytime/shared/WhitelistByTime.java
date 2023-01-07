@@ -5,17 +5,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import ru.nightmirror.wlbytime.shared.api.API;
 import ru.nightmirror.wlbytime.interfaces.api.IAPI;
-import ru.nightmirror.wlbytime.shared.common.Checker;
-import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
-import ru.nightmirror.wlbytime.shared.database.Database;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.shared.executors.CommandsExecutor;
-import ru.nightmirror.wlbytime.shared.executors.minecraft.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.listeners.PlayerJoinListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistCmdListener;
+import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
+import ru.nightmirror.wlbytime.shared.api.API;
+import ru.nightmirror.wlbytime.shared.common.Checker;
+import ru.nightmirror.wlbytime.shared.database.Database;
+import ru.nightmirror.wlbytime.shared.executors.CommandsExecutor;
+import ru.nightmirror.wlbytime.shared.executors.minecraft.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.shared.executors.minecraft.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.shared.placeholders.PlaceholderHook;
 
 import java.util.logging.Logger;
 
@@ -48,7 +49,16 @@ public class WhitelistByTime extends JavaPlugin {
 
         new Metrics(this, 13834);
 
-        log.info(ChatColor.GREEN + "Enabled!");
+        if (getConfig().getBoolean("placeholders-enabled", false)) {
+            try {
+                new PlaceholderHook(database, this).register();
+                log.info("Hooked with PlaceholderAPI");
+            } catch (Exception exception) {
+                log.warning("Can't hook with PlaceholderAPI. " + exception.getMessage());
+            }
+        }
+
+        log.info("Enabled!");
     }
 
     @Override

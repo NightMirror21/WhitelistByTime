@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 public class Database implements IDatabase {
@@ -77,6 +78,10 @@ public class Database implements IDatabase {
 
     @Override
     public void addPlayer(String nickname, long until) {
+        if (!getConfigBoolean("case-sensitive", true)) {
+            nickname = nickname.toLowerCase(Locale.ROOT);
+        }
+
         PlayerAddedToWhitelistEvent event = new PlayerAddedToWhitelistEvent(nickname, until);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
@@ -117,6 +122,10 @@ public class Database implements IDatabase {
 
     @Override
     public Boolean checkPlayer(String nickname) {
+        if (!getConfigBoolean("case-sensitive", true)) {
+            nickname = nickname.toLowerCase(Locale.ROOT);
+        }
+
         boolean inWhitelist = checkPlayerInWhitelist(nickname);
 
         if (inWhitelist) {

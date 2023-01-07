@@ -4,8 +4,9 @@
 - Working at 1.12.2 - 1.19.2
 - Full customization
 - API
-- Memorizing players by nickname case-sensitive
-- Storing data in SQLite or MySQL
+- Placeholders (Can be turned off)
+- Memorizing players by nickname case-sensitive or not (Customized)
+- Storing data in any database type
 - Executing the /whitelist command both in the console and in the game
 - Convenience of specifying the time and checking how much is left
 
@@ -19,6 +20,12 @@
 - (time) - time for which the player will be added to the whitelist\
  Example: 2d 3h 10m\
  Leave this value empty if you want to add player forever
+
+## Placeholders:
+All output can be configured in the config\
+\
+**%wlbytime_in_whitelist%** - *In whitelist or not*\
+**%wlbytime_time_left%** - *How much is left in whitelist*
 
 ## API
 
@@ -72,73 +79,83 @@ public class EventListener implements Listener {
 checker-thread: true
 # The delay through which the thread will check players. In seconds
 checker-delay: 1
+# Check the case of the nickname
+case-sensitive: true
 
 
 ####### DATABASE #######
 
-# Examples:
-# MySQL - jdbc:mysql://mysuperdomain.com/database_name:3306
-# SQLite - jdbc:sqlite://database.dat
-#
-# In case with SQLite you file will be located in path:
-# server/plugins/WhitelistByTime/database.dat
-database-url-connection: jdbc:type://url
+type: 'sqlite'
 
+# If not sqlite or h2
+address: 'localhost:3030'
+name: 'minecraft'
+
+# If using user and password
 use-user-and-password: false
-user: user
-password: qwerty123
+user: 'user'
+password: 'qwerty123'
 
+####### PLACEHOLDERS HOOK #######
 
+placeholders-enabled: true
+
+# %wlbytime_in_whitelist% - In whitelist or not
+in-whitelist-true: '&a✔'
+in-whitelist-false: '&c✖'
+
+# %wlbytime_time_left% - How much is left in whitelist
+time-left: '&a%time%'
 
 ####### MESSAGES #######
 
 minecraft-commands:
-  plugin-reloaded: '&6Plugin reloaded!'
-  not-permission: '&cYou do not have permission!'
+ plugin-reloaded: '&6Plugin reloaded!'
+ not-permission: '&cYou do not have permission!'
 
-  you-not-in-whitelist: '&6Sorry, but you are not in whitelist'
-  player-removed-from-whitelist: '&e%player% successfully removed from whitelist'
-  player-already-in-whitelist: '&e%player% already in whitelist'
-  player-not-in-whitelist: '&e%player% not in whitelist'
+ you-not-in-whitelist: '&6Sorry, but you are not in whitelist'
+ player-removed-from-whitelist: '&e%player% successfully removed from whitelist'
+ player-already-in-whitelist: '&e%player% already in whitelist'
+ player-not-in-whitelist: '&e%player% not in whitelist'
 
-  # For command with time
-  successfully-added-for-time: '&a%player% added to whitelist for %time%'
-  still-in-whitelist-for-time: '&a%player% will be in whitelist still %time%'
+ # For command with time
+ successfully-added-for-time: '&a%player% added to whitelist for %time%'
+ still-in-whitelist-for-time: '&a%player% will be in whitelist still %time%'
 
-  # For command without time
-  successfully-added: '&a%player% added to whitelist forever'
-  still-in-whitelist: '&a%player% will be in whitelist forever'
+ # For command without time
+ successfully-added: '&a%player% added to whitelist forever'
+ still-in-whitelist: '&a%player% will be in whitelist forever'
 
-  list-title: '&a> Whitelist:'
-  list-player: '&a| &f%player% &7[%time%]'
-  list-empty: '&aWhitelist is empty'
+ list-title: '&a> Whitelist:'
+ list-player: '&a| &f%player% &7[%time%]'
+ list-empty: '&aWhitelist is empty'
 
-  set-time: 'Now &a%player% &fwill be in whitelist for &a%time%'
-  add-time: 'Added &a%time% &fto &a%player%'
-  remove-time: 'Removed &a%time% &ffrom &a%player%'
+ set-time: 'Now &a%player% &fwill be in whitelist for &a%time%'
+ add-time: 'Added &a%time% &fto &a%player%'
+ remove-time: 'Removed &a%time% &ffrom &a%player%'
 
-  forever: 'forever'
+ forever: 'forever'
 
-  help:
-    - '&a> WhitelistByTime - Help'
-    - '&a| &f/whitelist add [nickname] (time)'
-    - '&a| &f/whitelist remove [nickname]'
-    - '&a| &f/whitelist check [nickname]'
-    - '&a| &f/whitelist reload'
-    - '&a| &f/whitelist getall'
-    - '&a| &f/whitelist time set/add/remove [nickname] [time]'
-    - '&a| &f(time) - time for which the player will be added to the whitelist'
-    - '&a| &fExample: 2d 3h 10m'
-    - '&a| &fLeave this value empty if you want to add player forever'
+ help:
+  - '&a> WhitelistByTime - Help'
+  - '&a| &f/whitelist add [nickname] (time)'
+  - '&a| &f/whitelist remove [nickname]'
+  - '&a| &f/whitelist check [nickname]'
+  - '&a| &f/whitelist reload'
+  - '&a| &f/whitelist getall'
+  - '&a| &f/whitelist time set/add/remove [nickname] [time]'
+  - '&a| &f(time) - time for which the player will be added to the whitelist'
+  - '&a| &fExample: 2d 3h 10m'
+  - '&a| &fLeave this value empty if you want to add player forever'
 
 
 
 time-units:
-  year: 'y'
-  month: 'mo'
-  week: 'w'
-  day: 'd'
-  hour: 'h'
-  minute: 'm'
-  second: 's'
+ year: 'y'
+ month: 'mo'
+ week: 'w'
+ day: 'd'
+ hour: 'h'
+ minute: 'm'
+ second: 's'
 ```

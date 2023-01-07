@@ -4,6 +4,8 @@
 checker-thread: true
 # The delay through which the thread will check players. In seconds
 checker-delay: 1
+# Check the case of the nickname
+case-sensitive: true
 
 
 ####### DATABASE #######
@@ -19,7 +21,16 @@ use-user-and-password: false
 user: 'user'
 password: 'qwerty123'
 
+####### PLACEHOLDERS HOOK #######
 
+placeholders-enabled: true
+
+# %wlbytime_in_whitelist% - In whitelist or not
+in-whitelist-true: '&a✔'
+in-whitelist-false: '&c✖'
+
+# %wlbytime_time_left% - How much is left in whitelist
+time-left: '&a%time%'
 
 ####### MESSAGES #######
 
