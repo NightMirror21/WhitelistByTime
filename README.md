@@ -1,71 +1,3 @@
-# WhitelistByTime
-
-## Features
-- Working at 1.12.2 - 1.19.2
-- Full customization
-- API
-- Memorizing players by nickname case-sensitive
-- Storing data in SQLite or MySQL
-- Executing the /whitelist command both in the console and in the game
-- Convenience of specifying the time and checking how much is left
-
-## Commands
-**/whitelist add [nickname] (time)** - *whitelistbytime.add*\
-**/whitelist remove [nickname]** - *whitelistbytime.remove*\
-**/whitelist check [nickname]** - *whitelistbytime.check*\
-**/whitelist time [nickname] [time]** - *whitelistbytime.time"*\
-**/whitelist reload** - *whitelistbytime.reload*\
-**/whitelist getall** - *whitelistbytime.getall*
-- (time) - time for which the player will be added to the whitelist\
- Example: 2d 3h 10m\
- Leave this value empty if you want to add player forever
-
-## API
-
-For usage API download .jar and add it to your project.
-
-**Events:**\
-PlayerAddedToWhitelistEvent\
-PlayerRemovedFromWhitelist
-
-### Example API usage:
-```java
-public class Command implements CommandExecutor {
-    
-    private final IAPI api = WhitelistByTime.getAPI();
-    
-    @Override
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
-        for (String nickname : WhitelistByTimeAPI.getAllPlayers()) {
-            api.removePlayer(nickname);
-        }
-        
-        commandSender.sendMessage("Success!");
-        return true;
-    }
-}
-```
-
-### Example PlayerAddedToWhitelistEvent usage:
-
-```java
-public class EventListener implements Listener {
-    
-    private final Logger log = Logger.getLogger("MySuperPlugin");
-
-    @EventHandler
-    public void onPlayerRemoved(PlayerRemovedFromWhitelistEvent event) {
-        if (event.getNickname().equals("Notch")) {
-            log.warning("Someone tried to remove Notch from whitelist!");
-
-            event.setCancelled(true);
-        }
-    }
-}
-```
-
-## Config
-```yaml
 ####### SETTINGS #######
 
 # Checks the player in the whitelist
@@ -76,17 +8,16 @@ checker-delay: 1
 
 ####### DATABASE #######
 
-# Examples:
-# MySQL - jdbc:mysql://mysuperdomain.com/database_name:3306
-# SQLite - jdbc:sqlite://database.dat
-#
-# In case with SQLite you file will be located in path:
-# server/plugins/WhitelistByTime/database.dat
-database-url-connection: jdbc:type://url
+type: 'sqlite'
 
+# If not sqlite or h2
+address: 'localhost:3030'
+name: 'minecraft'
+
+# If using user and password
 use-user-and-password: false
-user: user
-password: qwerty123
+user: 'user'
+password: 'qwerty123'
 
 
 
@@ -141,4 +72,3 @@ time-units:
   hour: 'h'
   minute: 'm'
   second: 's'
-```
