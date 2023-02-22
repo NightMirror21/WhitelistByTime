@@ -1,10 +1,10 @@
 package ru.nightmirror.wlbytime.shared.api;
 
 import lombok.RequiredArgsConstructor;
-import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
-import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.interfaces.api.IAPI;
+import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
+import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 
 import java.util.List;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class API implements IAPI {
 
     private final IDatabase database;
-    private final Plugin plugin;
+    private final WhitelistByTime plugin;
 
     @Override
     public boolean addPlayer(String nickname, long until) {
@@ -53,5 +53,10 @@ public class API implements IAPI {
         if (!database.checkPlayer(nickname)) return false;
         database.setUntil(nickname, until);
         return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return plugin.isWhitelistEnabled();
     }
 }

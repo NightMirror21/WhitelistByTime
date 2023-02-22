@@ -54,4 +54,11 @@ public interface IAPI {
      * @return Is successful
      */
     boolean setUntil(final String nickname, final long until);
+
+
+    /**
+     *
+     * @return If WhitelistByTime working and filtering players
+     */
+    boolean isEnabled();
 }

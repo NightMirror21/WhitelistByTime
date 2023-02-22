@@ -3,6 +3,7 @@
 ## Features
 - Working at 1.12.2 - 1.19.2
 - Full customization
+- HEX support
 - API
 - Placeholders (Can be turned off)
 - Memorizing players by nickname case-sensitive or not (Customized)
@@ -10,7 +11,8 @@
 - Executing the /whitelist command both in the console and in the game
 - Convenience of specifying the time and checking how much is left
 
-## Commands
+## Commands and Permissions
+**/whitelist on/off** - *whitelistbytime.turn*\
 **/whitelist add [nickname] (time)** - *whitelistbytime.add*\
 **/whitelist remove [nickname]** - *whitelistbytime.remove*\
 **/whitelist check [nickname]** - *whitelistbytime.check*\
@@ -75,6 +77,8 @@ public class EventListener implements Listener {
 ```yaml
 ####### SETTINGS #######
 
+# Is whitelist enabled by default on startup
+enabled: true
 # Checks the player in the whitelist
 checker-thread: true
 # The delay through which the thread will check players. In seconds
@@ -113,18 +117,26 @@ minecraft-commands:
  plugin-reloaded: '&6Plugin reloaded!'
  not-permission: '&cYou do not have permission!'
 
- you-not-in-whitelist: '&6Sorry, but you are not in whitelist'
- player-removed-from-whitelist: '&e%player% successfully removed from whitelist'
- player-already-in-whitelist: '&e%player% already in whitelist'
- player-not-in-whitelist: '&e%player% not in whitelist'
+ whitelist-enabled: '&aWhitelistByTime enabled'
+ whitelist-already-enabled: '&aWhitelistByTime already enabled'
+ whitelist-disabled: '&aWhitelistByTime disabled'
+ whitelist-already-disabled: '&aWhitelistByTime already disabled'
+
+ you-not-in-whitelist-kick:
+  - '#d2d301Sorry, but you are not in whitelist'
+  - 'Bye!'
+
+ player-removed-from-whitelist: '&e%player% &fsuccessfully removed from whitelist'
+ player-already-in-whitelist: '&e%player% &falready in whitelist'
+ player-not-in-whitelist: '&e%player% &fnot in whitelist'
 
  # For command with time
- successfully-added-for-time: '&a%player% added to whitelist for %time%'
- still-in-whitelist-for-time: '&a%player% will be in whitelist still %time%'
+ successfully-added-for-time: '&a%player% &fadded to whitelist for &a%time%'
+ still-in-whitelist-for-time: '&a%player% &fwill be in whitelist still &a%time%'
 
  # For command without time
- successfully-added: '&a%player% added to whitelist forever'
- still-in-whitelist: '&a%player% will be in whitelist forever'
+ successfully-added: '&a%player% &fadded to whitelist forever'
+ still-in-whitelist: '&a%player% &fwill be in whitelist forever'
 
  list-title: '&a> Whitelist:'
  list-player: '&a| &f%player% &7[%time%]'
@@ -138,6 +150,7 @@ minecraft-commands:
 
  help:
   - '&a> WhitelistByTime - Help'
+  - '&a| &f/whitelist on/off'
   - '&a| &f/whitelist add [nickname] (time)'
   - '&a| &f/whitelist remove [nickname]'
   - '&a| &f/whitelist check [nickname]'
@@ -151,11 +164,18 @@ minecraft-commands:
 
 
 time-units:
- year: 'y'
- month: 'mo'
- week: 'w'
- day: 'd'
- hour: 'h'
- minute: 'm'
- second: 's'
+ year:
+  - 'y'
+ month:
+  - 'mo'
+ week:
+  - 'w'
+ day:
+  - 'd'
+ hour:
+  - 'h'
+ minute:
+  - 'm'
+ second:
+  - 's'
 ```

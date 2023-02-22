@@ -3,12 +3,12 @@ package ru.nightmirror.wlbytime.shared.executors;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.plugin.Plugin;
-import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
-import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
-import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.interfaces.executors.ICommandsExecutor;
+import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
+import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
+import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
 public class CommandsExecutor implements ICommandsExecutor {
 
     private final IDatabase database;
-    private final Plugin plugin;
+    private final WhitelistByTime plugin;
 
     @Override
     public void reload(CommandSender sender, String[] strings) {
@@ -217,6 +217,30 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
+    public void turn(CommandSender sender, String[] strings) {
+        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.turn"))) {
+            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.not-permission", "&cYou do not have permission!")));
+            return;
+        }
+
+        if (strings[0].equalsIgnoreCase("on")) {
+            if (plugin.isWhitelistEnabled()) {
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.whitelist-already-enabled", "&aWhitelistByTime already enabled")));
+            } else {
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.whitelist-enabled", "&aWhitelistByTime enabled")));
+                plugin.setWhitelistEnabled(true);
+            }
+        } else {
+            if (!plugin.isWhitelistEnabled()) {
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.whitelist-already-disabled", "&aWhitelistByTime already disabled")));
+            } else {
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.whitelist-disabled", "&aWhitelistByTime disabled")));
+                plugin.setWhitelistEnabled(false);
+            }
+        }
+    }
+
+    @Override
     public void execute(CommandSender sender, String[] strings) {
         if (strings.length == 0 || strings[0].equals("")) {
             help(sender, strings);
@@ -224,6 +248,8 @@ public class CommandsExecutor implements ICommandsExecutor {
             add(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("remove")) {
             remove(sender, strings);
+        } else if (strings.length > 1 && (strings[0].equals("on") || strings[0].equals("off"))) {
+            turn(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("check")) {
             check(sender, strings);
         } else if (strings[0].equals("reload")) {

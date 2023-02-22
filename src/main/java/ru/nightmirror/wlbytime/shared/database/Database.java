@@ -2,10 +2,10 @@ package ru.nightmirror.wlbytime.shared.database;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
 import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerRemovedFromWhitelistEvent;
 
@@ -22,10 +22,10 @@ import java.util.logging.Logger;
 public class Database implements IDatabase {
     private Boolean useUserAndPassword;
     private String conStr;
-    private final Plugin plugin;
+    private final WhitelistByTime plugin;
     private final static Logger LOG = Logger.getLogger("WhitelistByTime");
 
-    public Database(Plugin plugin) {
+    public Database(WhitelistByTime plugin) {
         this.plugin = plugin;
         enable();
     }
@@ -137,14 +137,19 @@ public class Database implements IDatabase {
             }
         }
 
-        if (!inWhitelist) {
-            Player player = plugin.getServer().getPlayer(nickname);
-            if (player != null && player.isOnline()) {
-                player.kickPlayer(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.you-not-in-whitelist", "null")));
-            }
-        }
+        kick(nickname, inWhitelist);
 
         return inWhitelist;
+    }
+
+    private void kick(String nickname, boolean inWhitelist) {
+        if (!inWhitelist && plugin.isWhitelistEnabled()) {
+            Player player = plugin.getServer().getPlayer(nickname);
+            if (player != null && player.isOnline()) {
+                List<String> message = ColorsConvertor.convert(plugin.getConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick"));
+                player.kickPlayer(String.join("\n", message));
+            }
+        }
     }
 
     private Boolean checkPlayer(String nickname, Connection connection) {
@@ -161,12 +166,7 @@ public class Database implements IDatabase {
             }
         }
 
-        if (!inWhitelist) {
-            Player player = plugin.getServer().getPlayer(nickname);
-            if (player != null && player.isOnline()) {
-                player.kickPlayer(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.you-not-in-whitelist", "null")));
-            }
-        }
+        kick(nickname, inWhitelist);
 
         return inWhitelist;
     }

@@ -5,8 +5,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
+import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ import java.util.List;
 public class WhitelistTabCompleter implements TabCompleter {
 
     private final IDatabase database;
-    private final Plugin plugin;
+    private final WhitelistByTime plugin;
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
@@ -24,6 +24,13 @@ public class WhitelistTabCompleter implements TabCompleter {
 
         if (strings.length == 1) {
             if (commandSender.hasPermission("whitelistbytime.add")) args.add("add");
+            if (commandSender.hasPermission("whitelistbytime.turn")) {
+                if (plugin.isWhitelistEnabled()) {
+                    args.add("off");
+                } else {
+                    args.add("on");
+                }
+            }
             if (commandSender.hasPermission("whitelistbytime.remove")) args.add("remove");
             if (commandSender.hasPermission("whitelistbytime.check")) args.add("check");
             if (commandSender.hasPermission("whitelistbytime.reload")) args.add("reload");

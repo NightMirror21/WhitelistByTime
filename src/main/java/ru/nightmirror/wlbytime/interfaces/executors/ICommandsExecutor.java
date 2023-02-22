@@ -10,6 +10,7 @@ public interface ICommandsExecutor {
     void check(CommandSender sender, String[] strings);
     void add(CommandSender sender, String[] strings);
     void time(CommandSender sender, String[] strings);
+    void turn(CommandSender sender, String[] strings);
 
     void execute(CommandSender sender, String[] strings);
 }
