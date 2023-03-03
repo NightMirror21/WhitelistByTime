@@ -46,7 +46,7 @@ public class Database implements IDatabase {
     private void createTable() {
         final String query = "CREATE TABLE IF NOT EXISTS whitelist (\n"
                 + " `nickname` TEXT,\n"
-                + " `until` INTEGER\n"
+                + " `until` BIGINT\n"
                 + ");";
 
         try (
