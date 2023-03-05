@@ -17,6 +17,7 @@ type: 'sqlite'
 # If not sqlite or h2
 address: 'localhost:3030'
 name: 'minecraft'
+table: 'whitelist'
 
 # If using user and password
 use-user-and-password: false
