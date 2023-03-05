@@ -46,7 +46,7 @@ public class Database implements IDatabase {
     private void createTable() {
         final String query = "CREATE TABLE IF NOT EXISTS whitelist (\n"
                 + " `nickname` TEXT,\n"
-                + " `until` INTEGER\n"
+                + " `until` BIGINT\n"
                 + ");";
 
         try (
@@ -64,7 +64,7 @@ public class Database implements IDatabase {
         if (type.equalsIgnoreCase("sqlite") || type.equalsIgnoreCase("h2"))
             return "jdbc:" + type + ":" + new File(plugin.getDataFolder(), "database.db").getAbsolutePath();
 
-        return "jdbc:" + type + "://" + getConfigString("address") + File.separator + getConfigString("name");
+        return "jdbc:" + type + "://" + getConfigString("address") + "/" + getConfigString("name");
     }
 
     private Connection getConnection() {
