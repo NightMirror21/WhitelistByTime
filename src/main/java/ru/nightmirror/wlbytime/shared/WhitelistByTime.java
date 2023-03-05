@@ -48,7 +48,7 @@ public class WhitelistByTime extends JavaPlugin implements IPlugin {
         getCommand("wl").setTabCompleter(new WhitelistTabCompleter(database, this));
 
         if (getConfig().getBoolean("checker-thread", true)) {
-            checker = new Checker(this, database).start(getConfig().getInt("checker-thread", 1));
+            checker = new Checker(this, database).start(getConfig().getInt("checker-delay", 1));
         }
 
         api = new API(database, this);
