@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 public class Database implements IDatabase {
     private Boolean useUserAndPassword;
+    private String DBTable;
     private String conStr;
     private final WhitelistByTime plugin;
     private final static Logger LOG = Logger.getLogger("WhitelistByTime");
@@ -29,10 +30,10 @@ public class Database implements IDatabase {
         this.plugin = plugin;
         enable();
     }
-
     private void enable() {
         conStr = getStringSource();
         useUserAndPassword = getConfigBoolean("use-user-and-password", false);
+        DBTable = getConfigString("table", "whitelist");
 
         createTable();
     }
@@ -44,7 +45,7 @@ public class Database implements IDatabase {
     }
 
     private void createTable() {
-        final String query = "CREATE TABLE IF NOT EXISTS whitelist (\n"
+        final String query = "CREATE TABLE IF NOT EXISTS " + DBTable + " (\n"
                 + " `nickname` TEXT,\n"
                 + " `until` BIGINT\n"
                 + ");";
@@ -86,7 +87,7 @@ public class Database implements IDatabase {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
 
-        final String query = "INSERT INTO whitelist (`nickname`, `until`)" +
+        final String query = "INSERT INTO " + DBTable + " (`nickname`, `until`)" +
                 "VALUES ('"+nickname+"', '"+until+"');";
 
         try (
@@ -106,7 +107,7 @@ public class Database implements IDatabase {
     }
 
     private Boolean checkPlayerInWhitelist(String nickname) {
-        final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
+        final String query = "SELECT * FROM " + DBTable + " WHERE nickname = '"+nickname+"';";
 
         try (
                 Connection connection = getConnection();
@@ -173,7 +174,7 @@ public class Database implements IDatabase {
 
     @Override
     public long getUntil(String nickname) {
-        final String query = "SELECT * FROM whitelist WHERE nickname = '"+nickname+"';";
+        final String query = "SELECT * FROM " + DBTable + " WHERE nickname = '"+nickname+"';";
 
         try (
                 Connection connection = getConnection();
@@ -191,7 +192,7 @@ public class Database implements IDatabase {
 
     @Override
     public void setUntil(String nickname, long until) {
-        final String query = "UPDATE whitelist SET until = '"+until+"' WHERE nickname = '"+nickname+"';";
+        final String query = "UPDATE " + DBTable + " SET until = '"+until+"' WHERE nickname = '"+nickname+"';";
 
         try (
                 Connection connection = getConnection();
@@ -216,7 +217,7 @@ public class Database implements IDatabase {
 
         if (event.isCancelled()) return;
 
-        final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
+        final String query = "DELETE FROM " + DBTable + " WHERE nickname = '"+nickname+"';";
         try (
                 Connection connection = getConnection();
                 Statement statement = connection.createStatement()
@@ -235,7 +236,7 @@ public class Database implements IDatabase {
 
         if (event.isCancelled()) return;
 
-        final String query = "DELETE FROM whitelist WHERE nickname = '"+nickname+"';";
+        final String query = "DELETE FROM " + DBTable + " WHERE nickname = '"+nickname+"';";
         try (
                 Statement statement = connection.createStatement()
         ) {
@@ -249,7 +250,7 @@ public class Database implements IDatabase {
 
     @Override
     public List<String> getAll() {
-        final String query = "SELECT * FROM whitelist;";
+        final String query = "SELECT * FROM " + DBTable + ";";
 
         try (
                 Connection connection = getConnection();
