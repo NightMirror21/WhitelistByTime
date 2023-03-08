@@ -9,8 +9,10 @@ import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
 import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.shared.WhitelistByTime;
+import ru.nightmirror.wlbytime.shared.common.Checker;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class CommandsExecutor implements ICommandsExecutor {
@@ -44,22 +46,22 @@ public class CommandsExecutor implements ICommandsExecutor {
             return;
         }
 
-        List<String> list = database.getAll();
-        if (list != null && !list.isEmpty()) {
+        Map<String, Long> all;
+        synchronized (Checker.players) {
+            all = Checker.players;
+        }
+
+        if (all.size() > 0) {
+            String time;
             sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.list-title", "&a> Whitelist:")));
-
-            for (String nickname : list) {
-                String time;
-                long util = database.getUntil(nickname);
-
-                if (util == -1L) {
+            for (Map.Entry<String, Long> playerEntry: all.entrySet()) {
+                if (playerEntry.getValue() == -1L) {
                     time = ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.forever", "forever"));
                 } else {
-                    time = TimeConvertor.getTimeLine(plugin, util - System.currentTimeMillis());
+                    time = TimeConvertor.getTimeLine(plugin, playerEntry.getValue() - System.currentTimeMillis());
                 }
-
                 sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.list-player", "&a| &f%player% &7[%time%]"))
-                        .replaceAll("%player%", nickname)
+                        .replaceAll("%player%", playerEntry.getKey())
                         .replaceAll("%time%", time.trim()));
             }
         } else {
