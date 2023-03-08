@@ -41,6 +41,8 @@ public class TimeConvertor {
 
         if (ms != 0L) line = line + (ms/1000L) + plugin.getConfig().getStringList("time-units.second").get(0) + " ";
 
+        if (ms < 0L) line = plugin.getConfig().getString("minecraft-commands.forever", "forever");
+
         return line.trim();
     }
 
