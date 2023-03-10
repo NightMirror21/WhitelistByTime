@@ -36,9 +36,6 @@ public class Checker {
         for (Map.Entry<String, Long> playerEntry: all.entrySet()) {
             if (!database.checkPlayer(playerEntry.getValue())) {
                 database.removePlayer(playerEntry.getKey());
-                synchronized (toKick) {
-                    toKick.add(casedName(playerEntry.getKey()));
-                }
             }
         }
 

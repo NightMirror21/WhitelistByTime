@@ -5,6 +5,7 @@ import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
+import ru.nightmirror.wlbytime.shared.common.Checker;
 
 import java.io.File;
 import java.sql.Connection;
@@ -166,6 +167,9 @@ public class Database implements IDatabase {
             statement.executeUpdate(query);
 
             LOG.info("Player "+nickname+" removed");
+            synchronized (Checker.toKick) {
+                Checker.toKick.add(nickname);
+            }
         } catch (Exception exception) {
             LOG.warning("Can't remove player: " + exception.getMessage());
         }
