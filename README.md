@@ -112,6 +112,10 @@ in-whitelist-false: '&c✖'
 # %wlbytime_time_left% - How much is left in whitelist
 time-left: '&a%time%'
 
+# Show less information (without hours, minutes, seconds) when time left more than one day
+less-info-time-left: false
+less-info-expires-today: 'Expires in'
+
 ####### MESSAGES #######
 
 minecraft-commands:

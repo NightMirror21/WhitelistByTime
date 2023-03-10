@@ -43,7 +43,7 @@ public class PlaceholderHook extends PlaceholderExpansion {
             String result = database.checkPlayer(player.getName()) ? config.getString("in-whitelist-true", "YES") : config.getString("in-whitelist-false", "NO");
             return ColorsConvertor.convert(result);
         } else if (params.equalsIgnoreCase("time_left")) {
-            String time = TimeConvertor.getTimeLine(plugin, database.getUntil(player.getName()) - System.currentTimeMillis());
+            String time = TimeConvertor.getTimeLine(plugin, database.getUntil(player.getName()) - System.currentTimeMillis(), true);
             return ColorsConvertor.convert(config.getString("time-left", "&a%time%").replaceAll("%time%", time));
         }
 

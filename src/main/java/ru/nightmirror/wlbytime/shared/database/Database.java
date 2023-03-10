@@ -95,7 +95,7 @@ public class Database implements IDatabase {
             if (until == -1L) {
                 LOG.info("Player "+nickname+" added to whitelist forever");
             } else {
-                LOG.info("Player "+nickname+" added to whitelist for "+TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()));
+                LOG.info("Player "+nickname+" added to whitelist for "+TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis(), false));
             }
         } catch (Exception exception) {
             LOG.warning("Can't add player: " + exception.getMessage());
@@ -148,7 +148,7 @@ public class Database implements IDatabase {
             if (until == -1L) {
                 LOG.info("Set time for "+nickname+" forever");
             } else {
-                LOG.info("Set time for "+nickname+" "+TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()));
+                LOG.info("Set time for "+nickname+" "+TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis(), false));
             }
         } catch (Exception exception) {
             LOG.warning("Can't set time for player: " + nickname);

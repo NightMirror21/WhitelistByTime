@@ -34,7 +34,7 @@ public class API implements IAPI {
 
     @Override
     public String getUntilString(String nickname) {
-        return TimeConvertor.getTimeLine(plugin, database.getUntil(nickname));
+        return TimeConvertor.getTimeLine(plugin, database.getUntil(nickname), false);
     }
 
     @Override
