@@ -11,7 +11,6 @@ import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 import ru.nightmirror.wlbytime.shared.common.Checker;
 
-import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -116,6 +115,27 @@ public class CommandsExecutor implements ICommandsExecutor {
         } else {
             sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.player-not-in-whitelist", "&e%player% not in whitelist"))
                     .replaceAll("%player%", checkNickname));
+        }
+    }
+
+    @Override
+    public void checkme(CommandSender sender) {
+        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.checkme"))) {
+            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.not-permission", "&cYou do not have permission!")));
+            return;
+        }
+
+        if (database.checkPlayer(sender.getName())) {
+            long until = database.getUntil(sender.getName());
+
+            if (until == -1L) {
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.checkme-still-in-whitelist", "&fYou are permanently whitelisted")));
+            } else {
+                String time = TimeConvertor.getTimeLine(plugin, (until - System.currentTimeMillis()), false);
+
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.checkme-still-in-whitelist-for-time", "&fYou will remain on the whitelist for &a%time%"))
+                        .replaceAll("%time%", time));
+            }
         }
     }
 
@@ -254,6 +274,8 @@ public class CommandsExecutor implements ICommandsExecutor {
             turn(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("check")) {
             check(sender, strings);
+        } else if (strings.length == 1 && strings[0].equals("checkme")) {
+            checkme(sender);
         } else if (strings[0].equals("reload")) {
             reload(sender, strings);
         } else if (strings.length > 3 && strings[0].equals("time")) {

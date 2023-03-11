@@ -16,6 +16,7 @@
 **/whitelist add [nickname] (time)** - *whitelistbytime.add*\
 **/whitelist remove [nickname]** - *whitelistbytime.remove*\
 **/whitelist check [nickname]** - *whitelistbytime.check*\
+**/whitelist checkme** - *whitelistbytime.checkme*\
 **/whitelist time [nickname] [time]** - *whitelistbytime.time"*\
 **/whitelist reload** - *whitelistbytime.reload*\
 **/whitelist getall** - *whitelistbytime.getall*
@@ -138,10 +139,12 @@ minecraft-commands:
  # For command with time
  successfully-added-for-time: '&a%player% &fadded to whitelist for &a%time%'
  still-in-whitelist-for-time: '&a%player% &fwill be in whitelist still &a%time%'
+ checkme-still-in-whitelist-for-time: '&fYou will remain on the whitelist for &a%time%'
 
  # For command without time
  successfully-added: '&a%player% &fadded to whitelist forever'
  still-in-whitelist: '&a%player% &fwill be in whitelist forever'
+ checkme-still-in-whitelist: '&fYou are permanently whitelisted'
 
  list-title: '&a> Whitelist:'
  list-player: '&a| &f%player% &7[%time%]'
@@ -159,6 +162,7 @@ minecraft-commands:
   - '&a| &f/whitelist add [nickname] (time)'
   - '&a| &f/whitelist remove [nickname]'
   - '&a| &f/whitelist check [nickname]'
+  - '&a| &f/whitelist checkme'
   - '&a| &f/whitelist reload'
   - '&a| &f/whitelist getall'
   - '&a| &f/whitelist time set/add/remove [nickname] [time]'

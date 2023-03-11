@@ -35,6 +35,7 @@ public class WhitelistTabCompleter implements TabCompleter {
             }
             if (commandSender.hasPermission("whitelistbytime.remove")) args.add("remove");
             if (commandSender.hasPermission("whitelistbytime.check")) args.add("check");
+            if (commandSender.hasPermission("whitelistbytime.checkme")) args.add("checkme");
             if (commandSender.hasPermission("whitelistbytime.reload")) args.add("reload");
             if (commandSender.hasPermission("whitelistbytime.getall")) args.add("getall");
             if (commandSender.hasPermission("whitelistbytime.time")) args.add("time");

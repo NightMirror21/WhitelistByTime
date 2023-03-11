@@ -8,6 +8,7 @@ public interface ICommandsExecutor {
     void getAll(CommandSender sender, String[] strings);
     void remove(CommandSender sender, String[] strings);
     void check(CommandSender sender, String[] strings);
+    void checkme(CommandSender sender);
     void add(CommandSender sender, String[] strings);
     void time(CommandSender sender, String[] strings);
     void turn(CommandSender sender, String[] strings);
