@@ -73,7 +73,9 @@ public class Checker {
                         kick(player);
                     }
 
-                    toKick.removeAll(toKick);
+                    if(toKick.size() > 0) {
+                        toKick.removeAll(toKick);
+                    }
                 }
             }
         }.runTaskTimer(plugin, 20L * delaySeconds, 20L * delaySeconds);

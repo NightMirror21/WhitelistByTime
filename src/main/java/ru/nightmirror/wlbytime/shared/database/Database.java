@@ -196,7 +196,7 @@ public class Database implements IDatabase {
         } catch (Exception exception) {
             LOG.warning("Can't get all players: " + exception.getMessage());
         }
-        return null;
+        return new HashMap<String, Long>();
     }
 
     private String getConfigString(String path) {
