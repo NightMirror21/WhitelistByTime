@@ -1,5 +1,7 @@
 package ru.nightmirror.wlbytime.shared.database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
@@ -7,18 +9,20 @@ import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.shared.common.Checker;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public class Database implements IDatabase {
-    private Boolean useUserAndPassword;
+    private HikariConfig config;
+    private HikariDataSource source;
     private String DBTable;
-    private String conStr;
     private final WhitelistByTime plugin;
     private final static Logger LOG = Logger.getLogger("WhitelistByTime");
 
@@ -27,9 +31,15 @@ public class Database implements IDatabase {
         enable();
     }
     private void enable() {
-        conStr = getStringSource();
-        useUserAndPassword = getConfigBoolean("use-user-and-password", false);
         DBTable = getConfigString("table", "whitelist");
+
+        config = new HikariConfig();
+        config.setJdbcUrl(getStringSource());
+
+        if (getConfigBoolean("use-user-and-password", false)) {
+            config.setUsername(getConfigString("user"));
+            config.setPassword(getConfigString("password"));
+        }
 
         createTable();
     }
@@ -64,9 +74,13 @@ public class Database implements IDatabase {
         return "jdbc:" + type + "://" + getConfigString("address") + "/" + getConfigString("name");
     }
 
+    @Nullable
     private Connection getConnection() {
         try {
-            return useUserAndPassword ? DriverManager.getConnection(conStr, getConfigString("user"), getConfigString("password")) : DriverManager.getConnection(conStr);
+            if (source == null || source.isClosed()) {
+                source = new HikariDataSource(config);
+            }
+            return source.getConnection();
         } catch (Exception exception) {
             LOG.severe("Can't create connection: " + exception.getMessage());
         }
@@ -184,7 +198,7 @@ public class Database implements IDatabase {
                 Statement statement = connection.createStatement();
                 ResultSet resultSet = statement.executeQuery(query)
         ) {
-            Map<String, Long> players = new HashMap<String, Long>();
+            Map<String, Long> players = new HashMap<>();
 
             while (resultSet.next()) {
                 String nickname = resultSet.getString("nickname");
@@ -205,10 +219,6 @@ public class Database implements IDatabase {
 
     private String getConfigString(String path, String def) {
         return plugin.getConfig().getString(path, def);
-    }
-
-    private Boolean getConfigBoolean(String path) {
-        return getConfigBoolean(path, false);
     }
 
     private Boolean getConfigBoolean(String path, Boolean def) {
