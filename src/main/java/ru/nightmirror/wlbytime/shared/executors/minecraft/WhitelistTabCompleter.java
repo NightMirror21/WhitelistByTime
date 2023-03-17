@@ -7,10 +7,12 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.shared.WhitelistByTime;
+import ru.nightmirror.wlbytime.shared.common.Checker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class WhitelistTabCompleter implements TabCompleter {
@@ -33,15 +35,19 @@ public class WhitelistTabCompleter implements TabCompleter {
             }
             if (commandSender.hasPermission("whitelistbytime.remove")) args.add("remove");
             if (commandSender.hasPermission("whitelistbytime.check")) args.add("check");
+            if (commandSender.hasPermission("whitelistbytime.checkme")) args.add("checkme");
             if (commandSender.hasPermission("whitelistbytime.reload")) args.add("reload");
             if (commandSender.hasPermission("whitelistbytime.getall")) args.add("getall");
             if (commandSender.hasPermission("whitelistbytime.time")) args.add("time");
         } else if (strings.length == 2) {
             List<String> notInWhitelist = new ArrayList<>();
-            List<String> inWhitelist = database.getAll();
+            List<String> inWhitelist = getWL();
 
-            for (Player player : commandSender.getServer().getOnlinePlayers()) {
-                if (!database.checkPlayer(player.getName())) notInWhitelist.add(player.getName());
+
+            if(!plugin.isWhitelistEnabled()) {
+                for (Player player : commandSender.getServer().getOnlinePlayers()) {
+                    if (!database.checkPlayer(player.getName())) notInWhitelist.add(player.getName());
+                }
             }
 
             switch (strings[0]) {
@@ -77,7 +83,7 @@ public class WhitelistTabCompleter implements TabCompleter {
 
             if (commandSender.hasPermission("whitelistbytime.time")) {
                 if (strings[1].equals("set") || strings[1].equals("add") || strings[1].equals("remove")) {
-                    args.addAll(database.getAll());
+                    args.addAll(getWL());
                 }
             }
         } else if (strings.length == 4) {
@@ -92,5 +98,21 @@ public class WhitelistTabCompleter implements TabCompleter {
         }
 
         return args;
+    }
+
+    private List<String> getWL() {
+        Map<String, Long> all;
+
+        synchronized (Checker.players) {
+            all = Checker.players;
+        }
+
+        List<String> inWhitelist = new ArrayList<>();
+
+        for (Map.Entry<String, Long> playerEntry: all.entrySet()) {
+            inWhitelist.add(playerEntry.getKey());
+        }
+
+        return inWhitelist;
     }
 }

@@ -18,6 +18,8 @@ permissions:
     default: op
   whitelistbytime.check:
     default: op
+  whitelistbytime.checkme:
+    default: op
   whitelistbytime.reload:
     default: op
   whitelistbytime.getall:

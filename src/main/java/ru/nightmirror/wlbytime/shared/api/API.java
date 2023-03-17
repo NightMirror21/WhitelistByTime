@@ -7,6 +7,7 @@ import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class API implements IAPI {
@@ -33,7 +34,7 @@ public class API implements IAPI {
 
     @Override
     public String getUntilString(String nickname) {
-        return TimeConvertor.getTimeLine(plugin, database.getUntil(nickname));
+        return TimeConvertor.getTimeLine(plugin, database.getUntil(nickname), false);
     }
 
     @Override
@@ -44,7 +45,7 @@ public class API implements IAPI {
     }
 
     @Override
-    public List<String> getAllPlayers() {
+    public Map<String, Long> getAllPlayers() {
         return database.getAll();
     }
 

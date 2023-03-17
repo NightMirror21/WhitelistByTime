@@ -9,8 +9,9 @@ import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
 import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
 import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.shared.WhitelistByTime;
+import ru.nightmirror.wlbytime.shared.common.Checker;
 
-import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 public class CommandsExecutor implements ICommandsExecutor {
@@ -44,22 +45,22 @@ public class CommandsExecutor implements ICommandsExecutor {
             return;
         }
 
-        List<String> list = database.getAll();
-        if (list != null && !list.isEmpty()) {
+        Map<String, Long> all;
+        synchronized (Checker.players) {
+            all = Checker.players;
+        }
+
+        if (all.size() > 0) {
+            String time;
             sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.list-title", "&a> Whitelist:")));
-
-            for (String nickname : list) {
-                String time;
-                long util = database.getUntil(nickname);
-
-                if (util == -1L) {
+            for (Map.Entry<String, Long> playerEntry: all.entrySet()) {
+                if (playerEntry.getValue() == -1L) {
                     time = ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.forever", "forever"));
                 } else {
-                    time = TimeConvertor.getTimeLine(plugin, util - System.currentTimeMillis());
+                    time = TimeConvertor.getTimeLine(plugin, playerEntry.getValue() - System.currentTimeMillis(), false);
                 }
-
                 sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.list-player", "&a| &f%player% &7[%time%]"))
-                        .replaceAll("%player%", nickname)
+                        .replaceAll("%player%", playerEntry.getKey())
                         .replaceAll("%time%", time.trim()));
             }
         } else {
@@ -104,7 +105,7 @@ public class CommandsExecutor implements ICommandsExecutor {
                 sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.still-in-whitelist", "a%player% will be in whitelist forever"))
                         .replaceAll("%player%", checkNickname));
             } else {
-                String time = TimeConvertor.getTimeLine(plugin, (until - System.currentTimeMillis()));
+                String time = TimeConvertor.getTimeLine(plugin, (until - System.currentTimeMillis()), false);
 
                 sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.still-in-whitelist-for-time", "&a%player% will be in whitelist still %time%"))
                         .replaceAll("%player%", checkNickname)
@@ -114,6 +115,27 @@ public class CommandsExecutor implements ICommandsExecutor {
         } else {
             sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.player-not-in-whitelist", "&e%player% not in whitelist"))
                     .replaceAll("%player%", checkNickname));
+        }
+    }
+
+    @Override
+    public void checkme(CommandSender sender) {
+        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.checkme"))) {
+            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.not-permission", "&cYou do not have permission!")));
+            return;
+        }
+
+        if (database.checkPlayer(sender.getName())) {
+            long until = database.getUntil(sender.getName());
+
+            if (until == -1L) {
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.checkme-still-in-whitelist", "&fYou are permanently whitelisted")));
+            } else {
+                String time = TimeConvertor.getTimeLine(plugin, (until - System.currentTimeMillis()), false);
+
+                sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.checkme-still-in-whitelist-for-time", "&fYou will remain on the whitelist for &a%time%"))
+                        .replaceAll("%time%", time));
+            }
         }
     }
 
@@ -152,7 +174,7 @@ public class CommandsExecutor implements ICommandsExecutor {
         } else {
             sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-for-time", "&a%player% will be in whitelist still %time%"))
                     .replaceAll("%player%", addNickname)
-                    .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis())));
+                    .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis(), false)));
         }
     }
 
@@ -171,12 +193,12 @@ public class CommandsExecutor implements ICommandsExecutor {
             case "set":
                 if (playerExists) {
                     sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.set-time", "Now &a%player% &fwill be in whitelist for &a%time%"))
-                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis(), false))
                             .replaceAll("%player%", nickname));
                     database.setUntil(nickname, until);
                 } else {
                     sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-for-time", "&a%player% added to whitelist for %time%"))
-                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()-1000L))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()-1000L, false))
                             .replaceAll("%player%", nickname));
                     database.addPlayer(nickname, until);
                 }
@@ -184,12 +206,12 @@ public class CommandsExecutor implements ICommandsExecutor {
             case "add":
                 if (playerExists) {
                     sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.add-time", "Added &a%time% &fto &a%player%"))
-                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()-1000L))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()-1000L, false))
                             .replaceAll("%player%", nickname));
                     database.setUntil(nickname, (database.getUntil(nickname) + (until-System.currentTimeMillis())));
                 } else {
                     sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.successfully-added-for-time", "&a%player% added to whitelist for %time%"))
-                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis(), false))
                             .replaceAll("%player%", nickname));
                     database.addPlayer(nickname, until);
                 }
@@ -198,18 +220,18 @@ public class CommandsExecutor implements ICommandsExecutor {
                 if (playerExists) {
                     if ((database.getUntil(nickname) - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
                         sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.remove-time", "Removed &a%time% &ffrom &a%player%"))
-                                .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis()))
+                                .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis(), false))
                                 .replaceAll("%player%", nickname));
                         database.setUntil(nickname, (database.getUntil(nickname) - (until - System.currentTimeMillis())));
                     } else {
                         sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.player-removed-from-whitelist", "&e%player% successfully removed from whitelist"))
-                                .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis()))
+                                .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until - System.currentTimeMillis(), false))
                                 .replaceAll("%player%", nickname));
                         database.removePlayer(nickname);
                     }
                 } else {
                     sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.player-not-in-whitelist", "&e%player% not in whitelist"))
-                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis()))
+                            .replaceAll("%time%", TimeConvertor.getTimeLine(plugin, until-System.currentTimeMillis(), false))
                             .replaceAll("%player%", nickname));
                 }
                 break;
@@ -252,6 +274,8 @@ public class CommandsExecutor implements ICommandsExecutor {
             turn(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("check")) {
             check(sender, strings);
+        } else if (strings.length == 1 && strings[0].equals("checkme")) {
+            checkme(sender);
         } else if (strings[0].equals("reload")) {
             reload(sender, strings);
         } else if (strings.length > 3 && strings[0].equals("time")) {

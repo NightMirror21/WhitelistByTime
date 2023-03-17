@@ -1,6 +1,7 @@
 package ru.nightmirror.wlbytime.interfaces.api;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IAPI {
     /**
@@ -44,7 +45,7 @@ public interface IAPI {
      * Get all player's in whitelist
      * @return Nicknames of players
      */
-    List<String> getAllPlayers();
+    Map<String, Long> getAllPlayers();
 
     /**
      *
