@@ -6,8 +6,9 @@ import java.util.List;
 
 public class TimeConvertor {
 
-    public static String getTimeLine(Plugin plugin, long ms) {
+    public static String getTimeLine(Plugin plugin, long ms, Boolean placeHolder) {
         String line = "";
+        long fullMs = ms;
 
         if ((ms / 31536000000L) > 0L) {
             line = ms / 31536000000L + plugin.getConfig().getStringList("time-units.year").get(0) + " ";
@@ -29,17 +30,30 @@ public class TimeConvertor {
             ms = ms - (ms / 86400000L)*86400000L;
         }
 
-        if ((ms / 3600000L) > 0L) {
-            line = line + ms / 3600000L + plugin.getConfig().getStringList("time-units.hour").get(0) + " ";
-            ms = ms - (ms / 3600000L)*3600000L;
+        if (plugin.getConfig().getBoolean("less-info-time-left", false) && placeHolder) {
+            if((fullMs / 86400000L) < 1L) {
+                line = plugin.getConfig().getString("less-info-expires-today", "Expires in") + " ";
+                if (fullMs / 3600000L > 0) {
+                    line = line + fullMs / 3600000L + plugin.getConfig().getStringList("time-units.hour").get(0);
+                } else {
+                    line = line + fullMs / 60000L + plugin.getConfig().getStringList("time-units.minute").get(0);
+                }
+            }
+        } else {
+            if ((ms / 3600000L) > 0L) {
+                line = line + ms / 3600000L + plugin.getConfig().getStringList("time-units.hour").get(0) + " ";
+                ms = ms - (ms / 3600000L)*3600000L;
+            }
+
+            if ((ms / 60L) > 0L) {
+                line = line + ms / 60000L + plugin.getConfig().getStringList("time-units.minute").get(0) + " ";
+                ms = ms - (ms / 60000L)*60000L;
+            }
+
+            if (ms != 0L) line = line + (ms/1000L) + plugin.getConfig().getStringList("time-units.second").get(0) + " ";
         }
 
-        if ((ms / 60L) > 0L) {
-            line = line + ms / 60000L + plugin.getConfig().getStringList("time-units.minute").get(0) + " ";
-            ms = ms - (ms / 60000L)*60000L;
-        }
-
-        if (ms != 0L) line = line + (ms/1000L) + plugin.getConfig().getStringList("time-units.second").get(0) + " ";
+        if (ms < 0L) line = plugin.getConfig().getString("minecraft-commands.forever", "forever");
 
         return line.trim();
     }
