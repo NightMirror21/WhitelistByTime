@@ -30,6 +30,9 @@ All output can be configured in the config\
 **%wlbytime_in_whitelist%** - *In whitelist or not*\
 **%wlbytime_time_left%** - *How much is left in whitelist*
 
+## Statistics
+![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
+
 ## API
 
 For usage API download .jar and add it to your project.
