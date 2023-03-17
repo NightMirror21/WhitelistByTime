@@ -17,7 +17,7 @@
 **/whitelist remove [nickname]** - *whitelistbytime.remove*\
 **/whitelist check [nickname]** - *whitelistbytime.check*\
 **/whitelist checkme** - *whitelistbytime.checkme*\
-**/whitelist time [nickname] [time]** - *whitelistbytime.time"*\
+**/whitelist time set/add/remove [nickname] [time]** - *whitelistbytime.time*\
 **/whitelist reload** - *whitelistbytime.reload*\
 **/whitelist getall** - *whitelistbytime.getall*
 - (time) - time for which the player will be added to the whitelist\
