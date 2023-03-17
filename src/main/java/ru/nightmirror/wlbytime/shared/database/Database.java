@@ -1,5 +1,7 @@
 package ru.nightmirror.wlbytime.shared.database;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
@@ -9,9 +11,9 @@ import ru.nightmirror.wlbytime.shared.WhitelistByTime;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerAddedToWhitelistEvent;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerRemovedFromWhitelistEvent;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -20,8 +22,8 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 public class Database implements IDatabase {
-    private Boolean useUserAndPassword;
-    private String conStr;
+    private HikariConfig config;
+    private HikariDataSource source;
     private final WhitelistByTime plugin;
     private final static Logger LOG = Logger.getLogger("WhitelistByTime");
 
@@ -31,8 +33,13 @@ public class Database implements IDatabase {
     }
 
     private void enable() {
-        conStr = getStringSource();
-        useUserAndPassword = getConfigBoolean("use-user-and-password", false);
+        config = new HikariConfig();
+        config.setJdbcUrl(getStringURL());
+
+        if (getConfigBoolean("use-user-and-password", false)) {
+            config.setUsername(getConfigString("user"));
+            config.setPassword(getConfigString("password"));
+        }
 
         createTable();
     }
@@ -59,7 +66,7 @@ public class Database implements IDatabase {
         }
     }
 
-    private String getStringSource() {
+    private String getStringURL() {
         final String type = getConfigString("type", "sqlite");
         if (type.equalsIgnoreCase("sqlite") || type.equalsIgnoreCase("h2"))
             return "jdbc:" + type + ":" + new File(plugin.getDataFolder(), "database.db").getAbsolutePath();
@@ -67,9 +74,13 @@ public class Database implements IDatabase {
         return "jdbc:" + type + "://" + getConfigString("address") + File.separator + getConfigString("name");
     }
 
+    @Nullable
     private Connection getConnection() {
         try {
-            return useUserAndPassword ? DriverManager.getConnection(conStr, getConfigString("user"), getConfigString("password")) : DriverManager.getConnection(conStr);
+            if (source == null || source.isClosed()) {
+                source = new HikariDataSource(config);
+            }
+            return source.getConnection();
         } catch (Exception exception) {
             LOG.severe("Can't create connection: " + exception.getMessage());
         }
