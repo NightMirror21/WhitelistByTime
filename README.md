@@ -1,7 +1,7 @@
 # WhitelistByTime
 
 ## Features
-- Working at 1.12.2 - 1.19.2
+- Working at 1.12.2 - 1.19.4
 - Full customization
 - HEX support
 - API
