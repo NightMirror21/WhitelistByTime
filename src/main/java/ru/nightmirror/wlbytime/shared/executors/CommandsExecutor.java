@@ -33,6 +33,10 @@ public class CommandsExecutor implements ICommandsExecutor {
 
     @Override
     public void help(CommandSender sender, String[] strings) {
+        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.help"))) {
+            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.not-permission", "&cYou do not have permission!")));
+            return;
+        }
         for (String line : ColorsConvertor.convert(plugin.getConfig().getStringList("minecraft-commands.help"))) {
             sender.sendMessage(line);
         }
@@ -180,6 +184,11 @@ public class CommandsExecutor implements ICommandsExecutor {
 
     @Override
     public void time(CommandSender sender, String[] strings) {
+        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.time"))) {
+            sender.sendMessage(ColorsConvertor.convert(plugin.getConfig().getString("minecraft-commands.not-permission", "&cYou do not have permission!")));
+            return;
+        }
+
         String nickname = strings[2];
         boolean playerExists = database.checkPlayer(nickname);
 

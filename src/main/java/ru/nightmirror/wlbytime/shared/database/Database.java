@@ -210,7 +210,7 @@ public class Database implements IDatabase {
         } catch (Exception exception) {
             LOG.warning("Can't get all players: " + exception.getMessage());
         }
-        return new HashMap<String, Long>();
+        return Checker.players;
     }
 
     private String getConfigString(String path) {

@@ -28,3 +28,5 @@ permissions:
     default: op
   whitelistbytime.turn:
     default: op
+  whitelistbytime.help:
+    default: op
