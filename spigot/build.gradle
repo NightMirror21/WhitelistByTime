@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+def javaVersion = JavaVersion.VERSION_16;
+sourceCompatibility = javaVersion;
+targetCompatibility = javaVersion;
+
+group = 'ru.nightmirror'
+version = '6.0'
+description = 'WhitelistByTime-Spigot'
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url = uri('https://hub.spigotmc.org/nexus/content/repositories/snapshots/')
+    }
+
+    maven {
+        url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    shadow project(path: ':core', configuration: 'default')
+    compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
+    compileOnly 'org.bstats:bstats-bukkit:3.0.1'
+    compileOnly 'me.clip:placeholderapi:2.11.2'
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+shadowJar {
+    archiveClassifier.set(null)
+    configurations = [project.configurations.runtimeClasspath, project.configurations.shadow]
+    archiveFileName.set(project.description + '-' + project.version + '.jar')
+}
