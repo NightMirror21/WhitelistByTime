@@ -1,0 +1,53 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+group = 'ru.nightmirror'
+version = '5.0'
+description = 'WhitelistByTime'
+
+def javaVersion = JavaVersion.VERSION_16;
+sourceCompatibility = javaVersion;
+targetCompatibility = javaVersion;
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+repositories {
+    mavenLocal()
+
+    maven {
+        url = uri('https://hub.spigotmc.org/nexus/content/repositories/snapshots/')
+    }
+
+    maven {
+        url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
+
+    compileOnly 'org.bstats:bstats-bukkit:3.0.0'
+
+    implementation 'com.zaxxer:HikariCP:3.4.5'
+
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    compileOnly 'me.clip:placeholderapi:2.11.2'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
