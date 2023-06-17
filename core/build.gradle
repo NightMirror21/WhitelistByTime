@@ -15,7 +15,9 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.zaxxer:HikariCP:5.0.1'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+    implementation 'com.j256.ormlite:ormlite-core:6.1'
+    implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
