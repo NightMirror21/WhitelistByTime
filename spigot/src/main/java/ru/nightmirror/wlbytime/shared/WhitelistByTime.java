@@ -7,12 +7,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import ru.nightmirror.wlbytime.interfaces.IPlugin;
-import ru.nightmirror.wlbytime.interfaces.api.IAPI;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
-import ru.nightmirror.wlbytime.shared.api.API;
 import ru.nightmirror.wlbytime.shared.common.Checker;
 import ru.nightmirror.wlbytime.shared.database.Database;
 import ru.nightmirror.wlbytime.shared.executors.CommandsExecutor;
@@ -25,7 +23,6 @@ import java.util.logging.Logger;
 public class WhitelistByTime extends JavaPlugin implements IPlugin {
 
     private final Logger log = Logger.getLogger("WhitelistByTime");
-    private static IAPI api;
 
     private boolean whitelistEnabled = true;
 
@@ -51,8 +48,6 @@ public class WhitelistByTime extends JavaPlugin implements IPlugin {
             checker = new Checker(this, database).start(getConfig().getInt("checker-delay", 1));
         }
 
-        api = new API(database, this);
-
         new Metrics(this, 13834);
 
         if (getConfig().getBoolean("placeholders-enabled", false)) {
@@ -74,10 +69,6 @@ public class WhitelistByTime extends JavaPlugin implements IPlugin {
         }
 
         log.info(ChatColor.GOLD + "Disabled");
-    }
-
-    public static IAPI getAPI() {
-        return api;
     }
 
     @Override

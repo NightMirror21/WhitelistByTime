@@ -4,7 +4,7 @@
 - Working at 1.12.2 - 1.19.4
 - Full customization
 - HEX support
-- API
+- ~~API~~ (Temporarily removed)
 - Placeholders (Can be turned off)
 - Memorizing players by nickname case-sensitive or not (Customized)
 - Storing data in any database type
@@ -33,7 +33,7 @@ All output can be configured in the config\
 ## Statistics
 ![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
 
-## API
+## ~~API~~ (Temporarily removed)
 
 For usage API download .jar and add it to your project.
 
