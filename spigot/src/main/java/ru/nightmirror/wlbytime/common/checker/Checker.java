@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.shared.common;
+package ru.nightmirror.wlbytime.common.checker;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
-import ru.nightmirror.wlbytime.shared.WhitelistByTime;
+import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
+import ru.nightmirror.wlbytime.WhitelistByTime;
 import ru.nightmirror.wlbytime.shared.api.events.PlayerRemovedFromWhitelistEvent;
 
 import java.util.*;

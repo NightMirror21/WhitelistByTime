@@ -1,15 +1,15 @@
-package ru.nightmirror.wlbytime.shared.executors;
+package ru.nightmirror.wlbytime.common.command;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.interfaces.executors.ICommandsExecutor;
-import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
-import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
-import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
-import ru.nightmirror.wlbytime.shared.WhitelistByTime;
-import ru.nightmirror.wlbytime.shared.common.Checker;
+import ru.nightmirror.wlbytime.common.command.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
+import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
+import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
+import ru.nightmirror.wlbytime.WhitelistByTime;
+import ru.nightmirror.wlbytime.common.checker.Checker;
 
 import java.util.Map;
 

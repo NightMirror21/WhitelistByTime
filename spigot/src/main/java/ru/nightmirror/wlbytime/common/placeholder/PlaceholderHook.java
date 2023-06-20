@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.shared.placeholders;
+package ru.nightmirror.wlbytime.common.placeholder;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
@@ -7,8 +7,8 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.misc.convertors.ColorsConvertor;
-import ru.nightmirror.wlbytime.misc.convertors.TimeConvertor;
+import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
+import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 
 public class PlaceholderHook extends PlaceholderExpansion {
 

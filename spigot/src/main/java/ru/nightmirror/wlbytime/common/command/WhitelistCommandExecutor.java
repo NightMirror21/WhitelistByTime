@@ -1,10 +1,10 @@
-package ru.nightmirror.wlbytime.shared.executors.minecraft;
+package ru.nightmirror.wlbytime.common.command;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import ru.nightmirror.wlbytime.interfaces.executors.ICommandsExecutor;
+import ru.nightmirror.wlbytime.common.command.interfaces.command.ICommandsExecutor;
 
 @RequiredArgsConstructor
 public class WhitelistCommandExecutor implements CommandExecutor {

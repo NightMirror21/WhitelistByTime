@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.misc.convertors;
+package ru.nightmirror.wlbytime.common.convertor;
 
 import net.md_5.bungee.api.ChatColor;
 

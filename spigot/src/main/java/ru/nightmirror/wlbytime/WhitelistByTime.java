@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.shared;
+package ru.nightmirror.wlbytime;
 
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -6,17 +6,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
-import ru.nightmirror.wlbytime.interfaces.IPlugin;
+import ru.nightmirror.wlbytime.common.command.interfaces.IPlugin;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.listeners.PlayerLoginListener;
-import ru.nightmirror.wlbytime.listeners.WhitelistCmdListener;
-import ru.nightmirror.wlbytime.misc.utils.ConfigUtils;
-import ru.nightmirror.wlbytime.shared.common.Checker;
+import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
+import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
+import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
+import ru.nightmirror.wlbytime.common.checker.Checker;
 import ru.nightmirror.wlbytime.shared.database.Database;
-import ru.nightmirror.wlbytime.shared.executors.CommandsExecutor;
-import ru.nightmirror.wlbytime.shared.executors.minecraft.WhitelistCommandExecutor;
-import ru.nightmirror.wlbytime.shared.executors.minecraft.WhitelistTabCompleter;
-import ru.nightmirror.wlbytime.shared.placeholders.PlaceholderHook;
+import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
+import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
+import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 
 import java.util.logging.Logger;
 
