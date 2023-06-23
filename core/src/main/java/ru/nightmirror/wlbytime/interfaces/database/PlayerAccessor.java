@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 public interface PlayerAccessor {
     CompletableFuture<Optional<WLPlayer>> getPlayer(@NotNull String nickname);
     Optional<WLPlayer> getPlayerCached(@NotNull String nickname);
+    void loadPlayerToCache(@NotNull String nickname);
     CompletableFuture<Boolean> createOrUpdate(@NotNull WLPlayer player);
     CompletableFuture<Boolean> delete(@NotNull String nickname);
     CompletableFuture<List<WLPlayer>> getPlayers();

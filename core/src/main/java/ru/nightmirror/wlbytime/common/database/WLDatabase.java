@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayerMapper;
@@ -26,6 +27,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -36,11 +38,9 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
     @Getter
     boolean connected = false;
 
-    Mapper<WLPlayerTable, WLPlayer> mapper;
+    final Mapper<WLPlayerTable, WLPlayer> mapper;
 
-    Dao<WLPlayerTable, Long> dao;
     JdbcPooledConnectionSource connection;
-
     LoadingCache<String, WLPlayer> cache;
 
     public WLDatabase(DatabaseSettings settings) {
@@ -58,7 +58,6 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
         try {
             connection = getConnectionSource();
             TableUtils.createTableIfNotExists(connection, WLPlayerTable.class);
-            dao = DaoManager.createDao(connection, WLPlayerTable.class);
             connected = true;
             return true;
         } catch (SQLException exception) {
@@ -76,6 +75,16 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
                 settings.getUser(),
                 settings.getPassword()
         );
+    }
+
+    private CompletableFuture<Dao<WLPlayerTable, Long>> getDao() {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return DaoManager.createDao(connection, WLPlayerTable.class);
+            } catch (Exception exception) {
+                throw new CompletionException(exception);
+            }
+        });
     }
 
     @Override
@@ -100,12 +109,12 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
 
     @Override
     public CompletableFuture<Void> refreshCache() {
-        return CompletableFuture.runAsync(() -> getPlayers().join().forEach(player -> cache.put(player.getNickname(), player)));
+        return getPlayers().thenAccept(list -> list.forEach(player -> cache.put(player.getNickname(), player)));
     }
 
     @Override
     public CompletableFuture<Optional<WLPlayer>> getPlayer(@NotNull String nickname) {
-        return CompletableFuture.supplyAsync(() -> {
+        return getDao().thenApply((dao) -> {
             try {
                 Optional<WLPlayerTable> tableOptional = dao.queryForEq(WLPlayerTable.NICKNAME_COLUMN, nickname).stream().findAny();
                 if (tableOptional.isEmpty()) return Optional.empty();
@@ -123,12 +132,20 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
     }
 
     @Override
+    public void loadPlayerToCache(@NotNull String nickname) {
+        cache.refresh(nickname);
+    }
+
+    @Override
     public CompletableFuture<Boolean> createOrUpdate(@NotNull WLPlayer player) {
-        return CompletableFuture.supplyAsync(() -> {
+        return getDao().thenApply((dao) -> {
             try {
-                dao.createOrUpdate(mapper.toTable(player));
-                cache.refresh(player.getNickname());
-                return true;
+                Dao.CreateOrUpdateStatus status = dao.createOrUpdate(mapper.toTable(player));
+                if (status.isCreated() || status.isUpdated()) {
+                    cache.refresh(player.getNickname());
+                    return true;
+                }
+                return false;
             } catch (Exception exception) {
                 exception.printStackTrace();
                 return false;
@@ -138,13 +155,15 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
 
     @Override
     public CompletableFuture<Boolean> delete(@NotNull String nickname) {
-        return CompletableFuture.supplyAsync(() -> {
+        return getDao().thenApply((dao) -> {
             try {
                 WLPlayer player = getPlayer(nickname).join().orElse(null);
                 if (player == null) return false;
-                dao.delete(mapper.toTable(player));
-                cache.invalidate(player.getNickname());
-                return true;
+                if (dao.delete(mapper.toTable(player)) == 1) {
+                    cache.invalidate(player.getNickname());
+                    return true;
+                }
+                return false;
             } catch (Exception exception) {
                 exception.printStackTrace();
                 return false;
@@ -154,7 +173,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
 
     @Override
     public CompletableFuture<List<WLPlayer>> getPlayers() {
-        return CompletableFuture.supplyAsync(() -> {
+        return getDao().thenApply((dao) -> {
             try {
                 return dao.queryForAll().stream().map(t -> mapper.toEntity(t)).toList();
             } catch (Exception exception) {
