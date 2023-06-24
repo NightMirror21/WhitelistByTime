@@ -13,6 +13,7 @@ public interface PlayerAccessor {
     void loadPlayerToCache(@NotNull String nickname);
     CompletableFuture<Boolean> createOrUpdate(@NotNull WLPlayer player);
     CompletableFuture<Boolean> delete(@NotNull String nickname);
+    CompletableFuture<Void> delete(@NotNull List<WLPlayer> players);
     CompletableFuture<List<WLPlayer>> getPlayers();
     List<WLPlayer> getPlayersCached();
 }

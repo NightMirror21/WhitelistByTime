@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.command.interfaces;
+package ru.nightmirror.wlbytime.interfaces;
 
 import org.bukkit.configuration.file.FileConfiguration;
 

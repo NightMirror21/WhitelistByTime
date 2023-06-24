@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import ru.nightmirror.wlbytime.common.command.interfaces.IPlugin;
+import ru.nightmirror.wlbytime.interfaces.IPlugin;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import ru.nightmirror.wlbytime.common.command.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
 
 @RequiredArgsConstructor
 public class WhitelistCommandExecutor implements CommandExecutor {

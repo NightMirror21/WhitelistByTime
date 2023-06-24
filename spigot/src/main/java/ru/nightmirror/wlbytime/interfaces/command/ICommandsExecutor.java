@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.command.interfaces.command;
+package ru.nightmirror.wlbytime.interfaces.command;
 
 import org.bukkit.command.CommandSender;
 

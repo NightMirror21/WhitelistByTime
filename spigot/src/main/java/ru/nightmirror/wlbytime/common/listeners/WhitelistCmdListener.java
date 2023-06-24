@@ -7,7 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import ru.nightmirror.wlbytime.common.command.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
 
 import java.util.Arrays;
 import java.util.List;

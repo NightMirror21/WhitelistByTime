@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.common.command.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.utils.ConfigUtils;

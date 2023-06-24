@@ -12,11 +12,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayerMapper;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayerTable;
+import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
+import ru.nightmirror.wlbytime.interfaces.listener.PlayerListenersContainer;
 import ru.nightmirror.wlbytime.interfaces.database.CachedDatabase;
 import ru.nightmirror.wlbytime.interfaces.database.Mapper;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
@@ -31,7 +32,7 @@ import java.util.concurrent.CompletionException;
 
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WLDatabase implements PlayerAccessor, CachedDatabase {
+public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListenersContainer {
 
     @Setter
     DatabaseSettings settings;
@@ -42,6 +43,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
 
     JdbcPooledConnectionSource connection;
     LoadingCache<String, WLPlayer> cache;
+    List<PlayerListener> listeners;
 
     public WLDatabase(DatabaseSettings settings) {
         this.settings = settings;
@@ -161,12 +163,27 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
                 if (player == null) return false;
                 if (dao.delete(mapper.toTable(player)) == 1) {
                     cache.invalidate(player.getNickname());
+                    listeners.forEach(listener -> listener.playerRemoved(player));
                     return true;
                 }
                 return false;
             } catch (Exception exception) {
                 exception.printStackTrace();
                 return false;
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<Void> delete(@NotNull List<WLPlayer> players) {
+        return getDao().thenAccept((dao) -> {
+            try {
+                if (dao.delete(players.stream().map(mapper::toTable).toList()) == 1) {
+                    cache.invalidateAll(players.stream().map(WLPlayer::getNickname).toList());
+                    players.forEach(player -> listeners.forEach(listener -> listener.playerRemoved(player)));
+                }
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
         });
     }
@@ -186,5 +203,10 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase {
     @Override
     public List<WLPlayer> getPlayersCached() {
         return cache.asMap().values().stream().toList();
+    }
+
+    @Override
+    public void addListener(PlayerListener listener) {
+        listeners.add(listener);
     }
 }
