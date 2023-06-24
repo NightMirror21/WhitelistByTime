@@ -2,9 +2,9 @@ package ru.nightmirror.wlbytime.interfaces;
 
 import org.bukkit.configuration.file.FileConfiguration;
 
-public interface IPlugin {
+public interface IWhitelist {
     boolean isWhitelistEnabled();
     void setWhitelistEnabled(boolean mode);
     FileConfiguration getPluginConfig();
-    boolean reloadConfig();
+    void reload();
 }

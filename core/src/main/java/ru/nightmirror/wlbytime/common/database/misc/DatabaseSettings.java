@@ -18,6 +18,7 @@ public class DatabaseSettings {
     String type;
     String address;
     String databaseName;
+    boolean userUserAndPassword;
     String user;
     String password;
     List<String> params;

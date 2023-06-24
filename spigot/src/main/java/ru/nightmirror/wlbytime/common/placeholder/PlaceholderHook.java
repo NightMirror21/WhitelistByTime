@@ -1,26 +1,26 @@
 package ru.nightmirror.wlbytime.common.placeholder;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlaceholderHook extends PlaceholderExpansion {
 
-    private final IDatabase database;
-    private final FileConfiguration config;
-    private final Plugin plugin;
-
-    public PlaceholderHook(IDatabase database, Plugin plugin) {
-        this.database = database;
-        this.config = plugin.getConfig();
-        this.plugin = plugin;
-    }
+    PlayerAccessor playerAccessor;
+    TimeConvertor timeConvertor;
+    FileConfiguration config;
 
     @Override
     public @NotNull String getIdentifier() {
@@ -38,15 +38,25 @@ public class PlaceholderHook extends PlaceholderExpansion {
     }
 
     @Override
-    public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
+    public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
+
         if (params.equalsIgnoreCase("in_whitelist")) {
-            String result = database.checkPlayer(player.getName()) ? config.getString("in-whitelist-true", "YES") : config.getString("in-whitelist-false", "NO");
+            String result = playerAccessor.getPlayerCached(player.getName()).isPresent() ? config.getString("in-whitelist-true", "YES") : config.getString("in-whitelist-false", "NO");
             return ColorsConvertor.convert(result);
         } else if (params.equalsIgnoreCase("time_left")) {
-            String time = TimeConvertor.getTimeLine(plugin, database.getUntil(player.getName()) - System.currentTimeMillis(), true);
-            return ColorsConvertor.convert(config.getString("time-left", "&a%time%").replaceAll("%time%", time));
+            AtomicReference<String> time = new AtomicReference<>("");
+
+            playerAccessor.getPlayerCached(player.getName()).ifPresent(whitelistedPlayer -> {
+                time.set(timeConvertor.getTimeLine(whitelistedPlayer.getUntil() - System.currentTimeMillis()));
+            });
+
+            return ColorsConvertor.convert(config.getString("time-left", "&a%time%").replaceAll("%time%", time.get()));
         }
 
         return "{ERR_PARAM}";
+    }
+
+    public void unhook() {
+        unregister();
     }
 }

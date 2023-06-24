@@ -15,4 +15,9 @@ public class WLPlayer {
     @Nullable Long id;
     @NotNull String nickname;
     @NotNull Long until;
+
+    public WLPlayer(@NotNull String nickname, @NotNull Long until) {
+        this.nickname = nickname;
+        this.until = until;
+    }
 }

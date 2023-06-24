@@ -139,12 +139,34 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
+    public void loadPlayersToCache(@NotNull List<String> nicknames) {
+        cache.refreshAll(nicknames);
+    }
+
+    @Override
     public CompletableFuture<Boolean> createOrUpdate(@NotNull WLPlayer player) {
         return getDao().thenApply((dao) -> {
             try {
                 Dao.CreateOrUpdateStatus status = dao.createOrUpdate(mapper.toTable(player));
                 if (status.isCreated() || status.isUpdated()) {
                     cache.refresh(player.getNickname());
+                    return true;
+                }
+                return false;
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                return false;
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<Boolean> delete(@NotNull WLPlayer player) {
+        return getDao().thenApply((dao) -> {
+            try {
+                if (dao.delete(mapper.toTable(player)) == 1) {
+                    cache.invalidate(player.getNickname());
+                    listeners.forEach(listener -> listener.playerRemoved(player));
                     return true;
                 }
                 return false;

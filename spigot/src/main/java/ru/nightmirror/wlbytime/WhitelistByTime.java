@@ -1,74 +1,149 @@
 package ru.nightmirror.wlbytime;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import ru.nightmirror.wlbytime.interfaces.IPlugin;
-import ru.nightmirror.wlbytime.interfaces.database.IDatabase;
-import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
-import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
-import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
-import ru.nightmirror.wlbytime.common.checker.Checker;
-import ru.nightmirror.wlbytime.shared.database.Database;
+import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
+import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
+import ru.nightmirror.wlbytime.common.database.WLDatabase;
+import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
+import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
+import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
+import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
+import ru.nightmirror.wlbytime.interfaces.IWhitelist;
+import ru.nightmirror.wlbytime.interfaces.checker.Checker;
+import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
-public class WhitelistByTime extends JavaPlugin implements IPlugin {
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
-    private final Logger log = Logger.getLogger("WhitelistByTime");
+    static Logger log;
 
-    private boolean whitelistEnabled = true;
+    boolean whitelistEnabled = true;
 
-    private BukkitTask checker;
+    TimeConvertor timeConvertor;
+
+    WLDatabase database;
+    Checker checker;
+    PlaceholderHook placeholderHook;
+    Metrics metrics;
+
+    List<EventListener> listeners = new ArrayList<>();
 
     @Override
     public void onEnable() {
-        ConfigUtils.checkConfig(this);
+        log = getLogger();
 
+        ConfigUtils.checkConfig(this);
         whitelistEnabled = getConfig().getBoolean("enabled", true);
 
-        IDatabase database = new Database(this);
+        initTimeConvertor();
+        initDatabase();
+        initChecker();
+        initCommandsAndListeners();
+        initMetrics();
+        hookPlaceholder();
 
-        Bukkit.getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this)), this);
-        Bukkit.getPluginManager().registerEvents(new PlayerLoginListener(database, this), this);
+        info("Enabled");
+    }
 
-        getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this)));
-        getCommand("wl").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this)));
+    @Override
+    public void onDisable() {
+        listeners.forEach(EventListener::unregister);
+
+        if (placeholderHook != null) placeholderHook.unhook();
+        if (metrics != null) metrics.shutdown();
+        if (checker != null) checker.stop();
+        if (database != null) database.close();
+
+        info("Disabled");
+    }
+
+    @Override
+    public void reload() {
+        onDisable();
+        onEnable();
+    }
+
+    private void initTimeConvertor() {
+        TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
+                .year(getConfig().getStringList("time-units.year"))
+                .month(getConfig().getStringList("time-units.month"))
+                .week(getConfig().getStringList("time-units.week"))
+                .day(getConfig().getStringList("time-units.day"))
+                .hour(getConfig().getStringList("time-units.hour"))
+                .minute(getConfig().getStringList("time-units.minute"))
+                .second(getConfig().getStringList("time-units.second"))
+                .build();
+
+        timeConvertor = new TimeConvertor(settings);
+    }
+
+    private void initDatabase() {
+        DatabaseSettings settings = DatabaseSettings.builder()
+                .localStorageDir(getDataFolder())
+                .type(getConfig().getString("type", "sqlite"))
+                .address(getConfig().getString("address", "localhost"))
+                .databaseName(getConfig().getString("name", "whitelist"))
+                .userUserAndPassword(getConfig().getBoolean("userUserAndPassword", false))
+                .user(getConfig().getString("user", "user"))
+                .password(getConfig().getString("password", "password"))
+                .build();
+
+        database = new WLDatabase(settings);
+        database.loadPlayersToCache(Arrays.stream(getServer().getOfflinePlayers())
+                .map(OfflinePlayer::getName)
+                .filter(Objects::nonNull)
+                .toList());
+    }
+
+    private void initCommandsAndListeners() {
+        listeners.add(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)));
+        listeners.add(new PlayerLoginListener(database, this));
+        listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
+
+        getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
-        getCommand("wl").setTabCompleter(new WhitelistTabCompleter(database, this));
+    }
 
+    private void initChecker() {
         if (getConfig().getBoolean("checker-thread", true)) {
-            checker = new Checker(this, database).start(getConfig().getInt("checker-delay", 1));
+            checker = new PlayersChecker(database, Duration.of(getConfig().getInt("checker-delay", 1000), ChronoUnit.MILLIS));
+            checker.start();
         }
+    }
 
-        new Metrics(this, 13834);
-
+    private void hookPlaceholder() {
         if (getConfig().getBoolean("placeholders-enabled", false)) {
             try {
-                new PlaceholderHook(database, this).register();
+                placeholderHook = new PlaceholderHook(database, timeConvertor, getPluginConfig());
+                placeholderHook.register();
                 log.info("Hooked with PlaceholderAPI");
             } catch (Exception exception) {
                 log.warning("Can't hook with PlaceholderAPI. " + exception.getMessage());
             }
         }
-
-        log.info("Enabled!");
     }
 
-    @Override
-    public void onDisable() {
-        if (checker != null) {
-            checker.cancel();
-        }
-
-        log.info(ChatColor.GOLD + "Disabled");
+    private void initMetrics() {
+        new Metrics(this, 13834);
     }
 
     @Override
@@ -84,5 +159,18 @@ public class WhitelistByTime extends JavaPlugin implements IPlugin {
     @Override
     public FileConfiguration getPluginConfig() {
         return getConfig();
+    }
+
+
+    public static void info(String message) {
+        if (log != null) log.info(message);
+    }
+
+    public static void warn(String message) {
+        if (log != null) log.warning(message);
+    }
+
+    public static void error(String message) {
+        if (log != null) log.severe(message);
     }
 }

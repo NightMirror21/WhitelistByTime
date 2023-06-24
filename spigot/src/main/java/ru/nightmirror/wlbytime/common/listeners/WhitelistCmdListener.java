@@ -1,6 +1,8 @@
 package ru.nightmirror.wlbytime.common.listeners;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,16 +10,18 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class WhitelistCmdListener implements Listener {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class WhitelistCmdListener implements EventListener {
 
-    private final ICommandsExecutor executor;
+    ICommandsExecutor executor;
 
-    private final static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist", "/wl", "wl");
+    static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist", "/wl", "wl");
 
     @EventHandler
     private void onPlayerWhitelistCommand(PlayerCommandPreprocessEvent event) {
@@ -57,5 +61,11 @@ public class WhitelistCmdListener implements Listener {
 
             executor.execute(sender, strings);
         }
+    }
+
+    @Override
+    public void unregister() {
+        PlayerCommandPreprocessEvent.getHandlerList().unregister(this);
+        ServerCommandEvent.getHandlerList().unregister(this);
     }
 }

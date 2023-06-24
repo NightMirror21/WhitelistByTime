@@ -9,8 +9,7 @@ softdepend:
 commands:
   whitelist:
     usage: /whitelist help
-  wl:
-    usage: /wl help
+    aliases: wl
 permissions:
   whitelistbytime.add:
     default: op
