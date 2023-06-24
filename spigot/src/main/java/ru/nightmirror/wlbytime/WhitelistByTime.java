@@ -3,7 +3,6 @@ package ru.nightmirror.wlbytime;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.bstats.bukkit.Metrics;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,8 +15,10 @@ import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.WLDatabase;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
+import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
+import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
@@ -39,6 +40,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     boolean whitelistEnabled = true;
 
     TimeConvertor timeConvertor;
+    BukkitSyncer syncer;
 
     WLDatabase database;
     Checker checker;
@@ -50,6 +52,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     @Override
     public void onEnable() {
         log = getLogger();
+        syncer = new BukkitSyncer(this);
 
         ConfigUtils.checkConfig(this);
         whitelistEnabled = getConfig().getBoolean("enabled", true);
@@ -121,6 +124,8 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
+
+        database.addListener(new PlayerKicker(syncer, getConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick")));
     }
 
     private void initChecker() {
