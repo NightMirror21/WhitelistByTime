@@ -5,12 +5,14 @@ import com.j256.ormlite.table.DatabaseTable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @DatabaseTable(tableName = "wlbytime_players")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Data
+@NoArgsConstructor
 public class WLPlayerTable {
 
     public static final String TABLE_NAME = "wlbytime_players";
@@ -21,9 +23,18 @@ public class WLPlayerTable {
     @DatabaseField(generatedId = true, columnName = ID_COLUMN)
     Long id;
 
-    @DatabaseField(index = true, columnName = NICKNAME_COLUMN)
+    @DatabaseField(columnName = NICKNAME_COLUMN)
     String nickname;
 
     @DatabaseField(columnName = UNTIL_COLUMN)
     Long until;
+
+    @Override
+    public String toString() {
+        return "WLPlayerTable{" +
+                "id=" + id +
+                ", nickname='" + nickname + '\'' +
+                ", until=" + until +
+                '}';
+    }
 }

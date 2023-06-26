@@ -25,6 +25,7 @@ import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -43,7 +44,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
 
     JdbcPooledConnectionSource connection;
     LoadingCache<String, WLPlayer> cache;
-    List<PlayerListener> listeners;
+    final List<PlayerListener> listeners = new ArrayList<>();
 
     public WLDatabase(DatabaseSettings settings) {
         this.settings = settings;
@@ -149,6 +150,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
             try {
                 Dao.CreateOrUpdateStatus status = dao.createOrUpdate(mapper.toTable(player));
                 if (status.isCreated() || status.isUpdated()) {
+                    System.out.println("created/updated");
                     cache.refresh(player.getNickname());
                     return true;
                 }
@@ -165,6 +167,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
         return getDao().thenApply((dao) -> {
             try {
                 if (dao.delete(mapper.toTable(player)) == 1) {
+                    System.out.println("deleted");
                     cache.invalidate(player.getNickname());
                     listeners.forEach(listener -> listener.playerRemoved(player));
                     return true;
@@ -184,6 +187,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
                 WLPlayer player = getPlayer(nickname).join().orElse(null);
                 if (player == null) return false;
                 if (dao.delete(mapper.toTable(player)) == 1) {
+                    System.out.println("deleted");
                     cache.invalidate(player.getNickname());
                     listeners.forEach(listener -> listener.playerRemoved(player));
                     return true;
@@ -201,6 +205,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
         return getDao().thenAccept((dao) -> {
             try {
                 if (dao.delete(players.stream().map(mapper::toTable).toList()) == 1) {
+                    System.out.println("deleted");
                     cache.invalidateAll(players.stream().map(WLPlayer::getNickname).toList());
                     players.forEach(player -> listeners.forEach(listener -> listener.playerRemoved(player)));
                 }

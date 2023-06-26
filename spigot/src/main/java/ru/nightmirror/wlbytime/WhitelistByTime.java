@@ -108,6 +108,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
                 .userUserAndPassword(getConfig().getBoolean("userUserAndPassword", false))
                 .user(getConfig().getString("user", "user"))
                 .password(getConfig().getString("password", "password"))
+                .params(getConfig().getStringList("params"))
                 .build();
 
         database = new WLDatabase(settings);
@@ -119,20 +120,19 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initCommandsAndListeners() {
         listeners.add(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)));
-        listeners.add(new PlayerLoginListener(database, this));
+        listeners.add(new PlayerLoginListener(database, getConfig().getBoolean("case-sensitive", false),this));
         listeners.forEach(listener -> getServer().getPluginManager().registerEvents(listener, this));
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
-
-        database.addListener(new PlayerKicker(syncer, getConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick")));
     }
 
     private void initChecker() {
-        if (getConfig().getBoolean("checker-thread", true)) {
-            checker = new PlayersChecker(database, Duration.of(getConfig().getInt("checker-delay", 1000), ChronoUnit.MILLIS));
-            checker.start();
-        }
+        PlayerKicker playerKicker = new PlayerKicker(syncer, this, getConfig().getBoolean("case-sensitive", false), getConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick"));
+        database.addListener(playerKicker);
+
+        checker = new PlayersChecker(database, playerKicker, Duration.of(getConfig().getInt("checker-delay", 1000), ChronoUnit.MILLIS));
+        checker.start();
     }
 
     private void hookPlaceholder() {

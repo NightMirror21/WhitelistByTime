@@ -264,7 +264,7 @@ public class CommandsExecutor implements ICommandsExecutor {
             add(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("remove")) {
             remove(sender, strings);
-        } else if (strings.length > 1 && (strings[0].equals("on") || strings[0].equals("off"))) {
+        } else if (strings[0].equals("on") || strings[0].equals("off")) {
             turn(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("check")) {
             check(sender, strings);

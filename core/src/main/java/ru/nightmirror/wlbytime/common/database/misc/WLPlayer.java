@@ -20,4 +20,14 @@ public class WLPlayer {
         this.nickname = nickname;
         this.until = until;
     }
+
+
+    @Override
+    public String toString() {
+        return "WLPlayer{" +
+                "id=" + id +
+                ", nickname='" + nickname + '\'' +
+                ", until=" + until +
+                '}';
+    }
 }
