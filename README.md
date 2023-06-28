@@ -2,14 +2,6 @@
 
 This plugin allows you to add players for a certain time or permanently.
 
-## Features
-- Customization.
-- HEX support.
-- Placeholders (can be turned off).
-- Memorizing players by nickname (case-sensitive or customizable).
-- Storing data in any SQL database.
-- Convenience of specifying the time and checking the remaining duration.
-
 ## Statistics
 Statistics are obtained through bstats metrics.
 ![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
@@ -45,3 +37,5 @@ All output can be configured in the config.
    Create an issue in this repository and describe it in detail. I would be happy to get any feedback!
 3. *Will there be bungee\velocity support?*\
    Yes, it will, as soon as I learn how to use their api.
+4. *What is the difference in the whitelistbytime between paper and spigot?*\
+   The difference lies in the formatting of the messages. In Spigot, strings are used, whereas in Paper, components are utilized. To create colored messages in Spigot, you can use the '&' sign or hex codes (e.g., #ffffffff). However, in Paper, only MiniMessage formatting is supported.
