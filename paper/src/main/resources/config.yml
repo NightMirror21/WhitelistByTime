@@ -1,0 +1,108 @@
+####### SETTINGS #######
+
+# Is whitelist enabled by default on startup
+enabled: true
+# The delay through which the thread will check players. In milliseconds
+checker-delay: 1000
+# Check the case of the nickname
+case-sensitive: true
+
+
+####### DATABASE #######
+
+type: 'sqlite'
+
+# If not sqlite or h2
+address: 'localhost:3030'
+name: 'minecraft'
+
+# Params for connection
+params:
+  - 'autoReconnect=true'
+
+# If using user and password
+use-user-and-password: false
+user: 'user'
+password: 'qwerty123'
+
+####### PLACEHOLDERS HOOK #######
+
+placeholders-enabled: true
+
+# %wlbytime_in_whitelist% - In whitelist or not
+in-whitelist-true: '<green>✔'
+in-whitelist-false: '<red>✖'
+
+# %wlbytime_time_left% - How much is left in whitelist
+time-left: '<green>%time%'
+
+####### MESSAGES #######
+
+minecraft-commands:
+  plugin-reloaded: '<gold>Plugin reloaded!'
+  not-permission: '<red>You do not have permission!'
+
+  whitelist-enabled: '<green>WhitelistByTime enabled'
+  whitelist-already-enabled: '<green>WhitelistByTime already enabled'
+  whitelist-disabled: '<green>WhitelistByTime disabled'
+  whitelist-already-disabled: '<green>WhitelistByTime already disabled'
+
+  you-not-in-whitelist-kick:
+    - '<gold>Sorry, but you are not in whitelist'
+    - 'Bye!'
+
+  player-removed-from-whitelist: '<yellow>%player% <white>successfully removed from whitelist'
+  player-already-in-whitelist: '<yellow>%player% <white>already in whitelist'
+  player-not-in-whitelist: '<yellow>%player% <white>not in whitelist'
+
+  # For command with time
+  successfully-added-for-time: '<green>%player% <white>added to whitelist for <green>%time%'
+  still-in-whitelist-for-time: '<green>%player% <white>will be in whitelist still <green>%time%'
+  checkme-still-in-whitelist-for-time: '<white>You will remain on the whitelist for <green>%time%'
+
+  # For command without time
+  successfully-added: '<green>%player% <white>added to whitelist forever'
+  still-in-whitelist: '<green>%player% <white>will be in whitelist forever'
+  checkme-still-in-whitelist: '<white>You are permanently whitelisted'
+
+  list-title: '<green>> Whitelist:'
+  list-player: '<green>| <white>%player% <gray>[%time%]'
+  list-empty: '<green>Whitelist is empty'
+
+  set-time: 'Now <green>%player% <white>will be in whitelist for <green>%time%'
+  add-time: 'Added <green>%time% <white>to <green>%player%'
+  remove-time: 'Removed <green>%time% <white>from <green>%player%'
+
+  forever: 'forever'
+
+  help:
+    - '<green>> WhitelistByTime - Help'
+    - '<green>| <white>/whitelist on/off'
+    - '<green>| <white>/whitelist add [nickname] (time)'
+    - '<green>| <white>/whitelist remove [nickname]'
+    - '<green>| <white>/whitelist check [nickname]'
+    - '<green>| <white>/whitelist checkme'
+    - '<green>| <white>/whitelist reload'
+    - '<green>| <white>/whitelist getall'
+    - '<green>| <white>/whitelist time set/add/remove [nickname] [time]'
+    - '<green>| <white>(time) - time for which the player will be added to the whitelist'
+    - '<green>| <white>Example: 2d 3h 10m'
+    - '<green>| <white>Leave this value empty if you want to add player forever'
+
+
+
+time-units:
+  year:
+    - 'y'
+  month:
+    - 'mo'
+  week:
+    - 'w'
+  day:
+    - 'd'
+  hour:
+    - 'h'
+  minute:
+    - 'm'
+  second:
+    - 's'
