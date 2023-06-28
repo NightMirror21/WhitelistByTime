@@ -1,16 +1,18 @@
 # WhitelistByTime
 
-## Statistics
-Statistics are obtained through bstats metrics
-![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
+This plugin allows you to add players for a certain time or permanently.
 
 ## Features
-- Customization
-- HEX support
-- Placeholders (can be turned off)
-- Memorizing players by nickname (case-sensitive or customizable)
-- Storing data in any SQL database
-- Convenience of specifying the time and checking the remaining duration
+- Customization.
+- HEX support.
+- Placeholders (can be turned off).
+- Memorizing players by nickname (case-sensitive or customizable).
+- Storing data in any SQL database.
+- Convenience of specifying the time and checking the remaining duration.
+
+## Statistics
+Statistics are obtained through bstats metrics.
+![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
 
 ## Commands and Permissions
 | Command                                          | Permission              |
@@ -23,14 +25,23 @@ Statistics are obtained through bstats metrics
 | /whitelist time set/add/remove [nickname] [time] | whitelistbytime.time    |
 | /whitelist reload                                | whitelistbytime.reload  |
 | /whitelist getall                                | whitelistbytime.getall  |
+
 Note:
-- [nickname] - this argument is required
+- [nickname] - this argument is required.
 - (time) - The duration for which the player will be added to the whitelist.\
   Example: 2d 3h 10m.\
   Leave this value empty if you want to add the player permanently.
 
 ## Placeholders:
-All output can be configured in the config
+All output can be configured in the config.
 
-*%wlbytime_in_whitelist%* - In whitelist or not\
-*%wlbytime_time_left%* - How much is left in whitelist
+*%wlbytime_in_whitelist%* - In whitelist or not.\
+*%wlbytime_time_left%* - How much is left in whitelist.
+
+## FAQ
+1. *Why does the plugin weigh so much?*\
+   Because it contains libraries such as omrlite (database), caffein (cache), bstats (metrics).
+2. *I have a problem/idea where should I write?*\
+   Create an issue in this repository and describe it in detail. I would be happy to get any feedback!
+3. *Will there be bungee\velocity support?*\
+   Yes, it will, as soon as I learn how to use their api.
