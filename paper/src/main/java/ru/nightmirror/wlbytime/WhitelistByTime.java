@@ -94,6 +94,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
                 .hour(getConfig().getStringList("time-units.hour"))
                 .minute(getConfig().getStringList("time-units.minute"))
                 .second(getConfig().getStringList("time-units.second"))
+                .forever(getConfig().getString("minecraft-commands.forever", "forever"))
                 .build();
 
         timeConvertor = new TimeConvertor(settings);
