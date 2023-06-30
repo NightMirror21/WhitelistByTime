@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.WhitelistByTime;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
+import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
 import java.util.ArrayList;
@@ -21,7 +22,7 @@ import java.util.List;
 public class WhitelistTabCompleter implements TabCompleter {
 
     PlayerAccessor playerAccessor;
-    WhitelistByTime plugin;
+    IWhitelist plugin;
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, String[] strings) {
@@ -77,10 +78,10 @@ public class WhitelistTabCompleter implements TabCompleter {
             }
         } else if (strings.length == 3) {
             if (commandSender.hasPermission("whitelistbytime.add") && strings[0].equals("add")) {
-                args.add("1" + plugin.getConfig().getString("time-units.month"));
-                args.add("1" + plugin.getConfig().getString("time-units.week"));
-                args.add("1" + plugin.getConfig().getString("time-units.day"));
-                args.add("12" + plugin.getConfig().getString("time-units.hour"));
+                args.add("1" + plugin.getPluginConfig().getStringList("time-units.month").get(0));
+                args.add("1" + plugin.getPluginConfig().getStringList("time-units.week").get(0));
+                args.add("1" + plugin.getPluginConfig().getStringList("time-units.day").get(0));
+                args.add("12" + plugin.getPluginConfig().getStringList("time-units.hour").get(0));
             }
 
             if (commandSender.hasPermission("whitelistbytime.time")) {
@@ -91,10 +92,10 @@ public class WhitelistTabCompleter implements TabCompleter {
         } else if (strings.length == 4) {
             if (commandSender.hasPermission("whitelistbytime.time")) {
                 if (strings[1].equals("set") || strings[1].equals("add") || strings[1].equals("remove")) {
-                    args.add("1" + plugin.getConfig().getString("time-units.month"));
-                    args.add("1" + plugin.getConfig().getString("time-units.week"));
-                    args.add("1" + plugin.getConfig().getString("time-units.day"));
-                    args.add("12" + plugin.getConfig().getString("time-units.hour"));
+                    args.add("1" + plugin.getPluginConfig().getStringList("time-units.month").get(0));
+                    args.add("1" + plugin.getPluginConfig().getStringList("time-units.week").get(0));
+                    args.add("1" + plugin.getPluginConfig().getStringList("time-units.day").get(0));
+                    args.add("12" + plugin.getPluginConfig().getStringList("time-units.hour").get(0));
                 }
             }
         }

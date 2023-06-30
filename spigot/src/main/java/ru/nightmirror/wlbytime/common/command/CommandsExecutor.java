@@ -172,7 +172,7 @@ public class CommandsExecutor implements ICommandsExecutor {
                 } else {
                     sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "&a%player% will be in whitelist still %time%"))
                             .replaceAll("%player%", addNickname)
-                            .replaceAll("%time%", timeConvertor.getTimeLine(finalUntil - System.currentTimeMillis())));
+                            .replaceAll("%time%", timeConvertor.getTimeLine(finalUntil - System.currentTimeMillis() + 1000L)));
                 }
             });
         }));
@@ -194,35 +194,35 @@ public class CommandsExecutor implements ICommandsExecutor {
                 case "set" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(until);
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.set-time", "Now &a%player% &fwill be in whitelist for &a%time%"))
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
                     player.setUntil(until);
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "&a%player% added to whitelist for %time%"))
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 });
                 case "add" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(player.getUntil() + (until - System.currentTimeMillis()));
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.add-time", "Added &a%time% &fto &a%player%"))
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "&a%player% added to whitelist for %time%"))
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 });
                 case "remove" -> playerOptional.ifPresentOrElse(player -> {
                     if ((player.getUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
                         player.setUntil(player.getUntil() - (until - System.currentTimeMillis()));
                         playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.remove-time", "Removed &a%time% &ffrom &a%player%"))
-                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                                 .replaceAll("%player%", nickname)));
                     } else {
                         playerAccessor.delete(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-removed-from-whitelist", "&e%player% successfully removed from whitelist"))
-                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()  + 1000L))
                                 .replaceAll("%player%", nickname)));
                     }
                 }, () -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-not-in-whitelist", "&e%player% not in whitelist"))
