@@ -13,95 +13,135 @@ public class TimeConvertor {
     TimeUnitsConvertorSettings settings;
 
     public String getTimeLine(long ms) {
-        StringBuilder lineBuilder = new StringBuilder();
+        String line = "";
+        long fullMs = ms;
 
-        if (ms >= 31536000000L) {
-            long years = ms / 31536000000L;
-            lineBuilder.append(years).append(settings.getYear().get(0)).append(" ");
-            ms -= years * 31536000000L;
+        if ((ms / 31536000000L) > 0L) {
+            line = ms / 31536000000L + settings.getYear().get(0) + " ";
+            ms = ms - (ms / 31536000000L)*31536000000L;
         }
 
-        if (ms >= 2592000000L) {
-            long months = ms / 2592000000L;
-            lineBuilder.append(months).append(settings.getMonth().get(0)).append(" ");
-            ms -= months * 2592000000L;
+        if ((ms / 2592000000L) > 0L) {
+            line = line + ms / 2592000000L + settings.getMonth().get(0) + " ";
+            ms = ms - (ms / 2592000000L)*2592000000L;
         }
 
-        if (ms >= 604800000L) {
-            long weeks = ms / 604800000L;
-            lineBuilder.append(weeks).append(settings.getWeek().get(0)).append(" ");
-            ms -= weeks * 604800000L;
+        if ((ms / 604800000L) > 0L) {
+            line = line + ms / 604800000L + settings.getWeek().get(0) + " ";
+            ms = ms - (ms / 604800000L)*604800000L;
         }
 
-        if (ms >= 86400000L) {
-            long days = ms / 86400000L;
-            lineBuilder.append(days).append(settings.getDay().get(0)).append(" ");
-            ms -= days * 86400000L;
+        if ((ms / 86400000L) > 0L) {
+            line = line + ms / 86400000L + settings.getDay().get(0) + " ";
+            ms = ms - (ms / 86400000L)*86400000L;
         }
 
-        if (ms >= 3600000L) {
-            long hours = ms / 3600000L;
-            lineBuilder.append(hours).append(settings.getHour().get(0)).append(" ");
-            ms -= hours * 3600000L;
+        if ((ms / 3600000L) > 0L) {
+            line = line + ms / 3600000L + settings.getHour().get(0) + " ";
+            ms = ms - (ms / 3600000L)*3600000L;
         }
 
-        if (ms >= 60000L) {
-            long minutes = ms / 60000L;
-            lineBuilder.append(minutes).append(settings.getMinute().get(0)).append(" ");
-            ms -= minutes * 60000L;
+        if ((ms / 60L) > 0L) {
+            line = line + ms / 60000L + settings.getMinute().get(0) + " ";
+            ms = ms - (ms / 60000L)*60000L;
         }
 
-        if (ms >= 1000L) {
-            long seconds = ms / 1000L;
-            lineBuilder.append(seconds).append(settings.getSecond().get(0)).append(" ");
-        }
+        if (ms != 0L) line = line + (ms/1000L) + settings.getSecond().get(0) + " ";
 
-        String line = lineBuilder.toString().trim();
-        if (ms < 0L) {
-            line = settings.getForever();
-        }
+        if (ms < 0L) line = settings.getForever();
 
-        return line;
+        return line.trim();
     }
 
     public long getTimeMs(String line) {
-        long time = 0L;
-        String[] parts = line.split(" ");
+        long time = 0;
 
-        for (String timeStr : parts) {
-            timeStr = removeSuffixes(timeStr, settings.getYear());
-            timeStr = removeSuffixes(timeStr, settings.getMonth());
-            timeStr = removeSuffixes(timeStr, settings.getWeek());
-            timeStr = removeSuffixes(timeStr, settings.getDay());
-            timeStr = removeSuffixes(timeStr, settings.getHour());
-            timeStr = removeSuffixes(timeStr, settings.getMinute());
-            timeStr = removeSuffixes(timeStr, settings.getSecond());
+        for (String timeStr : line.split(" ")) {
 
-            if (checkLong(timeStr)) {
-                time += parseTime(timeStr);
+            // Year
+            if (endsWith(timeStr, settings.getYear())) {
+                timeStr = clear(timeStr, settings.getYear());
+
+                if (checkLong(timeStr)) {
+                    time+=31536000000L*Long.parseLong(timeStr);
+                }
+            }
+
+            // Month
+            if (endsWith(timeStr, settings.getMonth())) {
+                timeStr = clear(timeStr, settings.getMonth());
+
+                if (checkLong(timeStr)) {
+                    time+=2592000000L*Long.parseLong(timeStr);
+                }
+            }
+
+            // Week
+            if (endsWith(timeStr, settings.getWeek())) {
+                timeStr = clear(timeStr, settings.getWeek());
+
+                if (checkLong(timeStr)) {
+                    time+=604800000L*Long.parseLong(timeStr);
+                }
+            }
+
+            // Day
+            if (endsWith(timeStr, settings.getDay())) {
+                timeStr = clear(timeStr, settings.getDay());
+
+                if (checkLong(timeStr)) {
+                    time+=86400000L*Long.parseLong(timeStr);
+                }
+            }
+
+            // Hour
+            if (endsWith(timeStr, settings.getHour())) {
+                timeStr = clear(timeStr, settings.getHour());
+
+                if (checkLong(timeStr)) {
+                    time+=3600000L*Long.parseLong(timeStr);
+                }
+            }
+
+            // Minute
+            if (endsWith(timeStr, settings.getMinute())) {
+                timeStr = clear(timeStr, settings.getMinute());
+
+                if (checkLong(timeStr)) {
+                    time+=60000L*Long.parseLong(timeStr);
+                }
+            }
+
+            // Second
+            if (endsWith(timeStr, settings.getSecond())) {
+                timeStr = clear(timeStr, settings.getSecond());
+
+                if (checkLong(timeStr)) {
+                    time+=1000L*Long.parseLong(timeStr);
+                }
             }
         }
 
         return time;
     }
 
-    private boolean checkLong(String number) {
+    public static boolean checkLong(String number) {
         try {
             Long.parseLong(number);
-            return true;
-        } catch (NumberFormatException e) {
+        } catch (Exception e) {
             return false;
         }
+        return true;
     }
 
-    private String removeSuffixes(String string, List<String> suffixes) {
-        for (String suffix : suffixes) {
-            string = string.replaceAll(suffix, "");
+    private static boolean endsWith(String string, List<String> patterns) {
+        return patterns.stream().anyMatch(string::endsWith);
+    }
+
+    private static String clear(String string, List<String> patterns) {
+        for (String pattern : patterns) {
+            string = string.replaceAll(pattern, "");
         }
         return string;
-    }
-
-    private long parseTime(String timeStr) {
-        return Long.parseLong(timeStr) * 1000L;
     }
 }

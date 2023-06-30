@@ -55,8 +55,4 @@ public class PlaceholderHook extends PlaceholderExpansion {
 
         return "{ERR_PARAM}";
     }
-
-    public void unhook() {
-        unregister();
-    }
 }

@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '6.0'
+version = '6.1'
 description = 'WhitelistByTime-Paper'
 
 compileJava.options.encoding = "UTF-8"
@@ -41,7 +41,7 @@ dependencies {
     compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
-    compileOnly 'me.clip:placeholderapi:2.11.2'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'

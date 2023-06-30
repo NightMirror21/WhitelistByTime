@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '6.0'
+version = '6.1'
 description = 'WhitelistByTime-Spigot'
 
 compileJava.options.encoding = "UTF-8"
@@ -34,7 +34,7 @@ dependencies {
     shadow project(path: ':core', configuration: 'default')
     compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
-    compileOnly 'me.clip:placeholderapi:2.11.2'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
