@@ -200,13 +200,13 @@ public class CommandsExecutor implements ICommandsExecutor {
                     WLPlayer player = new WLPlayer(nickname, until);
                     player.setUntil(until);
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "&a%player% added to whitelist for %time%"))
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() - 1000L))
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
                             .replaceAll("%player%", nickname)));
                 });
                 case "add" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(player.getUntil() + (until - System.currentTimeMillis()));
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.add-time", "Added &a%time% &fto &a%player%"))
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() - 1000L))
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
