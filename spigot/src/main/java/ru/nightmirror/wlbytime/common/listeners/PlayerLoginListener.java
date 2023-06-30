@@ -54,5 +54,6 @@ public class PlayerLoginListener implements EventListener {
     @Override
     public void unregister() {
         AsyncPlayerPreLoginEvent.getHandlerList().unregister(this);
+        PlayerJoinEvent.getHandlerList().unregister(this);
     }
 }

@@ -75,6 +75,10 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         if (metrics != null) metrics.shutdown();
         if (checker != null) checker.stop();
         if (database != null) database.close();
+        if (getCommand("whitelist") != null) {
+            getCommand("whitelist").setExecutor(null);
+            getCommand("whitelist").setTabCompleter(null);
+        }
 
         info("Disabled");
     }
