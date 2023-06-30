@@ -153,7 +153,7 @@ public class CommandsExecutor implements ICommandsExecutor {
         String addNickname = strings[1];
         playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-already-in-whitelist", "<yellow>%player% already in whitelist"))
                 .replaceText(builder -> builder.match("%player%").replacement(addNickname))), () -> {
-            long current = System.currentTimeMillis() + 1000L;
+            long current = System.currentTimeMillis();
             long until = current;
 
             if (strings.length > 2) {
@@ -186,7 +186,7 @@ public class CommandsExecutor implements ICommandsExecutor {
 
         String nickname = strings[2];
         playerAccessor.getPlayer(nickname).thenAccept(playerOptional -> {
-            long tempUntil = System.currentTimeMillis() + 1000L;
+            long tempUntil = System.currentTimeMillis();
             for (int i = 3; i < strings.length; i++) tempUntil += timeConvertor.getTimeMs(strings[i]);
             long until = tempUntil;
             switch (strings[1]) {

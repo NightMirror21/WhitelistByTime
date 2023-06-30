@@ -46,11 +46,11 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     LoadingCache<String, WLPlayer> cache;
     final List<PlayerListener> listeners = new ArrayList<>();
 
-    public WLDatabase(DatabaseSettings settings) {
+    public WLDatabase(DatabaseSettings settings) throws SQLException {
         this.settings = settings;
         com.j256.ormlite.logger.Logger.setGlobalLogLevel(Level.OFF);
         mapper = new WLPlayerMapper();
-        if (!createConnection()) return;
+        if (!createConnection()) throw new SQLException("Can't create connection");
         cache = Caffeine.newBuilder()
                 .refreshAfterWrite(Duration.ofMinutes(5))
                 .build(key -> getPlayer(key).join().orElse(null));

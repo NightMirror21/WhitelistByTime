@@ -11,14 +11,13 @@ import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
-import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PlayerLoginListener implements EventListener {
+public class PlayerLoginListener implements Listener {
 
     PlayerAccessor playerAccessor;
     boolean caseSensitive;
@@ -49,11 +48,5 @@ public class PlayerLoginListener implements EventListener {
     @EventHandler
     private void loadToCache(PlayerJoinEvent event) {
         playerAccessor.loadPlayerToCache(event.getPlayer().getName());
-    }
-
-    @Override
-    public void unregister() {
-        AsyncPlayerPreLoginEvent.getHandlerList().unregister(this);
-        PlayerJoinEvent.getHandlerList().unregister(this);
     }
 }

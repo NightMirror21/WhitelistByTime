@@ -10,18 +10,16 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
-import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WhitelistCmdListener implements EventListener {
-
-    ICommandsExecutor executor;
+public class WhitelistCmdListener implements Listener {
 
     static List<String> ALIASES = Arrays.asList("/whitelist", "whitelist", "/wl", "wl");
+    ICommandsExecutor executor;
 
     @EventHandler
     private void onPlayerWhitelistCommand(PlayerCommandPreprocessEvent event) {
@@ -61,11 +59,5 @@ public class WhitelistCmdListener implements EventListener {
 
             executor.execute(sender, strings);
         }
-    }
-
-    @Override
-    public void unregister() {
-        PlayerCommandPreprocessEvent.getHandlerList().unregister(this);
-        ServerCommandEvent.getHandlerList().unregister(this);
     }
 }
