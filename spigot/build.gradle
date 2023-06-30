@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '6.0'
+version = '6.1'
 description = 'WhitelistByTime-Spigot'
 
 compileJava.options.encoding = "UTF-8"
