@@ -31,10 +31,7 @@ public class WhitelistCmdListener implements EventListener {
 
             final Player sender = event.getPlayer();
             final String[] strings = event.getMessage()
-                    .replaceAll("/whitelist", " ")
-                    .replaceAll("/wl", " ")
-                    .replaceAll("whitelist", " ")
-                    .replaceAll("wl", " ")
+                    .replaceFirst(cmd, " ")
                     .trim()
                     .split(" ");
 
@@ -51,10 +48,7 @@ public class WhitelistCmdListener implements EventListener {
 
             final CommandSender sender = event.getSender();
             final String[] strings = event.getCommand()
-                    .replaceAll("/whitelist", " ")
-                    .replaceAll("/wl", " ")
-                    .replaceAll("whitelist", " ")
-                    .replaceAll("wl", " ")
+                    .replaceFirst(cmd, " ")
                     .trim()
                     .split(" ");
 

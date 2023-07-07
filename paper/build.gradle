@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '6.1'
+version = '6.2'
 description = 'WhitelistByTime-Paper'
 
 compileJava.options.encoding = "UTF-8"
