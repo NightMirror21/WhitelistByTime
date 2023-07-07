@@ -1,8 +1,8 @@
-![magic](https://forthebadge.com/images/badges/powered-by-black-magic.svg) 
-
 # WhitelistByTime
 
 This plugin allows you to add players for a certain time or permanently.
+
+![magic](https://forthebadge.com/images/badges/powered-by-black-magic.svg) 
 
 ## Statistics
 Statistics are obtained through bstats metrics.
