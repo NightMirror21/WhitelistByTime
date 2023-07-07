@@ -43,7 +43,9 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     final Mapper<WLPlayerTable, WLPlayer> mapper;
 
     JdbcPooledConnectionSource connection;
-    LoadingCache<String, WLPlayer> cache;
+
+    final LoadingCache<String, WLPlayer> cache;
+
     final List<PlayerListener> listeners = new ArrayList<>();
 
     public WLDatabase(DatabaseSettings settings) throws SQLException {
