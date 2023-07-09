@@ -13,7 +13,7 @@ public class ColorsConvertor {
     }
 
     public static Component convert(String message) {
-        return MiniMessage.miniMessage().deserialize(message);
+        return MiniMessage.miniMessage().deserialize(convertHexAndLegacy(message));
     }
 
     public static String convertHexAndLegacy(String message) {
