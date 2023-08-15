@@ -50,10 +50,7 @@ public class PlayersChecker implements Checker, Runnable {
             for (WLPlayer player : toRemove) {
                 boolean toKick = onServer.stream().anyMatch(nickname -> (caseSensitive && player.getNickname().equals(nickname) || (!caseSensitive && player.getNickname().equalsIgnoreCase(nickname))));
                 if (toKick) {
-                    System.out.println("PlayerChecker. Kicking " + player.getNickname());
                     playersOnSeverAccessor.kickPlayer(player.getNickname());
-                } else {
-                    System.out.println("PlayerChecker. Player not found " + player.getNickname());
                 }
             }
 
@@ -63,7 +60,6 @@ public class PlayersChecker implements Checker, Runnable {
 
     @Override
     public void stop() {
-        System.out.println("Player checker stopped");
         executor.shutdown();
     }
 }
