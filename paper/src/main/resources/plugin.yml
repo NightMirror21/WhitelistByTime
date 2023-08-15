@@ -4,6 +4,7 @@ version: 6.2
 author: NightMirror
 description: Adding a player to the whitelist for a time
 api-version: 1.16
+folia-supported: true
 softdepend:
   - PlaceholderAPI
 commands:
