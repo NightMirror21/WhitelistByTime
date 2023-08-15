@@ -25,14 +25,12 @@ public class PlayersChecker implements Checker, Runnable {
 
     @Override
     public void start() {
-        System.out.println("Player checker started");
         executor.scheduleAtFixedRate(this, delay.toMillis(), delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void run() {
         playerAccessor.getPlayers().thenCompose(players -> {
-            System.out.println("Players on server: " + players.toString());
 
             long currentMilliseconds = System.currentTimeMillis();
             List<WLPlayer> toRemove = players.stream().filter(player -> player.getUntil() != -1L && player.getUntil() <= currentMilliseconds).toList();
@@ -44,7 +42,6 @@ public class PlayersChecker implements Checker, Runnable {
                 for (String nickname : onServer) {
                     boolean toKick = players.stream().noneMatch(player -> player.getNickname().equals(nickname));
                     if (toKick) {
-                        System.out.println("PlayerChecker. Kicking case sensitive " + nickname);
                         playersOnSeverAccessor.kickPlayer(nickname);
                     }
                 }
