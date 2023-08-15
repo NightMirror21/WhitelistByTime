@@ -1,0 +1,59 @@
+plugins {
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+def javaVersion = JavaVersion.VERSION_17;
+sourceCompatibility = javaVersion;
+targetCompatibility = javaVersion;
+
+group = 'ru.nightmirror'
+version = '6.2'
+description = 'WhitelistByTime-Folia'
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name 'dmulloy2-repo'
+        url 'https://repo.dmulloy2.net/repository/public/'
+    }
+
+    maven {
+        name 'papermc-repo'
+        url 'https://repo.papermc.io/repository/maven-public/'
+    }
+
+    maven {
+        url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    shadow project(path: ':core', configuration: 'default')
+    compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
+    compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
+    implementation 'org.bstats:bstats-bukkit:3.0.1'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+shadowJar {
+    relocate 'org.bstats', 'ru.nightmirror.wlbytime'
+    archiveClassifier.set(null)
+    configurations = [project.configurations.runtimeClasspath, project.configurations.shadow]
+    archiveFileName.set(project.description + '-' + project.version + '.jar')
+}
