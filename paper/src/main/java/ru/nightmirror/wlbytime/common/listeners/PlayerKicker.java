@@ -42,12 +42,20 @@ public class PlayerKicker implements PlayerListener, PlayersOnSeverAccessor {
         if (!whitelist.isWhitelistEnabled()) return;
 
         Bukkit.getOnlinePlayers().forEach(player -> {
-            if ((caseSensitive && player.getName().equals(nickname) || (!caseSensitive && player.getName().equalsIgnoreCase(nickname)))) {
+            boolean toKick = (caseSensitive && player.getName().equals(nickname) || (!caseSensitive && player.getName().equalsIgnoreCase(nickname)));
+            System.out.println("(scheduler) Case sensitive is enabled? " + caseSensitive);
+            if (toKick) {
+                System.out.println("(scheduler) Player found? " + player.getName());
                 syncer.sync(() -> {
                     List<Component> message = ColorsConvertor.convert(kickMessage);
                     player.kick(ComponentUtils.join(message, Component.text("\n")), PlayerKickEvent.Cause.WHITELIST);
                 });
             }
         });
+    }
+
+    @Override
+    public boolean isCaseSensitiveEnabled() {
+        return caseSensitive;
     }
 }

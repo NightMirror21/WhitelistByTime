@@ -30,10 +30,13 @@ public class PlayerLoginListener implements EventListener {
         if (!plugin.isWhitelistEnabled()) return;
 
         playerAccessor.getPlayers().thenAccept(players -> {
+            System.out.println("(on login) Case sensitive is enabled? " + caseSensitive);
             Optional<WLPlayer> playerOptional = players
                     .stream()
                     .filter(player -> (caseSensitive && player.getNickname().equals(event.getName()) || (!caseSensitive && player.getNickname().equalsIgnoreCase(event.getName()))))
                     .findAny();
+
+            System.out.println("(on login) Player found? " + playerOptional.isPresent());
 
             playerOptional.ifPresentOrElse(player -> {
                 if (player.getUntil() != -1L && player.getUntil() <= System.currentTimeMillis()) {
