@@ -18,11 +18,9 @@ public class ColorsConvertor {
     }
 
     public static String convertHexAndLegacy(String message) {
-        message = message.replaceAll("&", "§");
-
         if (message.contains("&") || message.contains("§")) {
             WhitelistByTime.error("Remove legacy color(s) (starts with '&' or '§') from config!");
-            WhitelistByTime.error("Paper and paper family don't support legacy color formats");
+            WhitelistByTime.error("Folia and paper family don't support legacy color formats");
             WhitelistByTime.error("Use MiniMessage by kyori and make life easier!");
         }
 

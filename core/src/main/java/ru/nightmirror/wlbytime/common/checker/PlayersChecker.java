@@ -30,16 +30,31 @@ public class PlayersChecker implements Checker, Runnable {
 
     @Override
     public void run() {
-        playerAccessor.getPlayers().thenAccept((players) -> {
+        playerAccessor.getPlayers().thenCompose(players -> {
+
             long currentMilliseconds = System.currentTimeMillis();
             List<WLPlayer> toRemove = players.stream().filter(player -> player.getUntil() != -1L && player.getUntil() <= currentMilliseconds).toList();
-            playerAccessor.delete(toRemove).join();
-        }).thenRun(() -> {
-           playersOnSeverAccessor.getPlayersOnServer().forEach(nickname -> {
-               playerAccessor.getPlayer(nickname).thenAccept(playerOptional -> {
-                   if (playerOptional.isEmpty()) playersOnSeverAccessor.kickPlayer(nickname);
-               });
-           });
+            List<String> onServer = playersOnSeverAccessor.getPlayersOnServer();
+
+            boolean caseSensitive = playersOnSeverAccessor.isCaseSensitiveEnabled();
+
+            if (caseSensitive) {
+                for (String nickname : onServer) {
+                    boolean toKick = players.stream().noneMatch(player -> player.getNickname().equals(nickname));
+                    if (toKick) {
+                        playersOnSeverAccessor.kickPlayer(nickname);
+                    }
+                }
+            }
+
+            for (WLPlayer player : toRemove) {
+                boolean toKick = onServer.stream().anyMatch(nickname -> (caseSensitive && player.getNickname().equals(nickname) || (!caseSensitive && player.getNickname().equalsIgnoreCase(nickname))));
+                if (toKick) {
+                    playersOnSeverAccessor.kickPlayer(player.getNickname());
+                }
+            }
+
+            return playerAccessor.delete(toRemove);
         });
     }
 

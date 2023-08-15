@@ -10,7 +10,6 @@ import org.bukkit.event.player.PlayerKickEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
-import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
@@ -22,7 +21,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerKicker implements PlayerListener, PlayersOnSeverAccessor {
 
-    BukkitSyncer syncer;
     IWhitelist whitelist;
     boolean caseSensitive;
     List<String> kickMessage;
@@ -44,10 +42,8 @@ public class PlayerKicker implements PlayerListener, PlayersOnSeverAccessor {
         Bukkit.getOnlinePlayers().forEach(player -> {
             boolean toKick = (caseSensitive && player.getName().equals(nickname) || (!caseSensitive && player.getName().equalsIgnoreCase(nickname)));
             if (toKick) {
-                syncer.sync(() -> {
-                    List<Component> message = ColorsConvertor.convert(kickMessage);
-                    player.kick(ComponentUtils.join(message, Component.text("\n")), PlayerKickEvent.Cause.WHITELIST);
-                });
+                List<Component> message = ColorsConvertor.convert(kickMessage);
+                player.kick(ComponentUtils.join(message, Component.text("\n")), PlayerKickEvent.Cause.WHITELIST);
             }
         });
     }
