@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group 'ru.nightmirror'
-version '1.0.0'
+version '2.0.0'
 
 repositories {
     mavenCentral()
@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'net.elytrium:serializer:1.1.1'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
     implementation 'com.j256.ormlite:ormlite-core:6.1'
     implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
