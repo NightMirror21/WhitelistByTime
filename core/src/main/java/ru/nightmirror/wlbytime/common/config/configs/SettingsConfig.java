@@ -8,6 +8,8 @@ import net.elytrium.serializer.annotations.CommentValue;
 import net.elytrium.serializer.annotations.NewLine;
 import net.elytrium.serializer.language.object.YamlSerializable;
 
+import java.util.List;
+
 @FieldDefaults(level = AccessLevel.PUBLIC)
 public class SettingsConfig extends YamlSerializable {
 
@@ -35,4 +37,16 @@ public class SettingsConfig extends YamlSerializable {
             @CommentValue("Check the case of the nickname")
     }, at = Comment.At.APPEND)
     boolean caseSensitive = true;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("Time units")
+    }, at = Comment.At.APPEND)
+    List<String> timeUnitsYear = List.of("y");
+    List<String> timeUnitsMonth = List.of("mo");
+    List<String> timeUnitsWeek = List.of("w");
+    List<String> timeUnitsDay = List.of("d");
+    List<String> timeUnitsHour = List.of("h");
+    List<String> timeUnitsMinute = List.of("m");
+    List<String> timeUnitsSecond = List.of("s");
 }
