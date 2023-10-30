@@ -25,7 +25,7 @@ public class ConfigsContainer<M extends YamlSerializable> {
     @Getter
     SettingsConfig settings;
 
-    public ConfigsContainer<M> load() {
+    public void load() {
         messages = isPaperFamily ? (M) new MessagesConfigForPaperFamily() : (M) new MessagesConfigForNotPaperFamily();
         messages.reload(new File(folder, "messages.yml").toPath());
 
@@ -37,6 +37,5 @@ public class ConfigsContainer<M extends YamlSerializable> {
 
         settings = new SettingsConfig();
         settings.reload(new File(folder, "settings.yml").toPath());
-        return this;
     }
 }

@@ -19,7 +19,6 @@ import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
-import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
 
@@ -60,7 +59,6 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     public void onEnable() {
         log = getLogger();
 
-        ConfigUtils.checkConfig(this);
         whitelistEnabled = getConfig().getBoolean("enabled", true);
 
         initTimeConvertor();

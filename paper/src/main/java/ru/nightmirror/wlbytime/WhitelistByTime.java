@@ -11,6 +11,8 @@ import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
+import ru.nightmirror.wlbytime.common.config.configs.MessagesConfigForPaperFamily;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.WLDatabase;
@@ -20,22 +22,18 @@ import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
-import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
-import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WhitelistByTime extends JavaPlugin implements IWhitelist {
+public class WhitelistByTime extends JavaPlugin implements IWhitelist<MessagesConfigForPaperFamily> {
 
     static Logger log;
 
@@ -43,6 +41,8 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     TimeConvertor timeConvertor;
     BukkitSyncer syncer;
+
+    ConfigsContainer<MessagesConfigForPaperFamily> configs;
 
     WLDatabase database;
     Checker checker;
@@ -54,8 +54,10 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         log = getLogger();
         syncer = new BukkitSyncer(this);
 
-        ConfigUtils.checkConfig(this);
-        whitelistEnabled = getConfig().getBoolean("enabled", true);
+        configs = new ConfigsContainer<>(getDataFolder());
+        configs.load();
+
+        whitelistEnabled = configs.getSettings().enabled;
 
         initTimeConvertor();
 
@@ -128,7 +130,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initCommandsAndListeners() {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)), this);
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfig().getBoolean("case-sensitive", false),this), this);
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, configs.getSettings().caseSensitive,this), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
@@ -145,7 +147,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     private void hookPlaceholder() {
         if (getConfig().getBoolean("placeholders-enabled", false)) {
             try {
-                placeholderHook = new PlaceholderHook(database, timeConvertor, getPluginConfig());
+                placeholderHook = new PlaceholderHook(database, timeConvertor, configs.getPlaceholders());
                 placeholderHook.register();
                 log.info("Hooked with PlaceholderAPI");
             } catch (Exception exception) {
@@ -169,10 +171,9 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     }
 
     @Override
-    public FileConfiguration getPluginConfig() {
-        return getConfig();
+    public ConfigsContainer<MessagesConfigForPaperFamily> getConfigs() {
+        return configs;
     }
-
 
     public static void info(String message) {
         if (log != null) log.info(message);

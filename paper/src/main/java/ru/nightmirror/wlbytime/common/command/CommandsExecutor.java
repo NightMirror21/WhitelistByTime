@@ -6,6 +6,8 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
+import ru.nightmirror.wlbytime.common.config.configs.MessagesConfigForPaperFamily;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
@@ -22,14 +24,14 @@ public class CommandsExecutor implements ICommandsExecutor {
      */
 
     PlayerAccessor playerAccessor;
-    IWhitelist whitelist;
+    IWhitelist<MessagesConfigForPaperFamily> whitelist;
     TimeConvertor timeConvertor;
-    FileConfiguration config;
+    ConfigsContainer<MessagesConfigForPaperFamily> config;
 
-    public CommandsExecutor(PlayerAccessor playerAccessor, IWhitelist whitelist, TimeConvertor timeConvertor) {
+    public CommandsExecutor(PlayerAccessor playerAccessor, IWhitelist<MessagesConfigForPaperFamily> whitelist, TimeConvertor timeConvertor) {
         this.playerAccessor = playerAccessor;
         this.whitelist = whitelist;
-        config = whitelist.getPluginConfig();
+
         this.timeConvertor = timeConvertor;
     }
 
