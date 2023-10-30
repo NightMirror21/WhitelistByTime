@@ -1,6 +1,7 @@
 package ru.nightmirror.wlbytime;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.OfflinePlayer;
@@ -11,6 +12,7 @@ import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.WLDatabase;
@@ -38,6 +40,9 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     TimeConvertor timeConvertor;
 
+    @Getter
+    ConfigsContainer configs;
+
     WLDatabase database;
     Checker checker;
     PlaceholderHook placeholderHook;
@@ -60,6 +65,9 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         log = getLogger();
 
         whitelistEnabled = getConfig().getBoolean("enabled", true);
+
+        configs = new ConfigsContainer(getDataFolder());
+        configs.load();
 
         initTimeConvertor();
 
@@ -149,7 +157,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     private void hookPlaceholder() {
         if (getConfig().getBoolean("placeholders-enabled", false)) {
             try {
-                placeholderHook = new PlaceholderHook(database, timeConvertor, getPluginConfig());
+                placeholderHook = new PlaceholderHook(database, timeConvertor, configs.getPlaceholders());
                 placeholderHook.register();
                 log.info("Hooked with PlaceholderAPI");
             } catch (Exception exception) {
@@ -170,10 +178,5 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     @Override
     public void setWhitelistEnabled(boolean mode) {
         whitelistEnabled = mode;
-    }
-
-    @Override
-    public FileConfiguration getPluginConfig() {
-        return getConfig();
     }
 }
