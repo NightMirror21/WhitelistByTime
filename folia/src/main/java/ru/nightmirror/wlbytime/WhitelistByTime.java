@@ -161,7 +161,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     }
 
     private void initMetrics() {
-        new Metrics(this, 13834);
+        metrics = new Metrics(this, 13834);
     }
 
     @Override
