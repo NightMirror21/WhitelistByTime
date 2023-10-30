@@ -1,6 +1,7 @@
 package ru.nightmirror.wlbytime;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.OfflinePlayer;
@@ -31,7 +32,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WhitelistByTime extends JavaPlugin implements IWhitelist<MessagesConfigForPaperFamily> {
+public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     static Logger log;
 
@@ -40,7 +41,8 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist<MessagesCo
     TimeConvertor timeConvertor;
     BukkitSyncer syncer;
 
-    ConfigsContainer<MessagesConfigForPaperFamily> configs;
+    @Getter
+    ConfigsContainer configs;
 
     WLDatabase database;
     Checker checker;
@@ -52,7 +54,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist<MessagesCo
         log = getLogger();
         syncer = new BukkitSyncer(this);
 
-        configs = new ConfigsContainer<>(getDataFolder());
+        configs = new ConfigsContainer(getDataFolder());
         configs.load();
 
         whitelistEnabled = configs.getSettings().enabled;
@@ -166,11 +168,6 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist<MessagesCo
     @Override
     public void setWhitelistEnabled(boolean mode) {
         whitelistEnabled = mode;
-    }
-
-    @Override
-    public ConfigsContainer<MessagesConfigForPaperFamily> getConfigs() {
-        return configs;
     }
 
     public static void info(String message) {

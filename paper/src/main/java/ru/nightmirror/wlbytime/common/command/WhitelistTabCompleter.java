@@ -79,10 +79,10 @@ public class WhitelistTabCompleter implements TabCompleter {
             }
         } else if (strings.length == 3) {
             if (commandSender.hasPermission("whitelistbytime.add") && strings[0].equals("add")) {
-                args.add("1" + plugin.getPluginConfig().getStringList("time-units.month").get(0));
-                args.add("1" + plugin.getPluginConfig().getStringList("time-units.week").get(0));
-                args.add("1" + plugin.getPluginConfig().getStringList("time-units.day").get(0));
-                args.add("12" + plugin.getPluginConfig().getStringList("time-units.hour").get(0));
+                args.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
+                args.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
+                args.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
+                args.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
             }
 
             if (commandSender.hasPermission("whitelistbytime.time")) {
@@ -93,10 +93,10 @@ public class WhitelistTabCompleter implements TabCompleter {
         } else if (strings.length == 4) {
             if (commandSender.hasPermission("whitelistbytime.time")) {
                 if (strings[1].equals("set") || strings[1].equals("add") || strings[1].equals("remove")) {
-                    args.add("1" + plugin.getPluginConfig().getStringList("time-units.month").get(0));
-                    args.add("1" + plugin.getPluginConfig().getStringList("time-units.week").get(0));
-                    args.add("1" + plugin.getPluginConfig().getStringList("time-units.day").get(0));
-                    args.add("12" + plugin.getPluginConfig().getStringList("time-units.hour").get(0));
+                    args.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
+                    args.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
+                    args.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
+                    args.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
                 }
             }
         }

@@ -4,12 +4,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.common.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.common.config.configs.SettingsConfig;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
@@ -44,7 +42,7 @@ public class PlaceholderHook extends PlaceholderExpansion {
 
         if (params.equalsIgnoreCase("in_whitelist")) {
             String result = playerAccessor.getPlayerCached(player.getName()).isPresent() ? config.inWhitelistTrue : config.inWhitelistFalse;
-            return ColorsConvertor.convertHexAndLegacy(result);
+            return ColorsConvertor.checkLegacy(result);
         } else if (params.equalsIgnoreCase("time_left")) {
             AtomicReference<String> time = new AtomicReference<>("");
 
@@ -52,7 +50,7 @@ public class PlaceholderHook extends PlaceholderExpansion {
                 time.set(timeConvertor.getTimeLine(whitelistedPlayer.getUntil() - System.currentTimeMillis()));
             });
 
-            return ColorsConvertor.convertHexAndLegacy(config.timeLeft.replaceAll("%time%", time.get()));
+            return ColorsConvertor.checkLegacy(config.timeLeft.replaceAll("%time%", time.get()));
         }
 
         return "{ERR_PARAM}";
