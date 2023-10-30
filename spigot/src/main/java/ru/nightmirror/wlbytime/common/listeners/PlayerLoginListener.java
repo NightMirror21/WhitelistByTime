@@ -35,11 +35,11 @@ public class PlayerLoginListener implements Listener {
 
             playerOptional.ifPresentOrElse(player -> {
                 if (player.getUntil() != -1L && player.getUntil() <= System.currentTimeMillis()) {
-                    List<String> message = ColorsConvertor.convert(plugin.getPluginConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick"));
+                    List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
                     event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, String.join("\n", message));
                 }
             }, () -> {
-                List<String> message = ColorsConvertor.convert(plugin.getPluginConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick"));
+                List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, String.join("\n", message));
             });
         }).join();
