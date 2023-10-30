@@ -11,7 +11,7 @@ import net.elytrium.serializer.language.object.YamlSerializable;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PUBLIC)
-public class MessagesConfigForNotPaperFamily extends YamlSerializable {
+public class MessagesConfig extends YamlSerializable {
 
     private static final SerializerConfig CONFIG = new SerializerConfig.Builder()
             .build();
@@ -82,7 +82,7 @@ public class MessagesConfigForNotPaperFamily extends YamlSerializable {
             "&b| &fLeave this value empty if you want to add player forever"
     );
 
-    public MessagesConfigForNotPaperFamily() {
-        super(MessagesConfigForNotPaperFamily.CONFIG);
+    public MessagesConfig() {
+        super(MessagesConfig.CONFIG);
     }
 }

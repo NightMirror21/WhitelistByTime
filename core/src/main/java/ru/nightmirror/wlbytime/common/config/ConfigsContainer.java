@@ -11,13 +11,12 @@ import java.io.File;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
-public class ConfigsContainer<M extends YamlSerializable> {
+public class ConfigsContainer {
 
-    boolean isPaperFamily;
     final File folder;
 
     @Getter
-    M messages;
+    MessagesConfig messages;
     @Getter
     DatabaseConfig database;
     @Getter
@@ -26,7 +25,7 @@ public class ConfigsContainer<M extends YamlSerializable> {
     SettingsConfig settings;
 
     public void load() {
-        messages = isPaperFamily ? (M) new MessagesConfigForPaperFamily() : (M) new MessagesConfigForNotPaperFamily();
+        messages = new MessagesConfig();
         messages.reload(new File(folder, "messages.yml").toPath());
 
         database = new DatabaseConfig();
