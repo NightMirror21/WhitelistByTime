@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group 'ru.nightmirror'
-version '2.0.0'
+version = rootProject.version
 
 repositories {
     mavenCentral()

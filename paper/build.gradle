@@ -3,12 +3,12 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-def javaVersion = JavaVersion.VERSION_16;
+def javaVersion = JavaVersion.VERSION_17;
 sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '2.0.0'
+version = rootProject.version
 description = 'WhitelistByTime-Paper'
 
 compileJava.options.encoding = "UTF-8"
@@ -16,11 +16,6 @@ compileTestJava.options.encoding = "UTF-8"
 
 repositories {
     mavenCentral()
-
-    maven {
-        name 'dmulloy2-repo'
-        url 'https://repo.dmulloy2.net/repository/public/'
-    }
 
     maven {
         name 'papermc-repo'
@@ -38,7 +33,7 @@ repositories {
 
 dependencies {
     shadow project(path: ':core', configuration: 'default')
-    compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
     compileOnly 'me.clip:placeholderapi:2.11.3'
@@ -52,4 +47,17 @@ shadowJar {
     archiveClassifier.set(null)
     configurations = [project.configurations.runtimeClasspath, project.configurations.shadow]
     archiveFileName.set(project.description + '-' + project.version + '.jar')
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
 }
