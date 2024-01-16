@@ -5,7 +5,7 @@ import lombok.experimental.FieldDefaults;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
+import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
@@ -24,59 +24,60 @@ public class CommandsExecutor implements ICommandsExecutor {
     PlayerAccessor playerAccessor;
     IWhitelist whitelist;
     TimeConvertor timeConvertor;
-    FileConfiguration config;
+    MessagesConfig messages;
 
     public CommandsExecutor(PlayerAccessor playerAccessor, IWhitelist whitelist, TimeConvertor timeConvertor) {
         this.playerAccessor = playerAccessor;
         this.whitelist = whitelist;
-        config = whitelist.getPluginConfig();
+        messages = whitelist.getConfigs().getMessages();
+
         this.timeConvertor = timeConvertor;
     }
 
     @Override
     public void reload(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.reload"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         whitelist.reload();
-        sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.plugin-reloaded", "<gold>Plugin reloaded!")));
+        sender.sendMessage(ColorsConvertor.convert(messages.pluginReloaded));
     }
 
     @Override
     public void help(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.help"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
-        ColorsConvertor.convert(config.getStringList("minecraft-commands.help")).forEach(sender::sendMessage);
+        ColorsConvertor.convert(messages.help).forEach(sender::sendMessage);
     }
 
     @Override
     public void getAll(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.getall"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         playerAccessor.getPlayers().thenAccept(players -> {
             if (players.size() == 0) {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.list-empty", "<green>Whitelist is empty")));
+                sender.sendMessage(ColorsConvertor.convert(messages.listEmpty));
                 return;
             }
 
             players.forEach(player -> {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.list-title", "<green>> Whitelist:")));
+                sender.sendMessage(ColorsConvertor.convert(messages.listTitle));
                 Component time;
 
                 if (player.getUntil() == -1L) {
-                    time = ColorsConvertor.convert(config.getString("minecraft-commands.forever", "forever"));
+                    time = ColorsConvertor.convert(messages.forever);
                 } else {
                     time = ColorsConvertor.convert(timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis()));
                 }
 
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.list-player", "<green>|</green> %player% <gray>[%time%]"))
+                sender.sendMessage(ColorsConvertor.convert(messages.listPlayer)
                                 .replaceText(builder -> builder.match("%player%").replacement(player.getNickname()))
                                 .replaceText(builder -> builder.match("%time%").replacement(time)));
             });
@@ -86,17 +87,17 @@ public class CommandsExecutor implements ICommandsExecutor {
     @Override
     public void remove(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.remove"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         String removeNickname = strings[1];
         playerAccessor.delete(removeNickname).thenAccept(deleted -> {
             if (deleted) {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-removed-from-whitelist", "<yellow>%player% successfully removed from whitelist"))
+                sender.sendMessage(ColorsConvertor.convert(messages.playerRemovedFromWhitelist)
                         .replaceText(builder -> builder.match("%player%").replacement(removeNickname)));
             } else {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-not-in-whitelist", "<yellow>%player% not in whitelist"))
+                sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
                         .replaceText(builder -> builder.match("%player%").replacement(removeNickname)));
             }
         });
@@ -105,54 +106,56 @@ public class CommandsExecutor implements ICommandsExecutor {
     @Override
     public void check(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.check"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         String checkNickname = strings[1];
         playerAccessor.getPlayer(checkNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (player.getUntil() == -1) {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.still-in-whitelist", "<green>%player% will be in whitelist forever"))
+                sender.sendMessage(ColorsConvertor.convert(messages.stillInWhitelist)
                         .replaceText(builder -> builder.match("%player%").replacement(checkNickname)));
             } else {
                 String time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.still-in-whitelist-for-time", "<green>%player% will be in whitelist still %time%"))
+                sender.sendMessage(ColorsConvertor.convert(messages.stillInWhitelistForTime)
                         .replaceText(builder -> builder.match("%player%").replacement(checkNickname))
                         .replaceText(builder -> builder.match("%time%").replacement(time)));
             }
-        }, () -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-not-in-whitelist", "<yellow>%player% not in whitelist"))
+        }, () -> sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
                 .replaceText(builder -> builder.match("%player%").replacement(checkNickname)))));
     }
 
     @Override
     public void checkme(CommandSender sender) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.checkme"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         playerAccessor.getPlayer(sender.getName()).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (player.getUntil() == -1) {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.checkme-still-in-whitelist", "&fYou are permanently whitelisted")));
+                sender.sendMessage(ColorsConvertor.convert(messages.checkMeStillInWhitelist));
             } else {
                 String time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.checkme-still-in-whitelist-for-time", "&fYou will remain on the whitelist for <green>%time%"))
+                sender.sendMessage(ColorsConvertor.convert(messages.checkmeStillInWhitelistForTime)
                         .replaceText(builder -> builder.match("%time%").replacement(time)));
             }
-        }, () -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-not-in-whitelist", "<yellow>%player% not in whitelist"))
+        }, () -> sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
                 .replaceText(builder -> builder.match("%player%").replacement(sender.getName())))));
     }
 
     @Override
     public void add(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.add"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         String addNickname = strings[1];
-        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-already-in-whitelist", "<yellow>%player% already in whitelist"))
-                .replaceText(builder -> builder.match("%player%").replacement(addNickname))), () -> {
+        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
+            sender.sendMessage(ColorsConvertor.convert(messages.playerAlreadyInWhitelist)
+                    .replaceText(builder -> builder.match("%player%").replacement(addNickname)));
+        }, () -> {
             long current = System.currentTimeMillis();
             long until = current;
 
@@ -166,10 +169,10 @@ public class CommandsExecutor implements ICommandsExecutor {
             long finalUntil = until;
             playerAccessor.createOrUpdate(new WLPlayer(addNickname, until)).thenRun(() -> {
                 if (finalUntil == -1L) {
-                    sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added", "<green>%player% <white>added to whitelist forever"))
-                            .replaceText(builder -> builder.match("%player%").replacement(addNickname)));
+                    sender.sendMessage(ColorsConvertor.convert(messages.successfullyAdded)
+                                    .replaceText(builder -> builder.match("%player%").replacement(addNickname)));
                 } else {
-                    sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "<green>%player% <white>added to whitelist for <green>%time%"))
+                    sender.sendMessage(ColorsConvertor.convert(messages.successfullyAddedForTime)
                             .replaceText(builder -> builder.match("%player%").replacement(addNickname))
                             .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(finalUntil - System.currentTimeMillis() + 1000L))));
                 }
@@ -180,7 +183,7 @@ public class CommandsExecutor implements ICommandsExecutor {
     @Override
     public void time(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.time"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
@@ -192,39 +195,39 @@ public class CommandsExecutor implements ICommandsExecutor {
             switch (strings[1]) {
                 case "set" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.set-time", "Now <green>%player% &fwill be in whitelist for <green>%time%"))
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.setTime)
                             .replaceText(builder -> builder.match("%player%").replacement(nickname))
                             .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
                     player.setUntil(until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "<green>%player% added to whitelist for %time%"))
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.successfullyAddedForTime)
                             .replaceText(builder -> builder.match("%player%").replacement(nickname))
                             .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
                 });
                 case "add" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(player.getUntil() + (until - System.currentTimeMillis()));
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.add-time", "Added <green>%time% &fto <green>%player%"))
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.addTime)
                             .replaceText(builder -> builder.match("%player%").replacement(nickname))
                             .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.successfully-added-for-time", "<green>%player% added to whitelist for %time%"))
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.successfullyAddedForTime)
                             .replaceText(builder -> builder.match("%player%").replacement(nickname))
                             .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
                 });
                 case "remove" -> playerOptional.ifPresentOrElse(player -> {
                     if ((player.getUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
                         player.setUntil(player.getUntil() - (until - System.currentTimeMillis()));
-                        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.remove-time", "Removed <green>%time% &ffrom <green>%player%"))
+                        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.removeTime)
                                 .replaceText(builder -> builder.match("%player%").replacement(nickname))
                                 .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
                     } else {
-                        playerAccessor.delete(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-removed-from-whitelist", "<yellow>%player% successfully removed from whitelist"))
+                        playerAccessor.delete(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.playerRemovedFromWhitelist)
                                 .replaceText(builder -> builder.match("%player%").replacement(nickname))
                                 .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
                     }
-                }, () -> sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.player-not-in-whitelist", "<yellow>%player% not in whitelist"))
+                }, () -> sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
                         .replaceText(builder -> builder.match("%player%").replacement(nickname))
                         .replaceText(builder -> builder.match("%time%").replacement(timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)))));
             }
@@ -234,22 +237,22 @@ public class CommandsExecutor implements ICommandsExecutor {
     @Override
     public void turn(CommandSender sender, String[] strings) {
         if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.turn"))) {
-            sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.not-permission", "<red>You do not have permission!")));
+            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
             return;
         }
 
         if (strings[0].equalsIgnoreCase("on")) {
             if (whitelist.isWhitelistEnabled()) {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.whitelist-already-enabled", "<green>WhitelistByTime already enabled")));
+                sender.sendMessage(ColorsConvertor.convert(messages.whitelistAlreadyEnabled));
             } else {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.whitelist-enabled", "<green>WhitelistByTime enabled")));
+                sender.sendMessage(ColorsConvertor.convert(messages.whitelistEnabled));
                 whitelist.setWhitelistEnabled(true);
             }
         } else {
             if (!whitelist.isWhitelistEnabled()) {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.whitelist-already-disabled", "<green>WhitelistByTime already disabled")));
+                sender.sendMessage(ColorsConvertor.convert(messages.whitelistAlreadyDisabled));
             } else {
-                sender.sendMessage(ColorsConvertor.convert(config.getString("minecraft-commands.whitelist-disabled", "<green>WhitelistByTime disabled")));
+                sender.sendMessage(ColorsConvertor.convert(messages.whitelistDisabled));
                 whitelist.setWhitelistEnabled(false);
             }
         }

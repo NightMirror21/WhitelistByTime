@@ -1,15 +1,16 @@
 package ru.nightmirror.wlbytime;
 
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.WLDatabase;
@@ -41,6 +42,9 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     TimeConvertor timeConvertor;
     BukkitSyncer syncer;
 
+    @Getter
+    ConfigsContainer configs;
+
     WLDatabase database;
     Checker checker;
     PlaceholderHook placeholderHook;
@@ -62,8 +66,10 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         log = getLogger();
         syncer = new BukkitSyncer(this);
 
-        ConfigUtils.checkConfig(this);
-        whitelistEnabled = getConfig().getBoolean("enabled", true);
+        configs = new ConfigsContainer(getDataFolder());
+        configs.load();
+
+        whitelistEnabled = configs.getSettings().enabled;
 
         initTimeConvertor();
 
@@ -88,14 +94,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
         if (placeholderHook != null) placeholderHook.unregister();
         if (checker != null) checker.stop();
-        if (database != null) {
-            database.close().join();
-        }
-
-        if (getCommand("whitelist") != null) {
-            getCommand("whitelist").setExecutor(null);
-            getCommand("whitelist").setTabCompleter(null);
-        }
+        if (database != null) database.close();
 
         info("Disabled");
     }
@@ -142,7 +141,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initCommandsAndListeners() {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)), this);
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfig().getBoolean("case-sensitive", false), this), this);
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, configs.getSettings().caseSensitive,this), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
@@ -159,7 +158,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     private void hookPlaceholder() {
         if (getConfig().getBoolean("placeholders-enabled", false)) {
             try {
-                placeholderHook = new PlaceholderHook(database, timeConvertor, getPluginConfig());
+                placeholderHook = new PlaceholderHook(database, timeConvertor, configs.getPlaceholders());
                 placeholderHook.register();
                 log.info("Hooked with PlaceholderAPI");
             } catch (Exception exception) {
@@ -186,8 +185,15 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         whitelistEnabled = mode;
     }
 
-    @Override
-    public FileConfiguration getPluginConfig() {
-        return getConfig();
+    public static void info(String message) {
+        if (log != null) log.info(message);
+    }
+
+    public static void warn(String message) {
+        if (log != null) log.warning(message);
+    }
+
+    public static void error(String message) {
+        if (log != null) log.severe(message);
     }
 }

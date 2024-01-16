@@ -1,10 +1,10 @@
-# WhitelistByTime
+<img src="./images/header.svg">
 
-This plugin allows you to add players for a certain time or permanently.
-
-## Statistics
-Statistics are obtained through bstats metrics.
 ![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
+*Statistics are obtained through bstats metrics.*
+
+## About
+This plugin allows you to add players for a certain time or permanently.
 
 ## Commands and Permissions
 | Command                                          | Permission              |
@@ -32,7 +32,7 @@ All output can be configured in the config.
 
 ## FAQ
 1. *Why does the plugin weigh so much?*\
-   Because it contains libraries such as omrlite (database), caffein (cache), bstats (metrics).
+   Because it contains libraries such as omrlite (database), caffein (cache), bstats (metrics), elytrium-serializer (configs).
 2. *I have a problem/idea where should I write?*\
    Create an issue in this repository and describe it in detail. I would be happy to get any feedback!
 3. *Will there be bungee\velocity support?*\
