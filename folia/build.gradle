@@ -8,7 +8,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '1.0.0'
+version = '1.0.1'
 description = 'WhitelistByTime-Folia'
 
 compileJava.options.encoding = "UTF-8"
@@ -38,7 +38,7 @@ repositories {
 
 dependencies {
     shadow project(path: ':core', configuration: 'default')
-    compileOnly 'dev.folia:folia-api:1.19.4-R0.1-SNAPSHOT'
+    compileOnly 'dev.folia:folia-api:1.20.2-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
     compileOnly 'me.clip:placeholderapi:2.11.3'
