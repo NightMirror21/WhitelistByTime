@@ -2,7 +2,6 @@ package ru.nightmirror.wlbytime;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.bstats.bukkit.Metrics;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.HandlerList;
@@ -21,16 +20,14 @@ import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
+import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
-import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -47,7 +44,18 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     WLDatabase database;
     Checker checker;
     PlaceholderHook placeholderHook;
-    Metrics metrics;
+
+    public static void info(String message) {
+        if (log != null) log.info(message);
+    }
+
+    public static void warn(String message) {
+        if (log != null) log.warning(message);
+    }
+
+    public static void error(String message) {
+        if (log != null) log.severe(message);
+    }
 
     @Override
     public void onEnable() {
@@ -79,7 +87,6 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         HandlerList.unregisterAll(this);
 
         if (placeholderHook != null) placeholderHook.unregister();
-        if (metrics != null) metrics.shutdown();
         if (checker != null) checker.stop();
         if (database != null) database.close();
 
@@ -128,7 +135,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initCommandsAndListeners() {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)), this);
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfig().getBoolean("case-sensitive", false),this), this);
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfig().getBoolean("case-sensitive", false), this), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
@@ -155,7 +162,11 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     }
 
     private void initMetrics() {
-        new Metrics(this, 13834);
+        try {
+            new MetricsLoader(this);
+        } catch (Exception exception) {
+            info("Failed to start collecting metrics. The plugin will continue working, but metrics will not be collected.");
+        }
     }
 
     @Override
@@ -171,18 +182,5 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     @Override
     public FileConfiguration getPluginConfig() {
         return getConfig();
-    }
-
-
-    public static void info(String message) {
-        if (log != null) log.info(message);
-    }
-
-    public static void warn(String message) {
-        if (log != null) log.warning(message);
-    }
-
-    public static void error(String message) {
-        if (log != null) log.severe(message);
     }
 }
