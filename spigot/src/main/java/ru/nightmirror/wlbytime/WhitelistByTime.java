@@ -20,7 +20,6 @@ import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
-import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
@@ -141,7 +140,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initCommandsAndListeners() {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)), this);
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, configs.getSettings().caseSensitive,this), this);
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, configs.getSettings().caseSensitive, this), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
@@ -183,17 +182,5 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     @Override
     public void setWhitelistEnabled(boolean mode) {
         whitelistEnabled = mode;
-    }
-
-    public static void info(String message) {
-        if (log != null) log.info(message);
-    }
-
-    public static void warn(String message) {
-        if (log != null) log.warning(message);
-    }
-
-    public static void error(String message) {
-        if (log != null) log.severe(message);
     }
 }

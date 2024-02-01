@@ -20,7 +20,6 @@ import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
-import ru.nightmirror.wlbytime.common.utils.ConfigUtils;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
@@ -48,18 +47,6 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     WLDatabase database;
     Checker checker;
     PlaceholderHook placeholderHook;
-
-    public static void info(String message) {
-        if (log != null) log.info(message);
-    }
-
-    public static void warn(String message) {
-        if (log != null) log.warning(message);
-    }
-
-    public static void error(String message) {
-        if (log != null) log.severe(message);
-    }
 
     @Override
     public void onEnable() {

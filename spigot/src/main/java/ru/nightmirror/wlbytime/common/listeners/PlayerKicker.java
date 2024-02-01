@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
