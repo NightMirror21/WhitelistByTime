@@ -2,12 +2,13 @@ package ru.nightmirror.wlbytime.common.convertor;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.md_5.bungee.api.ChatColor;
 import ru.nightmirror.wlbytime.WhitelistByTime;
 
 import java.util.List;
 
 public class ColorsConvertor {
+
+    private static boolean notifiedOfTheLegacyColors = false;
 
     public static List<Component> convert(List<String> list) {
         return list.stream().map(ColorsConvertor::convert).toList();
@@ -21,10 +22,13 @@ public class ColorsConvertor {
         message = message.replaceAll("&", "§");
 
         if (message.contains("&") || message.contains("§")) {
-            WhitelistByTime.error("Remove legacy color(s) (starts with '&' or '§') from config!");
-            WhitelistByTime.error("Paper and paper family don't support legacy color formats");
-            WhitelistByTime.error("Use MiniMessage by kyori and make life easier!");
-            WhitelistByTime.error("https://docs.advntr.dev/minimessage/format.html");
+            if (!notifiedOfTheLegacyColors) {
+                WhitelistByTime.error("Remove legacy color(s) (starts with '&' or '§') from config!");
+                WhitelistByTime.error("Paper and paper family don't support legacy color formats");
+                WhitelistByTime.error("Use MiniMessage by kyori and make life easier!");
+                WhitelistByTime.error("https://docs.advntr.dev/minimessage/format.html");
+                notifiedOfTheLegacyColors = true;
+            }
             message = replaceLegacyColors(message);
         }
 
