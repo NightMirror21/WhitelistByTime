@@ -3,13 +3,11 @@ package ru.nightmirror.wlbytime.common.command;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.ITabCompleter;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.IWrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
 import java.util.ArrayList;
@@ -18,13 +16,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WhitelistTabCompleter implements TabCompleter {
+public class WhitelistTabCompleter implements ITabCompleter {
 
     PlayerAccessor playerAccessor;
     IWhitelist plugin;
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, String[] strings) {
+    public List<String> onTabComplete(@NotNull IWrappedCommandSender commandSender, @NotNull String s, String[] strings) {
         List<String> args = new ArrayList<>();
 
         if (strings.length == 1) {
@@ -47,9 +45,9 @@ public class WhitelistTabCompleter implements TabCompleter {
             List<WLPlayer> inWhitelist = playerAccessor.getPlayersCached();
 
             if (!plugin.isWhitelistEnabled()) {
-                for (Player player : commandSender.getServer().getOnlinePlayers()) {
-                    if (playerAccessor.getPlayerCached(player.getName()).isEmpty())
-                        notInWhitelist.add(player.getName());
+                for (String nickname : commandSender.getAllPlayerNicknamesOnServer()) {
+                    if (playerAccessor.getPlayerCached(nickname).isEmpty())
+                        notInWhitelist.add(nickname);
                 }
             }
 

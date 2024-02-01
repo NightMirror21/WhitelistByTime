@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import ru.nightmirror.wlbytime.common.command.wrappers.WrapperCommandSender;
 import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
 
 @RequiredArgsConstructor
@@ -16,7 +17,7 @@ public class WhitelistCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] strings) {
-        executor.execute(sender, strings);
+        executor.execute(new WrapperCommandSender(sender), strings);
         return true;
     }
 }

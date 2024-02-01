@@ -2,14 +2,12 @@ package ru.nightmirror.wlbytime.common.command;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
 import ru.nightmirror.wlbytime.interfaces.IWhitelist;
 import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.IWrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -33,51 +31,51 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void reload(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.reload"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void reload(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.reload"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
         whitelist.reload();
-        sender.sendMessage(ColorsConvertor.convert(messages.pluginReloaded));
+        sender.sendMessage(messages.pluginReloaded);
     }
 
     @Override
-    public void help(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.help"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void help(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.help"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
-        for (String line : ColorsConvertor.convert(messages.help)) {
+        for (String line : messages.help) {
             sender.sendMessage(line);
         }
     }
 
     @Override
-    public void getAll(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.getall"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void getAll(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.getall"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
         playerAccessor.getPlayers().thenAccept(players -> {
             if (players.size() == 0) {
-                sender.sendMessage(ColorsConvertor.convert(messages.listEmpty));
+                sender.sendMessage(messages.listEmpty);
                 return;
             }
 
             players.forEach(player -> {
-                sender.sendMessage(ColorsConvertor.convert(messages.listTitle));
+                sender.sendMessage(messages.listTitle);
                 String time;
 
                 if (player.getUntil() == -1L) {
-                    time = ColorsConvertor.convert(messages.forever);
+                    time = messages.forever;
                 } else {
                     time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
                 }
 
-                sender.sendMessage(ColorsConvertor.convert(messages.listPlayer)
+                sender.sendMessage(messages.listPlayer
                         .replaceAll("%player%", player.getNickname())
                         .replaceAll("%time%", time.trim()));
             });
@@ -85,74 +83,74 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void remove(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.remove"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void remove(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.remove"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
         String removeNickname = strings[1];
         playerAccessor.delete(removeNickname).thenAccept(deleted -> {
             if (deleted) {
-                sender.sendMessage(ColorsConvertor.convert(messages.playerRemovedFromWhitelist)
+                sender.sendMessage(messages.playerRemovedFromWhitelist
                         .replaceAll("%player%", removeNickname));
             } else {
-                sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
+                sender.sendMessage(messages.playerNotInWhitelist
                         .replaceAll("%player%", removeNickname));
             }
         });
     }
 
     @Override
-    public void check(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.check"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void check(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.check"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
         String checkNickname = strings[1];
         playerAccessor.getPlayer(checkNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (player.getUntil() == -1) {
-                sender.sendMessage(ColorsConvertor.convert(messages.stillInWhitelist)
+                sender.sendMessage(messages.stillInWhitelist
                         .replaceAll("%player%", checkNickname));
             } else {
                 String time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
-                sender.sendMessage(ColorsConvertor.convert(messages.stillInWhitelistForTime)
+                sender.sendMessage(messages.stillInWhitelistForTime
                         .replaceAll("%player%", checkNickname)
                         .replaceAll("%time%", time));
             }
-        }, () -> sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
+        }, () -> sender.sendMessage(messages.playerNotInWhitelist
                 .replaceAll("%player%", checkNickname))));
     }
 
     @Override
-    public void checkme(CommandSender sender) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.checkme"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void checkme(IWrappedCommandSender sender) {
+        if (!(sender.hasPermission("whitelistbytime.checkme"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
-        playerAccessor.getPlayer(sender.getName()).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
+        playerAccessor.getPlayer(sender.getNickname()).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (player.getUntil() == -1) {
-                sender.sendMessage(ColorsConvertor.convert(messages.stillInWhitelist));
+                sender.sendMessage(messages.stillInWhitelist);
             } else {
                 String time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
-                sender.sendMessage(ColorsConvertor.convert(messages.stillInWhitelistForTime)
+                sender.sendMessage(messages.stillInWhitelistForTime
                         .replaceAll("%time%", time));
             }
-        }, () -> sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
-                .replaceAll("%player%", sender.getName()))));
+        }, () -> sender.sendMessage(messages.playerNotInWhitelist
+                .replaceAll("%player%", sender.getNickname()))));
     }
 
     @Override
-    public void add(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.add"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void add(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.add"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
         String addNickname = strings[1];
-        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> sender.sendMessage(ColorsConvertor.convert(messages.playerAlreadyInWhitelist)
+        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> sender.sendMessage(messages.playerAlreadyInWhitelist
                 .replaceAll("%player%", addNickname)), () -> {
             long current = System.currentTimeMillis();
             long until = current;
@@ -167,10 +165,10 @@ public class CommandsExecutor implements ICommandsExecutor {
             long finalUntil = until;
             playerAccessor.createOrUpdate(new WLPlayer(addNickname, until)).thenRun(() -> {
                 if (finalUntil == -1L) {
-                    sender.sendMessage(ColorsConvertor.convert(messages.successfullyAdded)
+                    sender.sendMessage(messages.successfullyAdded
                             .replaceAll("%player%", addNickname));
                 } else {
-                    sender.sendMessage(ColorsConvertor.convert(messages.successfullyAddedForTime)
+                    sender.sendMessage(messages.successfullyAddedForTime
                             .replaceAll("%player%", addNickname)
                             .replaceAll("%time%", timeConvertor.getTimeLine(finalUntil - System.currentTimeMillis() + 1000L)));
                 }
@@ -179,9 +177,9 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void time(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.time"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void time(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.time"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
@@ -193,39 +191,39 @@ public class CommandsExecutor implements ICommandsExecutor {
             switch (strings[1]) {
                 case "set" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.setTime)
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.setTime
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
                     player.setUntil(until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.successfullyAddedForTime)
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 });
                 case "add" -> playerOptional.ifPresentOrElse(player -> {
                     player.setUntil(player.getUntil() + (until - System.currentTimeMillis()));
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.addTime)
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.addTime
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
                     WLPlayer player = new WLPlayer(nickname, until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.successfullyAddedForTime)
+                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 });
                 case "remove" -> playerOptional.ifPresentOrElse(player -> {
                     if ((player.getUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
                         player.setUntil(player.getUntil() - (until - System.currentTimeMillis()));
-                        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.removeTime)
+                        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.removeTime
                                 .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                                 .replaceAll("%player%", nickname)));
                     } else {
-                        playerAccessor.delete(player).thenRun(() -> sender.sendMessage(ColorsConvertor.convert(messages.playerRemovedFromWhitelist)
-                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()  + 1000L))
+                        playerAccessor.delete(player).thenRun(() -> sender.sendMessage(messages.playerRemovedFromWhitelist
+                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                                 .replaceAll("%player%", nickname)));
                     }
-                }, () -> sender.sendMessage(ColorsConvertor.convert(messages.playerNotInWhitelist)
+                }, () -> sender.sendMessage(messages.playerNotInWhitelist
                         .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
                         .replaceAll("%player%", nickname)));
             }
@@ -233,31 +231,31 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void turn(CommandSender sender, String[] strings) {
-        if (!(sender instanceof ConsoleCommandSender || sender.hasPermission("whitelistbytime.turn"))) {
-            sender.sendMessage(ColorsConvertor.convert(messages.notPermission));
+    public void turn(IWrappedCommandSender sender, String[] strings) {
+        if (!(sender.hasPermission("whitelistbytime.turn"))) {
+            sender.sendMessage(messages.notPermission);
             return;
         }
 
         if (strings[0].equalsIgnoreCase("on")) {
             if (whitelist.isWhitelistEnabled()) {
-                sender.sendMessage(ColorsConvertor.convert(messages.whitelistAlreadyEnabled));
+                sender.sendMessage(messages.whitelistAlreadyEnabled);
             } else {
-                sender.sendMessage(ColorsConvertor.convert(messages.whitelistEnabled));
+                sender.sendMessage(messages.whitelistEnabled);
                 whitelist.setWhitelistEnabled(true);
             }
         } else {
             if (!whitelist.isWhitelistEnabled()) {
-                sender.sendMessage(ColorsConvertor.convert(messages.whitelistAlreadyDisabled));
+                sender.sendMessage(messages.whitelistAlreadyDisabled);
             } else {
-                sender.sendMessage(ColorsConvertor.convert(messages.whitelistDisabled));
+                sender.sendMessage(messages.whitelistDisabled);
                 whitelist.setWhitelistEnabled(false);
             }
         }
     }
 
     @Override
-    public void execute(CommandSender sender, String[] strings) {
+    public void execute(IWrappedCommandSender sender, String[] strings) {
         if (strings.length == 0 || strings[0].equals("")) {
             help(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("add")) {

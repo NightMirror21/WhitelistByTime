@@ -10,6 +10,7 @@ import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
+import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleterExecutor;
 import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
@@ -131,7 +132,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
         getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, configs.getSettings().caseSensitive,this), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
-        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleter(database, this));
+        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, this)));
     }
 
     private void initChecker() {
