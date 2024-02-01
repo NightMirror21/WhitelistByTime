@@ -10,6 +10,10 @@ import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.IWrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommandsExecutor implements ICommandsExecutor {
 
@@ -59,27 +63,63 @@ public class CommandsExecutor implements ICommandsExecutor {
             return;
         }
 
-        playerAccessor.getPlayers().thenAccept(players -> {
-            if (players.size() == 0) {
-                sender.sendMessage(messages.listEmpty);
-                return;
-            }
+        playerAccessor.getPlayers()
+                .thenApply(list -> list.stream().sorted(Comparator.comparingLong(WLPlayer::getUntil).reversed()).toList())
+                .thenAccept(players -> {
 
-            players.forEach(player -> {
-                sender.sendMessage(messages.listTitle);
-                String time;
+                    if (players.size() == 0) {
+                        sender.sendMessage(messages.listEmpty);
+                        return;
+                    }
 
-                if (player.getUntil() == -1L) {
-                    time = messages.forever;
-                } else {
-                    time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
-                }
+                    int page = 1;
+                    if (strings.length > 1) {
+                        try {
+                            page = Integer.parseInt(strings[1]);
+                        } catch (NumberFormatException ignored) {
+                            // ignored
+                        }
+                    }
 
-                sender.sendMessage(messages.listPlayer
-                        .replaceAll("%player%", player.getNickname())
-                        .replaceAll("%time%", time.trim()));
-            });
-        });
+                    int displayOnPage = 5;
+                    int maxPage = players.size() % displayOnPage != 0 ? players.size() / displayOnPage + 1 : players.size() / displayOnPage;
+
+                    if (page > maxPage) {
+                        sender.sendMessage(messages.pageNotExists.replaceAll("%page%", String.valueOf(page)));
+                        return;
+                    }
+
+                    List<WLPlayer> toDisplay = new ArrayList<>();
+
+                    for (int i = (page - 1) * displayOnPage; i < Math.min(page * displayOnPage, players.size()); i++) {
+                        toDisplay.add(players.get(i));
+                    }
+
+                    sender.sendMessage(messages.listTitle);
+
+                    toDisplay.forEach(player -> {
+                        String time;
+
+                        if (player.getUntil() == -1L) {
+                            time = messages.forever;
+                        } else {
+                            time = timeConvertor.getTimeLine(player.getUntil() - System.currentTimeMillis());
+                        }
+
+                        sender.sendMessage(messages.listPlayer
+                                .replaceAll("%player%", player.getNickname())
+                                .replaceAll("%time%", time.trim()));
+
+                    });
+
+                    if (maxPage > 1) {
+                        sender.sendMessage(messages.listPageableCommands
+                                .replaceAll("%current-page%", String.valueOf(page))
+                                .replaceAll("%max-page%", String.valueOf(maxPage))
+
+                        );
+                    }
+                });
     }
 
     @Override

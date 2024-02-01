@@ -54,8 +54,10 @@ public class MessagesConfig extends YamlSerializable {
 
     @NewLine
     String listTitle = "&b> Whitelist:";
-    String listPlayer = "&b| &f%player% <gray>[%time%]";
+    String listPlayer = "&b| &f%player% &7[%time%]";
     String listEmpty = "&bWhitelist is empty";
+    String listPageableCommands = "&fPage &b%current-page% &f/ &b%max-page% &7(To show another page run /whitelist getall <page>)";
+    String pageNotExists = "&fPage &b%page% &fnot exists";
 
     @NewLine
     String setTime = "Now &b%player% &fwill be in whitelist for &b%time%";
