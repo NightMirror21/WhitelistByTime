@@ -63,7 +63,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     public void onEnable() {
         log = getLogger();
 
-        whitelistEnabled = getConfig().getBoolean("enabled", true);
+        whitelistEnabled = getConfigs().getSettings().enabled;
 
         configs = new ConfigsContainer(getDataFolder());
         configs.load();
@@ -104,14 +104,14 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initTimeConvertor() {
         TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
-                .year(getConfig().getStringList("time-units.year"))
-                .month(getConfig().getStringList("time-units.month"))
-                .week(getConfig().getStringList("time-units.week"))
-                .day(getConfig().getStringList("time-units.day"))
-                .hour(getConfig().getStringList("time-units.hour"))
-                .minute(getConfig().getStringList("time-units.minute"))
-                .second(getConfig().getStringList("time-units.second"))
-                .forever(getConfig().getString("minecraft-commands.forever", "forever"))
+                .year(getConfigs().getSettings().timeUnitsYear)
+                .month(getConfigs().getSettings().timeUnitsMonth)
+                .week(getConfigs().getSettings().timeUnitsWeek)
+                .day(getConfigs().getSettings().timeUnitsDay)
+                .hour(getConfigs().getSettings().timeUnitsHour)
+                .minute(getConfigs().getSettings().timeUnitsMinute)
+                .second(getConfigs().getSettings().timeUnitsSecond)
+                .forever(getConfigs().getMessages().forever)
                 .build();
 
         timeConvertor = new TimeConvertor(settings);
@@ -120,13 +120,13 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     private void initDatabase() throws SQLException {
         DatabaseSettings settings = DatabaseSettings.builder()
                 .localStorageDir(getDataFolder())
-                .type(getConfig().getString("type", "sqlite"))
-                .address(getConfig().getString("address", "localhost"))
-                .databaseName(getConfig().getString("name", "whitelist"))
-                .userUserAndPassword(getConfig().getBoolean("userUserAndPassword", false))
-                .user(getConfig().getString("user", "user"))
-                .password(getConfig().getString("password", "password"))
-                .params(getConfig().getStringList("params"))
+                .type(getConfigs().getDatabase().type)
+                .address(getConfigs().getDatabase().address)
+                .databaseName(getConfigs().getDatabase().name)
+                .userUserAndPassword(getConfigs().getDatabase().useUserAndPassword)
+                .user(getConfigs().getDatabase().user)
+                .password(getConfigs().getDatabase().password)
+                .params(getConfigs().getDatabase().params)
                 .build();
 
         database = new WLDatabase(settings);
@@ -138,22 +138,22 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
 
     private void initCommandsAndListeners() {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)), this);
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfig().getBoolean("case-sensitive", false), this), this);
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfigs().getSettings().caseSensitive, this), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, this)));
     }
 
     private void initChecker() {
-        PlayerKicker playerKicker = new PlayerKicker(this, getConfig().getBoolean("case-sensitive", false), getConfig().getStringList("minecraft-commands.you-not-in-whitelist-kick"));
+        PlayerKicker playerKicker = new PlayerKicker(this, getConfigs().getSettings().caseSensitive, getConfigs().getMessages().youNotInWhitelistKick);
         database.addListener(playerKicker);
 
-        checker = new PlayersChecker(database, playerKicker, Duration.of(getConfig().getInt("checker-delay", 1000), ChronoUnit.MILLIS));
+        checker = new PlayersChecker(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
         checker.start();
     }
 
     private void hookPlaceholder() {
-        if (getConfig().getBoolean("placeholders-enabled", false)) {
+        if (getConfigs().getPlaceholders().placeholdersEnabled) {
             try {
                 placeholderHook = new PlaceholderHook(database, timeConvertor, configs.getPlaceholders());
                 placeholderHook.register();
