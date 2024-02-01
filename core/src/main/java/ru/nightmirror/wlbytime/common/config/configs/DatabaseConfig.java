@@ -18,26 +18,26 @@ public class DatabaseConfig extends YamlSerializable {
 
     @Comment(value = {
             @CommentValue("'sqlite' or 'mysql'")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     String type = "sqlite";
 
     @NewLine
     @Comment(value = {
             @CommentValue("If not sqlite or h2")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     String address = "localhost:3030";
     String name = "minecraft";
 
     @NewLine
     @Comment(value = {
             @CommentValue("Params for connection")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     List<String> params = List.of("autoReconnect=true");
 
     @NewLine
     @Comment(value = {
             @CommentValue("If using user and password")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     boolean useUserAndPassword = false;
     String user = "user";
     String password = "qwerty123";

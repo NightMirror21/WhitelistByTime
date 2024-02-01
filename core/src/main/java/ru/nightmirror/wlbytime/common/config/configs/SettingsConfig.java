@@ -20,28 +20,27 @@ public class SettingsConfig extends YamlSerializable {
         super(SettingsConfig.CONFIG);
     }
 
-    @NewLine
     @Comment(value = {
             @CommentValue("Is whitelist enabled by default on startup")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     boolean enabled = true;
 
     @NewLine
     @Comment(value = {
             @CommentValue("The delay through which the thread will check players. In milliseconds")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     int checkerDelay = 1000;
 
     @NewLine
     @Comment(value = {
             @CommentValue("Check the case of the nickname")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     boolean caseSensitive = true;
 
     @NewLine
     @Comment(value = {
             @CommentValue("Time units")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     List<String> timeUnitsYear = List.of("y");
     List<String> timeUnitsMonth = List.of("mo");
     List<String> timeUnitsWeek = List.of("w");

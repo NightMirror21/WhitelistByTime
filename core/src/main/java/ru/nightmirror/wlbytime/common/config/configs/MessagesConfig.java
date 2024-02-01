@@ -16,7 +16,6 @@ public class MessagesConfig extends YamlSerializable {
     private static final SerializerConfig CONFIG = new SerializerConfig.Builder()
             .build();
 
-    @NewLine
     String pluginReloaded = "&6Plugin reloaded!";
     String notPermission = "&cYou do not have permission!";
 
@@ -40,7 +39,7 @@ public class MessagesConfig extends YamlSerializable {
     @NewLine
     @Comment(value = {
             @CommentValue("For command with time")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     String successfullyAddedForTime = "&b%player% &fadded to whitelist for &b%time%";
     String stillInWhitelistForTime = "&b%player% &fwill be in whitelist still &b%time%";
     String checkmeStillInWhitelistForTime = "&fYou will remain on the whitelist for &b%time%";
@@ -48,7 +47,7 @@ public class MessagesConfig extends YamlSerializable {
     @NewLine
     @Comment(value = {
             @CommentValue("For command without time")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     String successfullyAdded = "&b%player% &fadded to whitelist forever";
     String stillInWhitelist = "&b%player% &fwill be in whitelist forever";
     String checkMeStillInWhitelist = "&fYou are permanently whitelisted";

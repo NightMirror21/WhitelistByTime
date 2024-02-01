@@ -19,14 +19,14 @@ public class PlaceholdersConfig extends YamlSerializable {
     @NewLine
     @Comment(value = {
             @CommentValue("%wlbytime_in_whitelist% - In whitelist or not")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     String inWhitelistTrue = "<green>✔";
     String inWhitelistFalse = "<red>✖";
 
     @NewLine
     @Comment(value = {
             @CommentValue("%wlbytime_time_left% - How much is left in whitelist")
-    }, at = Comment.At.APPEND)
+    }, at = Comment.At.PREPEND)
     String timeLeft = "<green>%time%";
 
     public PlaceholdersConfig() {
