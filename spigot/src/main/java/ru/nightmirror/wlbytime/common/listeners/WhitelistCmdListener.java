@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
+import ru.nightmirror.wlbytime.common.command.WrapperCommandSender;
 import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class WhitelistCmdListener implements Listener {
                     .trim()
                     .split(" ");
 
-            executor.execute(sender, strings);
+            executor.execute(new WrapperCommandSender(sender), strings);
         }
     }
 
@@ -51,7 +52,7 @@ public class WhitelistCmdListener implements Listener {
                     .trim()
                     .split(" ");
 
-            executor.execute(sender, strings);
+            executor.execute(new WrapperCommandSender(sender), strings);
         }
     }
 }
