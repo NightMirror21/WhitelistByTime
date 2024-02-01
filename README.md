@@ -4,7 +4,7 @@
 *Statistics are obtained through bstats metrics.*
 
 ## About
-This plugin allows you to add players for a certain time or permanently.
+This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
 
 ## Commands and Permissions
 | Command                                          | Permission              |
@@ -16,11 +16,12 @@ This plugin allows you to add players for a certain time or permanently.
 | /whitelist checkme                               | whitelistbytime.checkme |
 | /whitelist time set/add/remove [nickname] [time] | whitelistbytime.time    |
 | /whitelist reload                                | whitelistbytime.reload  |
-| /whitelist getall                                | whitelistbytime.getall  |
+| /whitelist getall (page)                         | whitelistbytime.getall  |
 
 Note:
 - [nickname] - this argument is required.
-- (time) - The duration for which the player will be added to the whitelist.\
+- (page) - page of list, if not specified, defaults to 1.
+- (time) - the duration for which the player will be added to the whitelist.\
   Example: 2d 3h 10m.\
   Leave this value empty if you want to add the player permanently.
 
