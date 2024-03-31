@@ -6,18 +6,18 @@ import lombok.experimental.FieldDefaults;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import ru.nightmirror.wlbytime.common.listeners.command.wrappers.WrapperCommandSender;
-import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
+import ru.nightmirror.wlbytime.common.listeners.command.wrappers.WrapperCommandSenderImpl;
+import ru.nightmirror.wlbytime.interfaces.command.CommandsExecutor;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WhitelistCommandExecutor implements CommandExecutor {
 
-    ICommandsExecutor executor;
+    CommandsExecutor executor;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] strings) {
-        executor.execute(new WrapperCommandSender(sender), strings);
+        executor.execute(new WrapperCommandSenderImpl(sender), strings);
         return true;
     }
 }

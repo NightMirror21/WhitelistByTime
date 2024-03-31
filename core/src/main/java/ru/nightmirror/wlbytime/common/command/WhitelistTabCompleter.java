@@ -4,10 +4,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
-import ru.nightmirror.wlbytime.interfaces.IWhitelist;
-import ru.nightmirror.wlbytime.interfaces.command.wrappers.ITabCompleter;
-import ru.nightmirror.wlbytime.interfaces.command.wrappers.IWrappedCommandSender;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.TabCompleter;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
 import java.util.ArrayList;
@@ -16,13 +16,13 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WhitelistTabCompleter implements ITabCompleter {
+public class WhitelistTabCompleter implements TabCompleter {
 
     PlayerAccessor playerAccessor;
-    IWhitelist plugin;
+    WhitelistByTime plugin;
 
     @Override
-    public List<String> onTabComplete(@NotNull IWrappedCommandSender commandSender, @NotNull String s, String[] strings) {
+    public List<String> onTabComplete(@NotNull WrappedCommandSender commandSender, @NotNull String s, String[] strings) {
         List<String> args = new ArrayList<>();
 
         if (strings.length == 1) {
@@ -42,7 +42,7 @@ public class WhitelistTabCompleter implements ITabCompleter {
             if (commandSender.hasPermission("whitelistbytime.time")) args.add("time");
         } else if (strings.length == 2) {
             List<String> notInWhitelist = new ArrayList<>();
-            List<WLPlayer> inWhitelist = playerAccessor.getPlayersCached();
+            List<PlayerData> inWhitelist = playerAccessor.getPlayersCached();
 
             if (!plugin.isWhitelistEnabled()) {
                 for (String nickname : commandSender.getAllPlayerNicknamesOnServer()) {
@@ -64,12 +64,12 @@ public class WhitelistTabCompleter implements ITabCompleter {
                 }
                 case "remove" -> {
                     if (commandSender.hasPermission("whitelistbytime.remove")) {
-                        args.addAll(inWhitelist.stream().map(WLPlayer::getNickname).toList());
+                        args.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
                     }
                 }
                 case "check" -> {
                     if (commandSender.hasPermission("whitelistbytime.check")) {
-                        args.addAll(inWhitelist.stream().map(WLPlayer::getNickname).toList());
+                        args.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
                         args.addAll(notInWhitelist);
                     }
                 }
@@ -84,7 +84,7 @@ public class WhitelistTabCompleter implements ITabCompleter {
 
             if (commandSender.hasPermission("whitelistbytime.time")) {
                 if (strings[1].equals("set") || strings[1].equals("add") || strings[1].equals("remove")) {
-                    args.addAll(playerAccessor.getPlayersCached().stream().map(WLPlayer::getNickname).toList());
+                    args.addAll(playerAccessor.getPlayersCached().stream().map(PlayerData::getNickname).toList());
                 }
             }
         } else if (strings.length == 4) {

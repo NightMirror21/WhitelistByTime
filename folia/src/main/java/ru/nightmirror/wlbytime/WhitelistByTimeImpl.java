@@ -7,12 +7,12 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
-import ru.nightmirror.wlbytime.common.command.CommandsExecutor;
+import ru.nightmirror.wlbytime.common.command.CommandsExecutorImpl;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
 import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
-import ru.nightmirror.wlbytime.common.database.WLDatabase;
+import ru.nightmirror.wlbytime.common.database.DatabaseImpl;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
@@ -21,7 +21,7 @@ import ru.nightmirror.wlbytime.common.listeners.command.WhitelistCommandExecutor
 import ru.nightmirror.wlbytime.common.listeners.command.WhitelistTabCompleterExecutor;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
-import ru.nightmirror.wlbytime.interfaces.IWhitelist;
+import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
 
 import java.sql.SQLException;
@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.logging.Logger;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WhitelistByTime extends JavaPlugin implements IWhitelist {
+public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
 
     static Logger log;
 
@@ -43,7 +43,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     @Getter
     ConfigsContainer configs;
 
-    WLDatabase database;
+    DatabaseImpl database;
     Checker checker;
     PlaceholderHook placeholderHook;
 
@@ -129,7 +129,7 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
                 .params(getConfigs().getDatabase().params)
                 .build();
 
-        database = new WLDatabase(settings);
+        database = new DatabaseImpl(settings);
         database.loadPlayersToCache(Arrays.stream(getServer().getOfflinePlayers())
                 .map(OfflinePlayer::getName)
                 .filter(Objects::nonNull)
@@ -137,10 +137,10 @@ public class WhitelistByTime extends JavaPlugin implements IWhitelist {
     }
 
     private void initCommandsAndListeners() {
-        getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutor(database, this, timeConvertor)), this);
+        getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutorImpl(database, this, timeConvertor)), this);
         getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, getConfigs().getSettings().caseSensitive, this), this);
 
-        getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutor(database, this, timeConvertor)));
+        getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutorImpl(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, this)));
     }
 

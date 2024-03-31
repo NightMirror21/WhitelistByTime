@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class WLPlayerTable {
+public class PlayerDataTable {
 
     public static final String TABLE_NAME = "wlbytime_players";
     public static final String ID_COLUMN = "id";

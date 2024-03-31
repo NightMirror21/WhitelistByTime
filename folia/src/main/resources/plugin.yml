@@ -1,5 +1,5 @@
 name: WhitelistByTime
-main: ru.nightmirror.wlbytime.WhitelistByTime
+main: ru.nightmirror.wlbytime.WhitelistByTimeImpl
 version: '${version}'
 author: NightMirror
 description: Adding a player to the whitelist for a time

@@ -4,7 +4,7 @@ import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.common.config.configs.SettingsConfig;
 
-public interface IWhitelist {
+public interface WhitelistByTime {
     boolean isWhitelistEnabled();
 
     void setWhitelistEnabled(boolean mode);

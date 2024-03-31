@@ -9,9 +9,9 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
-import ru.nightmirror.wlbytime.interfaces.IWhitelist;
+import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
 import ru.nightmirror.wlbytime.interfaces.misc.PlayersOnSeverAccessor;
 
@@ -21,13 +21,13 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerKicker implements PlayerListener, PlayersOnSeverAccessor {
 
-    IWhitelist whitelist;
+    WhitelistByTime whitelistByTime;
     boolean caseSensitive;
     List<String> kickMessage;
 
     @Override
-    public void playerRemoved(WLPlayer wlPlayer) {
-        kickPlayer(wlPlayer.getNickname());
+    public void playerRemoved(PlayerData playerData) {
+        kickPlayer(playerData.getNickname());
     }
 
     @Override
@@ -37,7 +37,7 @@ public class PlayerKicker implements PlayerListener, PlayersOnSeverAccessor {
 
     @Override
     public void kickPlayer(@NotNull String nickname) {
-        if (!whitelist.isWhitelistEnabled()) return;
+        if (!whitelistByTime.isWhitelistEnabled()) return;
 
         Bukkit.getOnlinePlayers().forEach(player -> {
             boolean toKick = (caseSensitive && player.getName().equals(nickname) || (!caseSensitive && player.getName().equalsIgnoreCase(nickname)));

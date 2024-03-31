@@ -13,14 +13,14 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayerMapper;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayerTable;
-import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
-import ru.nightmirror.wlbytime.interfaces.listener.PlayerListenersContainer;
-import ru.nightmirror.wlbytime.interfaces.database.CachedDatabase;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerDataMapper;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerDataTable;
+import ru.nightmirror.wlbytime.interfaces.database.Database;
 import ru.nightmirror.wlbytime.interfaces.database.Mapper;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
+import ru.nightmirror.wlbytime.interfaces.listener.PlayerListenersContainer;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -33,25 +33,25 @@ import java.util.concurrent.CompletionException;
 
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListenersContainer {
+public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersContainer {
 
     @Setter
     DatabaseSettings settings;
     @Getter
     boolean connected = false;
 
-    final Mapper<WLPlayerTable, WLPlayer> mapper;
+    final Mapper<PlayerDataTable, PlayerData> mapper;
 
     JdbcPooledConnectionSource connection;
 
-    final LoadingCache<String, WLPlayer> cache;
+    final LoadingCache<String, PlayerData> cache;
 
     final List<PlayerListener> listeners = new ArrayList<>();
 
-    public WLDatabase(DatabaseSettings settings) throws SQLException {
+    public DatabaseImpl(DatabaseSettings settings) throws SQLException {
         this.settings = settings;
         com.j256.ormlite.logger.Logger.setGlobalLogLevel(Level.OFF);
-        mapper = new WLPlayerMapper();
+        mapper = new PlayerDataMapper();
         if (!createConnection()) throw new SQLException("Can't create connection");
         cache = Caffeine.newBuilder()
                 .refreshAfterWrite(Duration.ofMinutes(5))
@@ -62,7 +62,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
         connected = false;
         try {
             connection = getConnectionSource();
-            TableUtils.createTableIfNotExists(connection, WLPlayerTable.class);
+            TableUtils.createTableIfNotExists(connection, PlayerDataTable.class);
             connected = true;
             return true;
         } catch (SQLException exception) {
@@ -82,10 +82,10 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
         );
     }
 
-    private CompletableFuture<Dao<WLPlayerTable, Long>> getDao() {
+    private CompletableFuture<Dao<PlayerDataTable, Long>> getDao() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return DaoManager.createDao(connection, WLPlayerTable.class);
+                return DaoManager.createDao(connection, PlayerDataTable.class);
             } catch (Exception exception) {
                 throw new CompletionException(exception);
             }
@@ -118,10 +118,10 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public CompletableFuture<Optional<WLPlayer>> getPlayer(@NotNull String nickname) {
+    public CompletableFuture<Optional<PlayerData>> getPlayer(@NotNull String nickname) {
         return getDao().thenApply((dao) -> {
             try {
-                Optional<WLPlayerTable> tableOptional = dao.queryForEq(WLPlayerTable.NICKNAME_COLUMN, nickname).stream().findAny();
+                Optional<PlayerDataTable> tableOptional = dao.queryForEq(PlayerDataTable.NICKNAME_COLUMN, nickname).stream().findAny();
                 if (tableOptional.isEmpty()) return Optional.empty();
                 return Optional.of(mapper.toEntity(tableOptional.get()));
             } catch (SQLException exception) {
@@ -132,7 +132,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public Optional<WLPlayer> getPlayerCached(@NotNull String nickname) {
+    public Optional<PlayerData> getPlayerCached(@NotNull String nickname) {
         return Optional.ofNullable(cache.getIfPresent(nickname));
     }
 
@@ -147,7 +147,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public CompletableFuture<Boolean> createOrUpdate(@NotNull WLPlayer player) {
+    public CompletableFuture<Boolean> createOrUpdate(@NotNull PlayerData player) {
         return getDao().thenApply((dao) -> {
             try {
                 Dao.CreateOrUpdateStatus status = dao.createOrUpdate(mapper.toTable(player));
@@ -164,7 +164,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public CompletableFuture<Boolean> delete(@NotNull WLPlayer player) {
+    public CompletableFuture<Boolean> delete(@NotNull PlayerData player) {
         return getDao().thenApply((dao) -> {
             try {
                 if (dao.delete(mapper.toTable(player)) == 1) {
@@ -184,7 +184,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     public CompletableFuture<Boolean> delete(@NotNull String nickname) {
         return getDao().thenApply((dao) -> {
             try {
-                WLPlayer player = getPlayer(nickname).join().orElse(null);
+                PlayerData player = getPlayer(nickname).join().orElse(null);
                 if (player == null) return false;
                 if (dao.delete(mapper.toTable(player)) == 1) {
                     cache.invalidate(player.getNickname());
@@ -200,11 +200,11 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public CompletableFuture<Void> delete(@NotNull List<WLPlayer> players) {
+    public CompletableFuture<Void> delete(@NotNull List<PlayerData> players) {
         return getDao().thenAccept((dao) -> {
             try {
                 if (dao.delete(players.stream().map(mapper::toTable).toList()) == 1) {
-                    cache.invalidateAll(players.stream().map(WLPlayer::getNickname).toList());
+                    cache.invalidateAll(players.stream().map(PlayerData::getNickname).toList());
                     players.forEach(player -> listeners.forEach(listener -> listener.playerRemoved(player)));
                 }
             } catch (Exception exception) {
@@ -214,7 +214,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public CompletableFuture<List<WLPlayer>> getPlayers() {
+    public CompletableFuture<List<PlayerData>> getPlayers() {
         return getDao().thenApply((dao) -> {
             try {
                 return dao.queryForAll().stream().map(t -> mapper.toEntity(t)).toList();
@@ -226,7 +226,7 @@ public class WLDatabase implements PlayerAccessor, CachedDatabase, PlayerListene
     }
 
     @Override
-    public List<WLPlayer> getPlayersCached() {
+    public List<PlayerData> getPlayersCached() {
         return cache.asMap().values().stream().toList();
     }
 

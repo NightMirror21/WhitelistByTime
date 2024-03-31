@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.common.checker;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.interfaces.checker.Checker;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 import ru.nightmirror.wlbytime.interfaces.misc.PlayersOnSeverAccessor;
@@ -33,7 +33,7 @@ public class PlayersChecker implements Checker, Runnable {
         playerAccessor.getPlayers().thenCompose(players -> {
 
             long currentMilliseconds = System.currentTimeMillis();
-            List<WLPlayer> toRemove = players.stream().filter(player -> player.getUntil() != -1L && player.getUntil() <= currentMilliseconds).toList();
+            List<PlayerData> toRemove = players.stream().filter(player -> player.getUntil() != -1L && player.getUntil() <= currentMilliseconds).toList();
             List<String> onServer = playersOnSeverAccessor.getPlayersOnServer();
 
             boolean caseSensitive = playersOnSeverAccessor.isCaseSensitiveEnabled();
@@ -47,7 +47,7 @@ public class PlayersChecker implements Checker, Runnable {
                 }
             }
 
-            for (WLPlayer player : toRemove) {
+            for (PlayerData player : toRemove) {
                 boolean toKick = onServer.stream().anyMatch(nickname -> (caseSensitive && player.getNickname().equals(nickname) || (!caseSensitive && player.getNickname().equalsIgnoreCase(nickname))));
                 if (toKick) {
                     playersOnSeverAccessor.kickPlayer(player.getNickname());

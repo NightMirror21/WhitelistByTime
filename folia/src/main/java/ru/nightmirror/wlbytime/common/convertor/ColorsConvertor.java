@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.common.convertor;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import ru.nightmirror.wlbytime.WhitelistByTime;
+import ru.nightmirror.wlbytime.WhitelistByTimeImpl;
 
 import java.util.List;
 
@@ -23,10 +23,10 @@ public class ColorsConvertor {
 
         if (message.contains("&") || message.contains("§")) {
             if (!notifiedOfTheLegacyColors) {
-                WhitelistByTime.error("Remove legacy color(s) (starts with '&' or '§') from config!");
-                WhitelistByTime.error("Paper and paper family don't support legacy color formats");
-                WhitelistByTime.error("Use MiniMessage by kyori and make life easier!");
-                WhitelistByTime.error("https://docs.advntr.dev/minimessage/format.html");
+                WhitelistByTimeImpl.error("Remove legacy color(s) (starts with '&' or '§') from config!");
+                WhitelistByTimeImpl.error("Paper and paper family don't support legacy color formats");
+                WhitelistByTimeImpl.error("Use MiniMessage by kyori and make life easier!");
+                WhitelistByTimeImpl.error("https://docs.advntr.dev/minimessage/format.html");
                 notifiedOfTheLegacyColors = true;
             }
             message = replaceLegacyColors(message);

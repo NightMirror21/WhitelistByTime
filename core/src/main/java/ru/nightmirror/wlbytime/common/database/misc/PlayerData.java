@@ -1,6 +1,5 @@
 package ru.nightmirror.wlbytime.common.database.misc;
 
-import com.j256.ormlite.field.DatabaseField;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,12 +10,12 @@ import org.jetbrains.annotations.Nullable;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @Data
-public class WLPlayer {
+public class PlayerData {
     @Nullable Long id;
     @NotNull String nickname;
     @NotNull Long until;
 
-    public WLPlayer(@NotNull String nickname, @NotNull Long until) {
+    public PlayerData(@NotNull String nickname, @NotNull Long until) {
         this.nickname = nickname;
         this.until = until;
     }

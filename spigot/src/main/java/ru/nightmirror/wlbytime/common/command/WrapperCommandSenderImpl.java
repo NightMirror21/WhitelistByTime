@@ -9,14 +9,14 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.interfaces.command.wrappers.IWrappedCommandSender;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
 
 import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WrapperCommandSender implements IWrappedCommandSender {
+public class WrapperCommandSenderImpl implements WrappedCommandSender {
 
     CommandSender commandSender;
 

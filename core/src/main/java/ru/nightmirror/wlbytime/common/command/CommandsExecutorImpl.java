@@ -4,10 +4,10 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
-import ru.nightmirror.wlbytime.common.database.misc.WLPlayer;
-import ru.nightmirror.wlbytime.interfaces.IWhitelist;
-import ru.nightmirror.wlbytime.interfaces.command.ICommandsExecutor;
-import ru.nightmirror.wlbytime.interfaces.command.wrappers.IWrappedCommandSender;
+import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
+import ru.nightmirror.wlbytime.interfaces.command.CommandsExecutor;
+import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class CommandsExecutor implements ICommandsExecutor {
+public class CommandsExecutorImpl implements CommandsExecutor {
 
     /*
     Why don't I say I'll redo it in the future, and you'll turn a blind eye?
@@ -23,30 +23,30 @@ public class CommandsExecutor implements ICommandsExecutor {
      */
 
     PlayerAccessor playerAccessor;
-    IWhitelist whitelist;
+    WhitelistByTime whitelistByTime;
     TimeConvertor timeConvertor;
     MessagesConfig messages;
 
-    public CommandsExecutor(PlayerAccessor playerAccessor, IWhitelist whitelist, TimeConvertor timeConvertor) {
+    public CommandsExecutorImpl(PlayerAccessor playerAccessor, WhitelistByTime whitelistByTime, TimeConvertor timeConvertor) {
         this.playerAccessor = playerAccessor;
-        this.whitelist = whitelist;
-        messages = whitelist.getMessages();
+        this.whitelistByTime = whitelistByTime;
+        messages = whitelistByTime.getMessages();
         this.timeConvertor = timeConvertor;
     }
 
     @Override
-    public void reload(IWrappedCommandSender sender, String[] strings) {
+    public void reload(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.reload"))) {
             sender.sendMessage(messages.notPermission);
             return;
         }
 
-        whitelist.reload();
+        whitelistByTime.reload();
         sender.sendMessage(messages.pluginReloaded);
     }
 
     @Override
-    public void help(IWrappedCommandSender sender, String[] strings) {
+    public void help(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.help"))) {
             sender.sendMessage(messages.notPermission);
             return;
@@ -57,14 +57,14 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void getAll(IWrappedCommandSender sender, String[] strings) {
+    public void getAll(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.getall"))) {
             sender.sendMessage(messages.notPermission);
             return;
         }
 
         playerAccessor.getPlayers()
-                .thenApply(list -> list.stream().sorted(Comparator.comparingLong(WLPlayer::getUntil).reversed()).toList())
+                .thenApply(list -> list.stream().sorted(Comparator.comparingLong(PlayerData::getUntil).reversed()).toList())
                 .thenAccept(players -> {
 
                     if (players.size() == 0) {
@@ -89,7 +89,7 @@ public class CommandsExecutor implements ICommandsExecutor {
                         return;
                     }
 
-                    List<WLPlayer> toDisplay = new ArrayList<>();
+                    List<PlayerData> toDisplay = new ArrayList<>();
 
                     for (int i = (page - 1) * displayOnPage; i < Math.min(page * displayOnPage, players.size()); i++) {
                         toDisplay.add(players.get(i));
@@ -123,7 +123,7 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void remove(IWrappedCommandSender sender, String[] strings) {
+    public void remove(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.remove"))) {
             sender.sendMessage(messages.notPermission);
             return;
@@ -142,7 +142,7 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void check(IWrappedCommandSender sender, String[] strings) {
+    public void check(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.check"))) {
             sender.sendMessage(messages.notPermission);
             return;
@@ -164,7 +164,7 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void checkme(IWrappedCommandSender sender) {
+    public void checkme(WrappedCommandSender sender) {
         if (!(sender.hasPermission("whitelistbytime.checkme"))) {
             sender.sendMessage(messages.notPermission);
             return;
@@ -183,7 +183,7 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void add(IWrappedCommandSender sender, String[] strings) {
+    public void add(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.add"))) {
             sender.sendMessage(messages.notPermission);
             return;
@@ -203,7 +203,7 @@ public class CommandsExecutor implements ICommandsExecutor {
 
             if (until == current) until = -1L;
             long finalUntil = until;
-            playerAccessor.createOrUpdate(new WLPlayer(addNickname, until)).thenRun(() -> {
+            playerAccessor.createOrUpdate(new PlayerData(addNickname, until)).thenRun(() -> {
                 if (finalUntil == -1L) {
                     sender.sendMessage(messages.successfullyAdded
                             .replaceAll("%player%", addNickname));
@@ -217,7 +217,7 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void time(IWrappedCommandSender sender, String[] strings) {
+    public void time(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.time"))) {
             sender.sendMessage(messages.notPermission);
             return;
@@ -235,7 +235,7 @@ public class CommandsExecutor implements ICommandsExecutor {
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
-                    WLPlayer player = new WLPlayer(nickname, until);
+                    PlayerData player = new PlayerData(nickname, until);
                     player.setUntil(until);
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
@@ -247,7 +247,7 @@ public class CommandsExecutor implements ICommandsExecutor {
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
                 }, () -> {
-                    WLPlayer player = new WLPlayer(nickname, until);
+                    PlayerData player = new PlayerData(nickname, until);
                     playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replaceAll("%player%", nickname)));
@@ -271,31 +271,31 @@ public class CommandsExecutor implements ICommandsExecutor {
     }
 
     @Override
-    public void turn(IWrappedCommandSender sender, String[] strings) {
+    public void turn(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.turn"))) {
             sender.sendMessage(messages.notPermission);
             return;
         }
 
         if (strings[0].equalsIgnoreCase("on")) {
-            if (whitelist.isWhitelistEnabled()) {
+            if (whitelistByTime.isWhitelistEnabled()) {
                 sender.sendMessage(messages.whitelistAlreadyEnabled);
             } else {
                 sender.sendMessage(messages.whitelistEnabled);
-                whitelist.setWhitelistEnabled(true);
+                whitelistByTime.setWhitelistEnabled(true);
             }
         } else {
-            if (!whitelist.isWhitelistEnabled()) {
+            if (!whitelistByTime.isWhitelistEnabled()) {
                 sender.sendMessage(messages.whitelistAlreadyDisabled);
             } else {
                 sender.sendMessage(messages.whitelistDisabled);
-                whitelist.setWhitelistEnabled(false);
+                whitelistByTime.setWhitelistEnabled(false);
             }
         }
     }
 
     @Override
-    public void execute(IWrappedCommandSender sender, String[] strings) {
+    public void execute(WrappedCommandSender sender, String[] strings) {
         if (strings.length == 0 || strings[0].equals("")) {
             help(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("add")) {
