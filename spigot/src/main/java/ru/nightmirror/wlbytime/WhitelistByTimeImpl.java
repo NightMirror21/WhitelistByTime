@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,6 +65,9 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     @Override
     public void onEnable() {
         log = getLogger();
+
+        checkCompatibility();
+
         syncer = new BukkitSyncer(this);
 
         configs = new ConfigsContainer(getDataFolder());
@@ -86,6 +90,18 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         hookPlaceholder();
 
         info("Enabled");
+    }
+
+    private void checkCompatibility() {
+        String core = Bukkit.getServer().getName();
+
+        if (core.equalsIgnoreCase("paper")) {
+            log.warning("Hey! You running WhitelistByTime for Spigot on Paper - it is not cool!");
+            log.warning("For better performance, we recommend downloading the Paper version of plugin");
+        } else if (core.equalsIgnoreCase("folia")) {
+            log.warning("Hey! You running WhitelistByTime for Spigot on Folia - it is not cool!");
+            log.warning("For better performance, we recommend downloading the Folia version of plugin");
+        }
     }
 
     @Override
