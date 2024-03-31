@@ -10,7 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.common.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
+import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,23 +20,24 @@ import java.util.concurrent.atomic.AtomicReference;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlaceholderHook extends PlaceholderExpansion {
 
+    VersionGetter versionGetter;
     PlayerAccessor playerAccessor;
     TimeConvertor timeConvertor;
     PlaceholdersConfig config;
 
     @Override
     public @NotNull String getIdentifier() {
-        return "wlbytime";
+        return WhitelistByTime.getPAPIIdentifier();
     }
 
     @Override
     public @NotNull String getAuthor() {
-        return "whitelistbytime";
+        return "WhitelistByTime";
     }
 
     @Override
     public @NotNull String getVersion() {
-        return "5.0";
+        return versionGetter.getVersion();
     }
 
     @Override

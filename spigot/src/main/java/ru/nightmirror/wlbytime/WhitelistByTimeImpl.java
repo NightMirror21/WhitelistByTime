@@ -105,6 +105,11 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         onEnable();
     }
 
+    @Override
+    public String getVersion() {
+        return getDescription().getVersion();
+    }
+
     private void initTimeConvertor() {
         TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
                 .year(getConfigs().getSettings().timeUnitsYear)
@@ -158,7 +163,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     private void hookPlaceholder() {
         if (getConfigs().getPlaceholders().placeholdersEnabled) {
             try {
-                placeholderHook = new PlaceholderHook(database, timeConvertor, configs.getPlaceholders());
+                placeholderHook = new PlaceholderHook(this, database, timeConvertor, configs.getPlaceholders());
                 placeholderHook.register();
                 log.info("Hooked with PlaceholderAPI");
             } catch (Exception exception) {

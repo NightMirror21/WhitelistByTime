@@ -77,6 +77,15 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     }
 
     @Override
+    public String getVersion() {
+        try {
+            return getDescription().getVersion();
+        } catch (NoSuchMethodError error) {
+            return getPluginMeta().getDescription();
+        }
+    }
+
+    @Override
     public void onDisable() {
         HandlerList.unregisterAll(this);
 
@@ -146,7 +155,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     private void hookPlaceholder() {
         if (getConfigs().getPlaceholders().placeholdersEnabled) {
             try {
-                placeholderHook = new PlaceholderHook(database, timeConvertor, configs.getPlaceholders());
+                placeholderHook = new PlaceholderHook(this, database, timeConvertor, configs.getPlaceholders());
                 placeholderHook.register();
                 log.info("Hooked with PlaceholderAPI");
             } catch (Exception exception) {
