@@ -23,10 +23,10 @@ public class ColorsConvertor {
 
         if (message.contains("&") || message.contains("§")) {
             if (!notifiedOfTheLegacyColors) {
-                WhitelistByTimeImpl.error("Remove legacy color(s) (starts with '&' or '§') from config!");
-                WhitelistByTimeImpl.error("Paper and paper family don't support legacy color formats");
-                WhitelistByTimeImpl.error("Use MiniMessage by kyori and make life easier!");
-                WhitelistByTimeImpl.error("https://docs.advntr.dev/minimessage/format.html");
+                WhitelistByTimeImpl.warn("Remove legacy color(s) (starts with '&' or '§') from config!");
+                WhitelistByTimeImpl.warn("Paper and paper family don't support legacy color formats");
+                WhitelistByTimeImpl.warn("Use MiniMessage by kyori and make life easier!");
+                WhitelistByTimeImpl.warn("https://docs.advntr.dev/minimessage/format.html");
                 notifiedOfTheLegacyColors = true;
             }
             message = replaceLegacyColors(message);
