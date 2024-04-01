@@ -13,14 +13,10 @@ import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommandsExecutorImpl implements CommandsExecutor {
-
-    /*
-    Why don't I say I'll redo it in the future, and you'll turn a blind eye?
-    Seriously, this config system is really dumb.
-     */
 
     PlayerAccessor playerAccessor;
     WhitelistByTime whitelistByTime;
@@ -51,11 +47,11 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             sender.sendMessage(messages.notPermission);
             return;
         }
-        for (String line : messages.help) {
-            sender.sendMessage(line);
-        }
+
+        messages.help.forEach(sender::sendMessage);
     }
 
+    // This method is too big, but I don't know how to redo it :(
     @Override
     public void getAll(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.getall"))) {
@@ -72,15 +68,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                         return;
                     }
 
-                    int page = 1;
-                    if (strings.length > 1) {
-                        try {
-                            page = Integer.parseInt(strings[1]);
-                        } catch (NumberFormatException ignored) {
-                            // ignored
-                        }
-                    }
-
+                    int page = strings.length > 1 ? tryToConvert(strings[1]).orElse(1) : 1;
                     int displayOnPage = 5;
                     int maxPage = players.size() % displayOnPage != 0 ? players.size() / displayOnPage + 1 : players.size() / displayOnPage;
 
@@ -109,7 +97,6 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                         sender.sendMessage(messages.listPlayer
                                 .replaceAll("%player%", player.getNickname())
                                 .replaceAll("%time%", time.trim()));
-
                     });
 
                     if (maxPage > 1) {
@@ -316,6 +303,14 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             getAll(sender, strings);
         } else {
             help(sender, strings);
+        }
+    }
+
+    private Optional<Integer> tryToConvert(String value) {
+        try {
+            return Optional.of(Integer.parseInt(value));
+        } catch (NumberFormatException exception) {
+            return Optional.empty();
         }
     }
 }
