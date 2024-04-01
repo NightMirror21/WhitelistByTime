@@ -1,7 +1,7 @@
 package ru.nightmirror.wlbytime.common.database;
 
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
@@ -44,7 +44,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
 
     JdbcPooledConnectionSource connection;
 
-    final LoadingCache<String, PlayerData> cache;
+    final AsyncLoadingCache<String, PlayerData> cache;
 
     final List<PlayerListener> listeners = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
         if (!createConnection()) throw new SQLException("Can't create connection");
         cache = Caffeine.newBuilder()
                 .refreshAfterWrite(Duration.ofMinutes(5))
-                .build(key -> getPlayer(key).join().orElse(null));
+                .buildAsync((key, executor) -> getPlayer(key).thenApply(v -> v.orElse(null)));
     }
 
     private boolean createConnection() {
@@ -114,16 +114,17 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
 
     @Override
     public CompletableFuture<Void> refreshCache() {
-        return getPlayers().thenAccept(list -> list.forEach(player -> cache.put(player.getNickname(), player)));
+        return getPlayers().thenAccept(list -> list.forEach(player -> cache.synchronous().put(player.getNickname(), player)));
     }
 
     @Override
     public CompletableFuture<Optional<PlayerData>> getPlayer(@NotNull String nickname) {
         return getDao().thenApply((dao) -> {
             try {
-                Optional<PlayerDataTable> tableOptional = dao.queryForEq(PlayerDataTable.NICKNAME_COLUMN, nickname).stream().findAny();
-                if (tableOptional.isEmpty()) return Optional.empty();
-                return Optional.of(mapper.toEntity(tableOptional.get()));
+                return dao.queryForEq(PlayerDataTable.NICKNAME_COLUMN, nickname)
+                        .stream()
+                        .findAny()
+                        .map(mapper::toEntity);
             } catch (SQLException exception) {
                 exception.printStackTrace();
                 return Optional.empty();
@@ -133,17 +134,17 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
 
     @Override
     public Optional<PlayerData> getPlayerCached(@NotNull String nickname) {
-        return Optional.ofNullable(cache.getIfPresent(nickname));
+        return Optional.ofNullable(cache.synchronous().getIfPresent(nickname));
     }
 
     @Override
     public void loadPlayerToCache(@NotNull String nickname) {
-        cache.refresh(nickname);
+        cache.synchronous().refresh(nickname);
     }
 
     @Override
     public void loadPlayersToCache(@NotNull List<String> nicknames) {
-        cache.refreshAll(nicknames);
+        cache.synchronous().refreshAll(nicknames);
     }
 
     @Override
@@ -152,7 +153,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
             try {
                 Dao.CreateOrUpdateStatus status = dao.createOrUpdate(mapper.toTable(player));
                 if (status.isCreated() || status.isUpdated()) {
-                    cache.refresh(player.getNickname());
+                    cache.synchronous().refresh(player.getNickname());
                     return true;
                 }
                 return false;
@@ -168,7 +169,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
         return getDao().thenApply((dao) -> {
             try {
                 if (dao.delete(mapper.toTable(player)) == 1) {
-                    cache.invalidate(player.getNickname());
+                    cache.synchronous().invalidate(player.getNickname());
                     listeners.forEach(listener -> listener.playerRemoved(player));
                     return true;
                 }
@@ -182,20 +183,19 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
 
     @Override
     public CompletableFuture<Boolean> delete(@NotNull String nickname) {
-        return getDao().thenApply((dao) -> {
+
+        return getDao().thenCombine(getPlayer(nickname), (dao, playerOptional) -> {
             try {
-                PlayerData player = getPlayer(nickname).join().orElse(null);
-                if (player == null) return false;
-                if (dao.delete(mapper.toTable(player)) == 1) {
-                    cache.invalidate(player.getNickname());
+                PlayerData player = playerOptional.orElse(null);
+                if (player != null && dao.delete(mapper.toTable(player)) == 1) {
+                    cache.synchronous().invalidate(player.getNickname());
                     listeners.forEach(listener -> listener.playerRemoved(player));
                     return true;
                 }
-                return false;
             } catch (Exception exception) {
                 exception.printStackTrace();
-                return false;
             }
+            return false;
         });
     }
 
@@ -204,7 +204,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
         return getDao().thenAccept((dao) -> {
             try {
                 if (dao.delete(players.stream().map(mapper::toTable).toList()) == 1) {
-                    cache.invalidateAll(players.stream().map(PlayerData::getNickname).toList());
+                    cache.synchronous().invalidateAll(players.stream().map(PlayerData::getNickname).toList());
                     players.forEach(player -> listeners.forEach(listener -> listener.playerRemoved(player)));
                 }
             } catch (Exception exception) {
@@ -217,7 +217,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
     public CompletableFuture<List<PlayerData>> getPlayers() {
         return getDao().thenApply((dao) -> {
             try {
-                return dao.queryForAll().stream().map(t -> mapper.toEntity(t)).toList();
+                return dao.queryForAll().stream().map(mapper::toEntity).toList();
             } catch (Exception exception) {
                 exception.printStackTrace();
                 return List.of();
@@ -227,7 +227,7 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
 
     @Override
     public List<PlayerData> getPlayersCached() {
-        return cache.asMap().values().stream().toList();
+        return cache.synchronous().asMap().values().stream().toList();
     }
 
     @Override
