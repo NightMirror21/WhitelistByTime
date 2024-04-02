@@ -153,7 +153,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
                 .params(getConfigs().getDatabase().params)
                 .build();
 
-        database = new DatabaseImpl(settings);
+        database = new DatabaseImpl(settings, configs.getSettings().caseSensitive);
         database.loadPlayersToCache(Arrays.stream(getServer().getOfflinePlayers())
                 .map(OfflinePlayer::getName)
                 .filter(Objects::nonNull)
