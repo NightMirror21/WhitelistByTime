@@ -90,7 +90,9 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                         String time;
 
                         if (player.isForever()) {
-                            time = player.isFrozen() ? messages.frozen : messages.forever;
+                            time = messages.forever;
+                        } else if (player.isFrozen()) {
+                            time = messages.frozen;
                         } else {
                             time = timeConvertor.getTimeLine(player.calculateUntil() - System.currentTimeMillis());
                         }

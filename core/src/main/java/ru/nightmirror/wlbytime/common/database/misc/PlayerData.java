@@ -24,12 +24,20 @@ public class PlayerData {
         frozenAt = -1L;
     }
 
+    public void setUntil(Long until) {
+        this.until = until;
+
+        if (isFrozen()) {
+            frozenAt = System.currentTimeMillis();
+        }
+    }
+
     public Long calculateUntil() {
         return frozenAt == -1L ? until : (until - frozenAt + System.currentTimeMillis());
     }
 
     public boolean isFrozen() {
-        return frozenAt == -1L;
+        return frozenAt != -1L;
     }
 
     public boolean isForever() {
@@ -37,7 +45,7 @@ public class PlayerData {
     }
 
     public void switchFreeze() {
-        if (until != -1L) {
+        if (until == -1L) {
             return;
         }
 
