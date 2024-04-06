@@ -9,13 +9,22 @@ import java.util.concurrent.CompletableFuture;
 
 public interface PlayerAccessor {
     CompletableFuture<Optional<PlayerData>> getPlayer(@NotNull String nickname);
+
     Optional<PlayerData> getPlayerCached(@NotNull String nickname);
+
     void loadPlayerToCache(@NotNull String nickname);
+
     void loadPlayersToCache(@NotNull List<String> nicknames);
+
     CompletableFuture<Boolean> createOrUpdate(@NotNull PlayerData player);
+
     CompletableFuture<Boolean> delete(@NotNull PlayerData player);
+
     CompletableFuture<Boolean> delete(@NotNull String nickname);
+
     CompletableFuture<Void> delete(@NotNull List<PlayerData> players);
+
     CompletableFuture<List<PlayerData>> getPlayers();
+
     List<PlayerData> getPlayersCached();
 }

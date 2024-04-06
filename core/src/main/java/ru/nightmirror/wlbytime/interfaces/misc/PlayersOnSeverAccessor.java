@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface PlayersOnSeverAccessor {
     List<String> getPlayersOnServer();
+
     void kickPlayer(@NotNull String nickname);
+
     boolean isCaseSensitiveEnabled();
 }

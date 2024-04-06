@@ -27,6 +27,7 @@ public class PlayerLoginListener implements EventListener {
 
     @EventHandler
     private void allowOrDisallow(AsyncPlayerPreLoginEvent event) {
+        // TODO Move it to the core module.
         if (!plugin.isWhitelistEnabled()) return;
 
         playerAccessor.getPlayers().thenAccept(players -> {
