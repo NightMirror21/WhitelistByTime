@@ -7,16 +7,17 @@
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
 
 ## Commands and Permissions
-| Command                                          | Permission              |
-|--------------------------------------------------|-------------------------|
-| /whitelistByTime on/off                                | whitelistbytime.turn    |
-| /whitelistByTime add  [nickname] (time)                | whitelistbytime.turn    |
-| /whitelistByTime remove [nickname]                     | whitelistbytime.remove  |
-| /whitelistByTime check [nickname]                      | whitelistbytime.check   |
-| /whitelistByTime checkme                               | whitelistbytime.checkme |
-| /whitelistByTime time set/add/remove [nickname] [time] | whitelistbytime.time    |
-| /whitelistByTime reload                                | whitelistbytime.reload  |
-| /whitelistByTime getall (page)                         | whitelistbytime.getall  |
+| Command                                                | Permission                   |
+|--------------------------------------------------------|------------------------------|
+| /whitelistByTime on/off                                | whitelistbytime.turn         |
+| /whitelistByTime add  [nickname] (time)                | whitelistbytime.turn         |
+| /whitelistByTime remove [nickname]                     | whitelistbytime.remove       |
+| /whitelistByTime check [nickname]                      | whitelistbytime.check        |
+| /whitelistByTime checkme                               | whitelistbytime.checkme      |
+| /whitelistByTime time set/add/remove [nickname] [time] | whitelistbytime.time         |
+| /whitelistByTime reload                                | whitelistbytime.reload       |
+| /whitelistByTime getall (page)                         | whitelistbytime.getall       |
+| /whitelistByTime switchfreeze [nickname]               | whitelistbytime.switchfreeze |
 
 Note:
 - [nickname] - this argument is required.
