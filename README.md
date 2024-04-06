@@ -4,7 +4,7 @@
 *Statistics are obtained through bstats metrics.*
 
 ## Links
-![SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-12-2-1-20-4.98946/) - over 3000 downloads (6/04/2024).
+[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-12-2-1-20-4.98946/) - over 3000 downloads (6/04/2024).
 
 ## About
 This plugin allows you to add players for a certain time or permanently.
