@@ -25,7 +25,7 @@ public class PlayersChecker implements Checker, Runnable {
 
     @Override
     public void start() {
-        executor.scheduleAtFixedRate(this, delay.toMillis(), delay.toMillis(), TimeUnit.MILLISECONDS);
+        executor.scheduleWithFixedDelay(this, delay.toMillis(), delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     @Override
