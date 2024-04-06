@@ -36,7 +36,7 @@ public class PlayerLoginListener implements EventListener {
                     .findAny();
 
             playerOptional.ifPresentOrElse(player -> {
-                if (player.getUntil() != -1L && player.getUntil() <= System.currentTimeMillis()) {
+                if (player.calculateUntil() != -1L && player.calculateUntil() <= System.currentTimeMillis()) {
                     List<Component> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
                     event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, ComponentUtils.join(message, Component.text("\n")));
                 }

@@ -33,7 +33,7 @@ public class PlayersChecker implements Checker, Runnable {
         playerAccessor.getPlayers().thenCompose(players -> {
 
             long currentMilliseconds = System.currentTimeMillis();
-            List<PlayerData> toRemove = players.stream().filter(player -> player.getUntil() != -1L && player.getUntil() <= currentMilliseconds).toList();
+            List<PlayerData> toRemove = players.stream().filter(player -> player.calculateUntil() != -1L && player.calculateUntil() <= currentMilliseconds).toList();
             List<String> onServer = playersOnSeverAccessor.getPlayersOnServer();
 
             boolean caseSensitive = playersOnSeverAccessor.isCaseSensitiveEnabled();

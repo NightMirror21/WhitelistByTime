@@ -42,7 +42,7 @@ public class MessagesConfig extends YamlSerializable {
     }, at = Comment.At.PREPEND)
     String successfullyAddedForTime = "&b%player% &fadded to whitelist for &b%time%";
     String stillInWhitelistForTime = "&b%player% &fwill be in whitelist still &b%time%";
-    String checkmeStillInWhitelistForTime = "&fYou will remain on the whitelist for &b%time%";
+    String checkMeStillInWhitelistForTime = "&fYou will remain on the whitelist for &b%time%";
 
     @NewLine
     @Comment(value = {
@@ -66,6 +66,11 @@ public class MessagesConfig extends YamlSerializable {
 
     @NewLine
     String forever = "forever";
+    String frozen = "frozen";
+
+    @NewLine
+    String playerUnfrozen = "Player &f%player% &funfrozen";
+    String playerFrozen = "Player &f%player% &ffrozen";
 
     @NewLine
     List<String> help = List.of(
@@ -77,6 +82,7 @@ public class MessagesConfig extends YamlSerializable {
             "&b| &f/whitelist checkme",
             "&b| &f/whitelist reload",
             "&b| &f/whitelist getall",
+            "&b| &f/whitelist switchfreeze [nickname]",
             "&b| &f/whitelist time set/add/remove [nickname] [time]",
             "&b| &f(time) - time for which the player will be added to the whitelist",
             "&b| &fExample: 2d 3h 10m",

@@ -27,6 +27,7 @@ public class WhitelistTabCompleter implements TabCompleter {
 
         if (strings.length == 1) {
             if (commandSender.hasPermission("whitelistbytime.add")) args.add("add");
+            if (commandSender.hasPermission("whitelistbytime.switchfreeze")) args.add("switchfreeze");
             if (commandSender.hasPermission("whitelistbytime.turn")) {
                 if (plugin.isWhitelistEnabled()) {
                     args.add("off");
@@ -67,7 +68,7 @@ public class WhitelistTabCompleter implements TabCompleter {
                         args.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
                     }
                 }
-                case "check" -> {
+                case "check", "switchfreeze" -> {
                     if (commandSender.hasPermission("whitelistbytime.check")) {
                         args.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
                         args.addAll(notInWhitelist);

@@ -14,8 +14,6 @@ import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlaceholderHook extends PlaceholderExpansion {
@@ -42,18 +40,18 @@ public class PlaceholderHook extends PlaceholderExpansion {
 
     @Override
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
-
         if (params.equalsIgnoreCase("in_whitelist")) {
-            String result = playerAccessor.getPlayerCached(player.getName()).isPresent() ? config.inWhitelistTrue : config.inWhitelistFalse;
-            return ColorsConvertor.checkLegacy(result);
+            String output =  playerAccessor.getPlayerCached(player.getName())
+                    .map(d -> d.isFrozen() ? config.frozen : config.inWhitelistTrue)
+                    .orElse(config.inWhitelistFalse);
+
+            return ColorsConvertor.checkLegacy(output);
         } else if (params.equalsIgnoreCase("time_left")) {
-            AtomicReference<String> time = new AtomicReference<>("");
+            String output = playerAccessor.getPlayerCached(player.getName())
+                    .map(whitelistedPlayer -> timeConvertor.getTimeLine(whitelistedPlayer.calculateUntil() - System.currentTimeMillis()))
+                    .orElse("");
 
-            playerAccessor.getPlayerCached(player.getName()).ifPresent(whitelistedPlayer -> {
-                time.set(timeConvertor.getTimeLine(whitelistedPlayer.getUntil() - System.currentTimeMillis()));
-            });
-
-            return ColorsConvertor.checkLegacy(config.timeLeft.replaceAll("%time%", time.get()));
+            return ColorsConvertor.checkLegacy(config.timeLeft.replaceAll("%time%", output));
         }
 
         return "{ERR_PARAM}";

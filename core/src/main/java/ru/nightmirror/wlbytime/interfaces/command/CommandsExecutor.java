@@ -7,6 +7,7 @@ public interface CommandsExecutor {
     void help(WrappedCommandSender sender, String[] strings);
     void getAll(WrappedCommandSender sender, String[] strings);
     void remove(WrappedCommandSender sender, String[] strings);
+    void switchFreeze(WrappedCommandSender sender, String[] strings);
     void check(WrappedCommandSender sender, String[] strings);
     void checkme(WrappedCommandSender sender);
     void add(WrappedCommandSender sender, String[] strings);
