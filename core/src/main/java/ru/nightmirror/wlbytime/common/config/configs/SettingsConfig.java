@@ -25,6 +25,11 @@ public class SettingsConfig extends YamlSerializable {
     }, at = Comment.At.PREPEND)
     boolean enabled = true;
 
+    @Comment(value = {
+            @CommentValue("When a player join to the server and his time is frozen, the time will unfreeze")
+    }, at = Comment.At.PREPEND)
+    boolean unfreezeOnJoin = false;
+
     @NewLine
     @Comment(value = {
             @CommentValue("The delay through which the thread will check players. In milliseconds")

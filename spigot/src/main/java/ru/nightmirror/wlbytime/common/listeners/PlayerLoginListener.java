@@ -37,6 +37,11 @@ public class PlayerLoginListener implements Listener {
                 if (player.calculateUntil() != -1L && player.calculateUntil() <= System.currentTimeMillis()) {
                     List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
                     event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, String.join("\n", message));
+                } else {
+                    if (player.isFrozen() && plugin.getPluginConfig().unfreezeOnJoin) {
+                        player.switchFreeze();
+                        playerAccessor.createOrUpdate(player);
+                    }
                 }
             }, () -> {
                 List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
