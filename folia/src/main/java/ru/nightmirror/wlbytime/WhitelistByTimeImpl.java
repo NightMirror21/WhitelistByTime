@@ -63,10 +63,10 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     public void onEnable() {
         log = getLogger();
 
-        whitelistEnabled = getConfigs().getSettings().enabled;
-
         configs = new ConfigsContainer(getDataFolder());
         configs.load();
+
+        whitelistEnabled = getConfigs().getSettings().enabled;
 
         initTimeConvertor();
 
