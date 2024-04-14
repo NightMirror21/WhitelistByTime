@@ -8,47 +8,27 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerLoginListener implements Listener {
 
-    PlayerAccessor playerAccessor;
-    boolean caseSensitive;
     WhitelistByTime plugin;
+    PlayerAccessor playerAccessor;
+    Predicate<ConnectingPlayersFilter.ConnectingPlayer> filter;
 
     @EventHandler
     private void allowOrDisallow(AsyncPlayerPreLoginEvent event) {
-        // TODO Move it to the core module.
-        if (!plugin.isWhitelistEnabled()) return;
-
-        playerAccessor.getPlayers().thenAccept(players -> {
-            Optional<PlayerData> playerOptional = players
-                    .stream()
-                    .filter(player -> (caseSensitive && player.getNickname().equals(event.getName()) || (!caseSensitive && player.getNickname().equalsIgnoreCase(event.getName()))))
-                    .findAny();
-
-            playerOptional.ifPresentOrElse(player -> {
-                if (player.calculateUntil() != -1L && player.calculateUntil() <= System.currentTimeMillis()) {
-                    List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
-                    event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, String.join("\n", message));
-                } else {
-                    if (player.isFrozen() && plugin.getPluginConfig().unfreezeOnJoin) {
-                        player.switchFreeze();
-                        playerAccessor.createOrUpdate(player);
-                    }
-                }
-            }, () -> {
-                List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
-                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, String.join("\n", message));
-            });
-        }).join();
+        if (!filter.test(new ConnectingPlayersFilter.ConnectingPlayer(event.getName(), event.getUniqueId()))) {
+            List<String> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, String.join("\n", message));
+        }
     }
 
     @EventHandler

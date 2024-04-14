@@ -8,49 +8,29 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlayerLoginListener implements EventListener {
 
-    PlayerAccessor playerAccessor;
-    boolean caseSensitive;
     WhitelistByTime plugin;
+    PlayerAccessor playerAccessor;
+    Predicate<ConnectingPlayersFilter.ConnectingPlayer> filter;
 
     @EventHandler
     private void allowOrDisallow(AsyncPlayerPreLoginEvent event) {
-        // TODO Move it to the core module.
-        if (!plugin.isWhitelistEnabled()) return;
-
-        playerAccessor.getPlayers().thenAccept(players -> {
-            Optional<PlayerData> playerOptional = players
-                    .stream()
-                    .filter(player -> (caseSensitive && player.getNickname().equals(event.getName()) || (!caseSensitive && player.getNickname().equalsIgnoreCase(event.getName()))))
-                    .findAny();
-
-            playerOptional.ifPresentOrElse(player -> {
-                if (player.calculateUntil() != -1L && player.calculateUntil() <= System.currentTimeMillis()) {
-                    List<Component> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
-                    event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, ComponentUtils.join(message, Component.text("\n")));
-                } else {
-                    if (player.isFrozen() && plugin.getPluginConfig().unfreezeOnJoin) {
-                        player.switchFreeze();
-                        playerAccessor.createOrUpdate(player);
-                    }
-                }
-            }, () -> {
-                List<Component> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
-                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, ComponentUtils.join(message, Component.text("\n")));
-            });
-        }).join();
+        if (!filter.test(new ConnectingPlayersFilter.ConnectingPlayer(event.getName(), event.getUniqueId()))) {
+            List<Component> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, ComponentUtils.join(message, Component.text("\n")));
+        }
     }
 
     @EventHandler

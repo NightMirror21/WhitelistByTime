@@ -16,6 +16,7 @@ import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.DatabaseImpl;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
+import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
 import ru.nightmirror.wlbytime.common.filters.OnlinePlayersFilter;
 import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
@@ -31,6 +32,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -151,7 +153,12 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
 
     private void initCommandsAndListeners() {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutorImpl(database, this, timeConvertor)), this);
-        getServer().getPluginManager().registerEvents(new PlayerLoginListener(database, configs.getSettings().caseSensitive,this), this);
+        Predicate<ConnectingPlayersFilter.ConnectingPlayer> filter = new ConnectingPlayersFilter(
+                database,
+                configs.getSettings().caseSensitive,
+                this
+        );
+        getServer().getPluginManager().registerEvents(new PlayerLoginListener(this, database, filter), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutorImpl(database, this, timeConvertor)));
         getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, this)));
