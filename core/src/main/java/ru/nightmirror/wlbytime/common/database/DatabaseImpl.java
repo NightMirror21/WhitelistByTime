@@ -93,11 +93,6 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
     }
 
     @Override
-    public CompletableFuture<Boolean> reconnect() {
-        return CompletableFuture.supplyAsync(this::createConnection);
-    }
-
-    @Override
     public CompletableFuture<Boolean> close() {
         return CompletableFuture.supplyAsync(() -> {
             if (isConnected()) {
@@ -110,11 +105,6 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
             }
             return true;
         });
-    }
-
-    @Override
-    public CompletableFuture<Void> refreshCache() {
-        return getPlayers().thenAccept(list -> list.forEach(player -> cache.synchronous().put(player.getNickname(), player)));
     }
 
     @Override
