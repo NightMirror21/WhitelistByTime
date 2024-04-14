@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.nightmirror.wlbytime.common.checker.PlayersOnServerChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutorImpl;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
 import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
@@ -14,6 +13,7 @@ import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.DatabaseImpl;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
+import ru.nightmirror.wlbytime.common.filters.OnlinePlayersFilter;
 import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
@@ -22,7 +22,7 @@ import ru.nightmirror.wlbytime.common.listeners.command.WhitelistTabCompleterExe
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
-import ru.nightmirror.wlbytime.interfaces.checker.Checker;
+import ru.nightmirror.wlbytime.interfaces.checker.Switchable;
 
 import java.sql.SQLException;
 import java.time.Duration;
@@ -44,7 +44,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     ConfigsContainer configs;
 
     DatabaseImpl database;
-    Checker checker;
+    Switchable onlinePlayersFilter;
     PlaceholderHook placeholderHook;
 
     public static void info(String message) {
@@ -90,7 +90,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         HandlerList.unregisterAll(this);
 
         if (placeholderHook != null) placeholderHook.unregister();
-        if (checker != null) checker.stop();
+        if (onlinePlayersFilter != null) onlinePlayersFilter.stop();
         if (database != null) database.close();
 
         info("Disabled");
@@ -157,8 +157,8 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         PlayerKicker playerKicker = new PlayerKicker(this, getConfigs().getSettings().caseSensitive, getConfigs().getMessages().youNotInWhitelistKick);
         database.addListener(playerKicker);
 
-        checker = new PlayersOnServerChecker(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
-        checker.start();
+        onlinePlayersFilter = new OnlinePlayersFilter(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
+        onlinePlayersFilter.start();
     }
 
     private void hookPlaceholder() {

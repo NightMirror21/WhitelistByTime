@@ -1,10 +1,10 @@
-package ru.nightmirror.wlbytime.common.checker;
+package ru.nightmirror.wlbytime.common.filters;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
-import ru.nightmirror.wlbytime.interfaces.checker.Checker;
+import ru.nightmirror.wlbytime.interfaces.checker.Switchable;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
 import ru.nightmirror.wlbytime.interfaces.misc.PlayersOnSeverAccessor;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class PlayersOnServerChecker implements Checker, Runnable {
+public class OnlinePlayersFilter implements Switchable, Runnable {
 
     PlayerAccessor playerAccessor;
     PlayersOnSeverAccessor playersOnSeverAccessor;

@@ -1,6 +1,6 @@
 package ru.nightmirror.wlbytime.interfaces.checker;
 
-public interface Checker {
+public interface Switchable {
     void start();
 
     void stop();
