@@ -182,54 +182,6 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
         });
     }
 
-    @Override
-    public CompletableFuture<Boolean> delete(@NotNull PlayerData player) {
-        return getDao().thenApply((dao) -> {
-            try {
-                if (dao.delete(mapper.toTable(player)) == 1) {
-                    invalidateFromCache(player.getNickname());
-                    listeners.forEach(listener -> listener.playerRemoved(player));
-                    return true;
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-            return false;
-        });
-    }
-
-    @Override
-    public CompletableFuture<Boolean> delete(@NotNull String nickname) {
-
-        return getDao().thenCombine(getPlayer(nickname), (dao, playerOptional) -> {
-            try {
-                PlayerData player = playerOptional.orElse(null);
-                if (player != null && dao.delete(mapper.toTable(player)) == 1) {
-                    invalidateFromCache(player.getNickname());
-                    listeners.forEach(listener -> listener.playerRemoved(player));
-                    return true;
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-            return false;
-        });
-    }
-
-    @Override
-    public CompletableFuture<Void> delete(@NotNull List<PlayerData> players) {
-        return getDao().thenAccept((dao) -> {
-            try {
-                if (dao.delete(players.stream().map(mapper::toTable).toList()) == 1) {
-                    players.stream().map(PlayerData::getNickname).forEach(this::invalidateFromCache);
-                    players.forEach(player -> listeners.forEach(listener -> listener.playerRemoved(player)));
-                }
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        });
-    }
-
     private void invalidateFromCache(String nickname) {
         if (caseSensitive) {
             cache.synchronous().invalidate(nickname);

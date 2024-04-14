@@ -30,10 +30,8 @@ public class OnlinePlayersFilter implements Switchable, Runnable {
 
     @Override
     public void run() {
-        playerAccessor.getPlayers().thenCompose(players -> {
-
-            long currentMilliseconds = System.currentTimeMillis();
-            List<PlayerData> toRemove = players.stream().filter(player -> player.calculateUntil() != -1L && player.calculateUntil() <= currentMilliseconds).toList();
+        playerAccessor.getPlayers().thenAccept(players -> {
+            List<PlayerData> toRemove = players.stream().filter(player -> !player.canPlay()).toList();
             List<String> onServer = playersOnSeverAccessor.getPlayersOnServer();
 
             boolean caseSensitive = playersOnSeverAccessor.isCaseSensitiveEnabled();
@@ -53,8 +51,6 @@ public class OnlinePlayersFilter implements Switchable, Runnable {
                     playersOnSeverAccessor.kickPlayer(player.getNickname());
                 }
             }
-
-            return playerAccessor.delete(toRemove);
         }).join();
     }
 

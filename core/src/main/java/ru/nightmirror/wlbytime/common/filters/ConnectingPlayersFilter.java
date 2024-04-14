@@ -24,7 +24,7 @@ public class ConnectingPlayersFilter implements Predicate<ConnectingPlayersFilte
 
         return playerAccessor.getPlayer(connectingPlayer.getNickname())
                 .thenApply(playerOptional -> playerOptional.map(player -> {
-                    if (player.calculateUntil() != -1L && player.calculateUntil() <= System.currentTimeMillis()) {
+                    if (!player.canPlay()) {
                         return false;
                     } else if (player.isFrozen() && plugin.getPluginConfig().unfreezeOnJoin) {
                         player.switchFreeze();
