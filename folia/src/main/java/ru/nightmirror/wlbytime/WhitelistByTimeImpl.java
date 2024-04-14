@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.nightmirror.wlbytime.common.checker.PlayersChecker;
+import ru.nightmirror.wlbytime.common.checker.PlayersOnServerChecker;
 import ru.nightmirror.wlbytime.common.command.CommandsExecutorImpl;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
 import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
@@ -157,7 +157,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         PlayerKicker playerKicker = new PlayerKicker(this, getConfigs().getSettings().caseSensitive, getConfigs().getMessages().youNotInWhitelistKick);
         database.addListener(playerKicker);
 
-        checker = new PlayersChecker(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
+        checker = new PlayersOnServerChecker(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
         checker.start();
     }
 

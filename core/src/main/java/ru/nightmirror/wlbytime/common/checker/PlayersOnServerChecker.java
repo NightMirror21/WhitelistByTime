@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class PlayersChecker implements Checker, Runnable {
+public class PlayersOnServerChecker implements Checker, Runnable {
 
     PlayerAccessor playerAccessor;
     PlayersOnSeverAccessor playersOnSeverAccessor;
@@ -55,7 +55,7 @@ public class PlayersChecker implements Checker, Runnable {
             }
 
             return playerAccessor.delete(toRemove);
-        });
+        }).join();
     }
 
     @Override
