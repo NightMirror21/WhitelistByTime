@@ -244,7 +244,6 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
         }
     }
 
-    // TODO Think about optimization.
     @Override
     public CompletableFuture<List<PlayerData>> getPlayers() {
         return getDao().thenApply((dao) -> {
