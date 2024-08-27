@@ -26,4 +26,15 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.26'
     annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.xerial:sqlite-jdbc:3.42.0.0'
+    testImplementation 'net.elytrium:serializer:1.1.1'
+    testImplementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
+    testImplementation 'com.j256.ormlite:ormlite-core:6.1'
+    testImplementation 'com.j256.ormlite:ormlite-jdbc:6.1'
+    testCompileOnly 'org.jetbrains:annotations:24.0.1'
+    testCompileOnly 'org.projectlombok:lombok:1.18.26'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
 }
