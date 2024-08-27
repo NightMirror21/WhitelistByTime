@@ -52,10 +52,9 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         messages.help.forEach(sender::sendMessage);
     }
 
-    // This method is too big, but I don't know how to redo it :(
     @Override
     public void getAll(WrappedCommandSender sender, String[] strings) {
-        if (!(sender.hasPermission("whitelistbytime.getall"))) {
+        if (!sender.hasPermission("whitelistbytime.getall")) {
             sender.sendMessage(messages.notPermission);
             return;
         }
@@ -63,53 +62,70 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         playerAccessor.getPlayers()
                 .thenApply(list -> list.stream().filter(PlayerData::canPlay).toList())
                 .thenApply(list -> list.stream().sorted(Comparator.comparingLong(PlayerData::calculateUntil).reversed()).toList())
-                .thenAccept(players -> {
-                    if (players.isEmpty()) {
-                        sender.sendMessage(messages.listEmpty);
-                        return;
-                    }
+                .thenAccept(players -> handlePlayerList(sender, strings, players));
+    }
 
-                    int page = strings.length > 1 ? tryToConvert(strings[1]).orElse(1) : 1;
-                    int displayOnPage = 5;
-                    int maxPage = players.size() % displayOnPage != 0 ? players.size() / displayOnPage + 1 : players.size() / displayOnPage;
+    private void handlePlayerList(WrappedCommandSender sender, String[] strings, List<PlayerData> players) {
+        if (players.isEmpty()) {
+            sender.sendMessage(messages.listEmpty);
+            return;
+        }
 
-                    if (page > maxPage) {
-                        sender.sendMessage(messages.pageNotExists.replaceAll("%page%", String.valueOf(page)));
-                        return;
-                    }
+        int page = getPage(strings);
+        int displayOnPage = 5;
+        int maxPage = calculateMaxPage(players.size(), displayOnPage);
 
-                    List<PlayerData> toDisplay = new ArrayList<>();
+        if (page > maxPage) {
+            sender.sendMessage(messages.pageNotExists.replaceAll("%page%", String.valueOf(page)));
+            return;
+        }
 
-                    for (int i = (page - 1) * displayOnPage; i < Math.min(page * displayOnPage, players.size()); i++) {
-                        toDisplay.add(players.get(i));
-                    }
+        List<PlayerData> toDisplay = getPlayersToDisplay(players, page, displayOnPage);
+        sendPlayerList(sender, toDisplay, page, maxPage);
+    }
 
-                    sender.sendMessage(messages.listTitle);
+    private int getPage(String[] strings) {
+        return strings.length > 1 ? tryToConvert(strings[1]).orElse(1) : 1;
+    }
 
-                    toDisplay.forEach(player -> {
-                        String time;
+    private int calculateMaxPage(int size, int displayOnPage) {
+        return size % displayOnPage != 0 ? size / displayOnPage + 1 : size / displayOnPage;
+    }
 
-                        if (player.isForever()) {
-                            time = messages.forever;
-                        } else if (player.isFrozen()) {
-                            time = messages.frozen;
-                        } else {
-                            time = timeConvertor.getTimeLine(player.calculateUntil() - System.currentTimeMillis());
-                        }
+    private List<PlayerData> getPlayersToDisplay(List<PlayerData> players, int page, int displayOnPage) {
+        List<PlayerData> toDisplay = new ArrayList<>();
+        for (int i = (page - 1) * displayOnPage; i < Math.min(page * displayOnPage, players.size()); i++) {
+            toDisplay.add(players.get(i));
+        }
+        return toDisplay;
+    }
 
-                        sender.sendMessage(messages.listPlayer
-                                .replaceAll("%player%", player.getNickname())
-                                .replaceAll("%time%", time.trim()));
-                    });
+    private void sendPlayerList(WrappedCommandSender sender, List<PlayerData> players, int page, int maxPage) {
+        sender.sendMessage(messages.listTitle);
+        for (PlayerData player : players) {
+            String time = getPlayerTime(player);
+            sender.sendMessage(messages.listPlayer
+                    .replaceAll("%player%", player.getNickname())
+                    .replaceAll("%time%", time.trim()));
+        }
+        if (maxPage > 1) {
+            sender.sendMessage(messages.listPageableCommands
+                    .replaceAll("%current-page%", String.valueOf(page))
+                    .replaceAll("%max-page%", String.valueOf(maxPage))
+            );
+        }
+    }
 
-                    if (maxPage > 1) {
-                        sender.sendMessage(messages.listPageableCommands
-                                .replaceAll("%current-page%", String.valueOf(page))
-                                .replaceAll("%max-page%", String.valueOf(maxPage))
-
-                        );
-                    }
-                });
+    private String getPlayerTime(PlayerData player) {
+        if (player.isForever()) {
+            return messages.forever;
+        } else if (player.isFrozen()) {
+            return messages.frozen;
+        } else if (player.isNotInWhitelist()) {
+            return messages.expired;
+        } else {
+            return timeConvertor.getTimeLine(player.calculateUntil() - System.currentTimeMillis());
+        }
     }
 
     @Override
