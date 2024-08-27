@@ -3,7 +3,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-def javaVersion = JavaVersion.VERSION_17;
+def javaVersion = JavaVersion.VERSION_21;
 sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
     shadow project(path: ':core', configuration: 'default')
-    compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
     compileOnly 'me.clip:placeholderapi:2.11.3'
@@ -50,7 +50,7 @@ shadowJar {
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 processResources {
