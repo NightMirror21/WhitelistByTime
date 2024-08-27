@@ -67,6 +67,7 @@ public class MessagesConfig extends YamlSerializable {
     @NewLine
     String forever = "forever";
     String frozen = "frozen";
+    String expired = "expired";
 
     @NewLine
     String playerUnfrozen = "Player &f%player% &funfrozen";
