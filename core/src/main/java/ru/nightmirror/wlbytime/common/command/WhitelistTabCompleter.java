@@ -17,88 +17,114 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WhitelistTabCompleter implements TabCompleter {
+    private static final String PERM_ADD = "whitelistbytime.add";
+    private static final String PERM_SWITCHFREEZE = "whitelistbytime.switchfreeze";
+    private static final String PERM_TURN = "whitelistbytime.turn";
+    private static final String PERM_REMOVE = "whitelistbytime.remove";
+    private static final String PERM_CHECK = "whitelistbytime.check";
+    private static final String PERM_CHECKME = "whitelistbytime.checkme";
+    private static final String PERM_RELOAD = "whitelistbytime.reload";
+    private static final String PERM_GETALL = "whitelistbytime.getall";
+    private static final String PERM_TIME = "whitelistbytime.time";
 
     PlayerAccessor playerAccessor;
     WhitelistByTime plugin;
 
     @Override
-    public List<String> onTabComplete(@NotNull WrappedCommandSender commandSender, @NotNull String s, String[] strings) {
-        List<String> args = new ArrayList<>();
+    public List<String> onTabComplete(@NotNull WrappedCommandSender commandSender, @NotNull String command, String[] args) {
+        List<String> suggestions = new ArrayList<>();
 
-        if (strings.length == 1) {
-            if (commandSender.hasPermission("whitelistbytime.add")) args.add("add");
-            if (commandSender.hasPermission("whitelistbytime.switchfreeze")) args.add("switchfreeze");
-            if (commandSender.hasPermission("whitelistbytime.turn")) {
-                if (plugin.isWhitelistEnabled()) {
-                    args.add("off");
-                } else {
-                    args.add("on");
-                }
-            }
-            if (commandSender.hasPermission("whitelistbytime.remove")) args.add("remove");
-            if (commandSender.hasPermission("whitelistbytime.check")) args.add("check");
-            if (commandSender.hasPermission("whitelistbytime.checkme")) args.add("checkme");
-            if (commandSender.hasPermission("whitelistbytime.reload")) args.add("reload");
-            if (commandSender.hasPermission("whitelistbytime.getall")) args.add("getall");
-            if (commandSender.hasPermission("whitelistbytime.time")) args.add("time");
-        } else if (strings.length == 2) {
-            List<String> notInWhitelist = new ArrayList<>();
-            List<PlayerData> inWhitelist = playerAccessor.getPlayersCached();
+        switch (args.length) {
+            case 1:
+                handleFirstArgument(commandSender, suggestions);
+                break;
+            case 2:
+                handleSecondArgument(commandSender, args, suggestions);
+                break;
+            case 3:
+                handleThirdArgument(commandSender, args, suggestions);
+                break;
+            case 4:
+                handleFourthArgument(commandSender, args, suggestions);
+                break;
+        }
+        return suggestions;
+    }
 
-            if (!plugin.isWhitelistEnabled()) {
-                for (String nickname : commandSender.getAllPlayerNicknamesOnServer()) {
-                    if (playerAccessor.getPlayerCached(nickname).isEmpty())
-                        notInWhitelist.add(nickname);
-                }
-            }
+    private void handleFirstArgument(WrappedCommandSender commandSender, List<String> suggestions) {
+        if (commandSender.hasPermission(PERM_ADD)) suggestions.add("add");
+        if (commandSender.hasPermission(PERM_SWITCHFREEZE)) suggestions.add("switchfreeze");
+        if (commandSender.hasPermission(PERM_TURN)) {
+            suggestions.add(plugin.isWhitelistEnabled() ? "off" : "on");
+        }
+        if (commandSender.hasPermission(PERM_REMOVE)) suggestions.add("remove");
+        if (commandSender.hasPermission(PERM_CHECK)) suggestions.add("check");
+        if (commandSender.hasPermission(PERM_CHECKME)) suggestions.add("checkme");
+        if (commandSender.hasPermission(PERM_RELOAD)) suggestions.add("reload");
+        if (commandSender.hasPermission(PERM_GETALL)) suggestions.add("getall");
+        if (commandSender.hasPermission(PERM_TIME)) suggestions.add("time");
+    }
 
-            switch (strings[0]) {
-                case "time" -> {
-                    if (commandSender.hasPermission("whitelistbytime.time")) {
-                        args.addAll(Arrays.asList("set", "add", "remove"));
-                    }
-                }
-                case "add" -> {
-                    if (commandSender.hasPermission("whitelistbytime.add")) {
-                        args.addAll(notInWhitelist);
-                    }
-                }
-                case "remove" -> {
-                    if (commandSender.hasPermission("whitelistbytime.remove")) {
-                        args.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
-                    }
-                }
-                case "check", "switchfreeze" -> {
-                    if (commandSender.hasPermission("whitelistbytime.check")) {
-                        args.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
-                        args.addAll(notInWhitelist);
-                    }
-                }
-            }
-        } else if (strings.length == 3) {
-            if (commandSender.hasPermission("whitelistbytime.add") && strings[0].equals("add")) {
-                args.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
-                args.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
-                args.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
-                args.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
-            }
+    private void handleSecondArgument(WrappedCommandSender commandSender, String[] args, List<String> suggestions) {
+        List<PlayerData> inWhitelist = playerAccessor.getPlayersCached();
+        List<String> notInWhitelist = new ArrayList<>();
 
-            if (commandSender.hasPermission("whitelistbytime.time")) {
-                if (strings[1].equals("set") || strings[1].equals("add") || strings[1].equals("remove")) {
-                    args.addAll(playerAccessor.getPlayersCached().stream().map(PlayerData::getNickname).toList());
-                }
-            }
-        } else if (strings.length == 4) {
-            if (commandSender.hasPermission("whitelistbytime.time")) {
-                if (strings[1].equals("set") || strings[1].equals("add") || strings[1].equals("remove")) {
-                    args.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
-                    args.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
-                    args.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
-                    args.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
+        if (!plugin.isWhitelistEnabled()) {
+            for (String nickname : commandSender.getAllPlayerNicknamesOnServer()) {
+                if (playerAccessor.getPlayerCached(nickname).isEmpty()) {
+                    notInWhitelist.add(nickname);
                 }
             }
         }
 
-        return args;
+        switch (args[0]) {
+            case "time":
+                if (commandSender.hasPermission(PERM_TIME)) {
+                    suggestions.addAll(Arrays.asList("set", "add", "remove"));
+                }
+                break;
+            case "add":
+                if (commandSender.hasPermission(PERM_ADD)) {
+                    suggestions.addAll(notInWhitelist);
+                }
+                break;
+            case "remove":
+                if (commandSender.hasPermission(PERM_REMOVE)) {
+                    suggestions.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
+                }
+                break;
+            case "check":
+            case "switchfreeze":
+                if (commandSender.hasPermission(PERM_CHECK)) {
+                    suggestions.addAll(inWhitelist.stream().map(PlayerData::getNickname).toList());
+                    suggestions.addAll(notInWhitelist);
+                }
+                break;
+        }
+    }
+
+    private void handleThirdArgument(WrappedCommandSender commandSender, String[] args, List<String> suggestions) {
+        if (commandSender.hasPermission(PERM_ADD) && "add".equals(args[0])) {
+            suggestions.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
+            suggestions.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
+            suggestions.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
+            suggestions.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
+        }
+        if (commandSender.hasPermission(PERM_TIME)) {
+            if ("set".equals(args[1]) || "add".equals(args[1]) || "remove".equals(args[1])) {
+                suggestions.addAll(playerAccessor.getPlayersCached().stream().map(PlayerData::getNickname).toList());
+            }
+        }
+    }
+
+    private void handleFourthArgument(WrappedCommandSender commandSender, String[] args, List<String> suggestions) {
+        if (commandSender.hasPermission(PERM_TIME)) {
+            if ("set".equals(args[1]) || "add".equals(args[1]) || "remove".equals(args[1])) {
+                suggestions.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
+                suggestions.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
+                suggestions.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
+                suggestions.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
+            }
+        }
     }
 }
