@@ -93,26 +93,21 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     }
 
     private List<PlayerData> getPlayersToDisplay(List<PlayerData> players, int page, int displayOnPage) {
-        List<PlayerData> toDisplay = new ArrayList<>();
-        for (int i = (page - 1) * displayOnPage; i < Math.min(page * displayOnPage, players.size()); i++) {
-            toDisplay.add(players.get(i));
-        }
-        return toDisplay;
+        int startIndex = (page - 1) * displayOnPage;
+        int endIndex = Math.min(page * displayOnPage, players.size());
+        return new ArrayList<>(players.subList(startIndex, endIndex));
     }
 
     private void sendPlayerList(WrappedCommandSender sender, List<PlayerData> players, int page, int maxPage) {
         sender.sendMessage(messages.listTitle);
-        for (PlayerData player : players) {
+
+        players.forEach(player -> {
             String time = getPlayerTime(player);
-            sender.sendMessage(messages.listPlayer
-                    .replaceAll("%player%", player.getNickname())
-                    .replaceAll("%time%", time.trim()));
-        }
+            sender.sendMessage(messages.listPlayer.replace("%player%", player.getNickname()).replace("%time%", time.trim()));
+        });
+
         if (maxPage > 1) {
-            sender.sendMessage(messages.listPageableCommands
-                    .replaceAll("%current-page%", String.valueOf(page))
-                    .replaceAll("%max-page%", String.valueOf(maxPage))
-            );
+            sender.sendMessage(messages.listPageableCommands.replace("%current-page%", String.valueOf(page)).replace("%max-page%", String.valueOf(maxPage)));
         }
     }
 
@@ -155,31 +150,25 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     @Override
     public void switchFreeze(WrappedCommandSender sender, String[] strings) {
-        if (!(sender.hasPermission("whitelistbytime.switchfreeze"))) {
+        if (!sender.hasPermission("whitelistbytime.switchfreeze")) {
             sender.sendMessage(messages.notPermission);
             return;
         }
 
         String nickname = strings[1];
         playerAccessor.getPlayer(nickname).thenCompose(dataOptional -> {
-            if (dataOptional.isEmpty() || !dataOptional.get().canPlay()) {
-                sender.sendMessage(messages.playerNotInWhitelist
-                        .replaceAll("%player%", nickname));
+            if (dataOptional.isPresent() && dataOptional.get().canPlay()) {
+                PlayerData data = dataOptional.get();
+                data.switchFreeze();
+
+                String messageKey = data.isFrozen() ? messages.playerFrozen : messages.playerUnfrozen;
+                sender.sendMessage(messageKey.replaceAll("%player%", nickname));
+
+                return playerAccessor.createOrUpdate(data);
+            } else {
+                sender.sendMessage(messages.playerNotInWhitelist.replaceAll("%player%", nickname));
                 return CompletableFuture.completedFuture(null);
             }
-
-            PlayerData data = dataOptional.get();
-            data.switchFreeze();
-
-            if (data.isFrozen()) {
-                sender.sendMessage(messages.playerFrozen
-                        .replaceAll("%player%", nickname));
-            } else {
-                sender.sendMessage(messages.playerUnfrozen
-                        .replaceAll("%player%", nickname));
-            }
-
-            return playerAccessor.createOrUpdate(data);
         });
     }
 
@@ -232,26 +221,27 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     @Override
     public void add(WrappedCommandSender sender, String[] strings) {
-        if (!(sender.hasPermission("whitelistbytime.add"))) {
+        if (!sender.hasPermission("whitelistbytime.add")) {
             sender.sendMessage(messages.notPermission);
             return;
         }
 
         String addNickname = strings[1];
-        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> sender.sendMessage(messages.playerAlreadyInWhitelist
-                .replaceAll("%player%", addNickname)), () -> {
-            long until = parseUntil(strings);
-            playerAccessor.createOrUpdate(new PlayerData(addNickname, until)).thenRun(() -> {
-                if (until == -1L) {
-                    sender.sendMessage(messages.successfullyAdded
-                            .replaceAll("%player%", addNickname));
-                } else {
-                    sender.sendMessage(messages.successfullyAddedForTime
+        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> {
+            if (playerOptional.isPresent()) {
+                sender.sendMessage(messages.playerAlreadyInWhitelist.replaceAll("%player%", addNickname));
+            } else {
+                long until = parseUntil(strings);
+                PlayerData newPlayerData = new PlayerData(addNickname, until);
+                playerAccessor.createOrUpdate(newPlayerData).thenRun(() -> {
+                    String message = (until == -1L) ? messages.successfullyAdded.replaceAll("%player%", addNickname)
+                            : messages.successfullyAddedForTime
                             .replaceAll("%player%", addNickname)
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L)));
-                }
-            });
-        }));
+                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L));
+                    sender.sendMessage(message);
+                });
+            }
+        });
     }
 
     private long parseUntil(String[] strings) {
@@ -270,72 +260,91 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     @Override
     public void time(WrappedCommandSender sender, String[] strings) {
-        if (!(sender.hasPermission("whitelistbytime.time"))) {
+        if (!sender.hasPermission("whitelistbytime.time")) {
             sender.sendMessage(messages.notPermission);
             return;
         }
 
         String nickname = strings[2];
         playerAccessor.getPlayer(nickname).thenAccept(playerOptional -> {
-            long tempUntil = System.currentTimeMillis();
-            for (int i = 3; i < strings.length; i++) tempUntil += timeConvertor.getTimeMs(strings[i]);
-            long until = tempUntil;
-            switch (strings[1]) {
-                // Think about it, maybe it should be moved to a separate service
-                case "set" -> playerOptional.ifPresentOrElse(player -> {
-                    player.setUntil(until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.setTime
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                            .replaceAll("%player%", nickname)));
-                }, () -> {
-                    PlayerData player = new PlayerData(nickname, until);
-                    player.setUntil(until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                            .replaceAll("%player%", nickname)));
-                });
-                case "add" -> playerOptional.ifPresentOrElse(player -> {
-                    if (!player.canPlay()) {
-                        player.setUntil(until);
-                        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
-                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                                .replaceAll("%player%", nickname)));
-                    } else {
-                        player.setUntil(player.calculateUntil() + (until - System.currentTimeMillis()));
-                        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.addTime
-                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                                .replaceAll("%player%", nickname)));
-                    }
-                }, () -> {
-                    PlayerData player = new PlayerData(nickname, until);
-                    playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
-                            .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                            .replaceAll("%player%", nickname)));
-                });
-                case "remove" -> playerOptional.ifPresentOrElse(player -> {
-                    if (player.canPlay()) {
-                        player.setUntil(player.calculateUntil() - (until - System.currentTimeMillis()));
-                        playerAccessor.createOrUpdate(player).thenRun(() -> {
-                            if ((player.calculateUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
-                                sender.sendMessage(messages.removeTime
-                                        .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                                        .replaceAll("%player%", nickname));
-                            } else {
-                                sender.sendMessage(messages.playerRemovedFromWhitelist
-                                        .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                                        .replaceAll("%player%", nickname));
-                            }
-                        });
-                    } else {
-                        sender.sendMessage(messages.playerNotInWhitelist
-                                .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
-                                .replaceAll("%player%", nickname));
-                    }
-                }, () -> sender.sendMessage(messages.playerNotInWhitelist
-                        .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
-                        .replaceAll("%player%", nickname)));
+
+            long until = System.currentTimeMillis();
+            for (int i = 3; i < strings.length; i++) {
+                until += timeConvertor.getTimeMs(strings[i]);
             }
+
+            handleTimeCommand(strings[1], sender, playerOptional, nickname, until);
         });
+    }
+
+    private void handleTimeCommand(String commandType, WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
+        switch (commandType) {
+            case "set" -> handleTimeSet(sender, playerOptional, nickname, until);
+            case "add" -> handleTimeAdd(sender, playerOptional, nickname, until);
+            case "remove" -> handleTimeRemove(sender, playerOptional, nickname, until);
+            default -> messages.help.forEach(sender::sendMessage);
+        }
+    }
+
+    private void handleTimeSet(WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
+        playerOptional.ifPresentOrElse(player -> {
+            player.setUntil(until);
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.setTime
+                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                    .replace("%player%", nickname)));
+        }, () -> {
+            PlayerData player = new PlayerData(nickname, until);
+            player.setUntil(until);
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                    .replace("%player%", nickname)));
+        });
+    }
+
+    private void handleTimeAdd(WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
+        playerOptional.ifPresentOrElse(player -> {
+            if (!player.canPlay()) {
+                player.setUntil(until);
+                playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+                        .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                        .replace("%player%", nickname)));
+            } else {
+                player.setUntil(player.calculateUntil() + (until - System.currentTimeMillis()));
+                playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.addTime
+                        .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                        .replace("%player%", nickname)));
+            }
+        }, () -> {
+            PlayerData player = new PlayerData(nickname, until);
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                    .replace("%player%", nickname)));
+        });
+    }
+
+    private void handleTimeRemove(WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
+        playerOptional.ifPresentOrElse(player -> {
+            if (player.canPlay()) {
+                player.setUntil(player.calculateUntil() - (until - System.currentTimeMillis()));
+                playerAccessor.createOrUpdate(player).thenRun(() -> {
+                    if ((player.calculateUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
+                        sender.sendMessage(messages.removeTime
+                                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                                .replace("%player%", nickname));
+                    } else {
+                        sender.sendMessage(messages.playerRemovedFromWhitelist
+                                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                                .replace("%player%", nickname));
+                    }
+                });
+            } else {
+                sender.sendMessage(messages.playerNotInWhitelist
+                        .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                        .replace("%player%", nickname));
+            }
+        }, () -> sender.sendMessage(messages.playerNotInWhitelist
+                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                .replace("%player%", nickname)));
     }
 
     @Override
