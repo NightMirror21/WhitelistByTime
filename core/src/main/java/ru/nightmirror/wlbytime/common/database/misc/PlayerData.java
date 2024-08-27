@@ -14,19 +14,19 @@ import org.jetbrains.annotations.Nullable;
 @ToString
 public class PlayerData {
 
-    private static final Long UNTIL_FOREVER = -1L;
-    private static final Long UNTIL_NOT_IN_WHITELIST = 0L;
-    private static final Long NOT_FROZEN = -1L;
-
     @Nullable Long id;
     @NotNull String nickname;
     @NotNull Long until;
-    @NotNull Long frozenAt;
+    @Nullable Long frozenAt;
 
     public PlayerData(@NotNull String nickname, @NotNull Long until) {
         this.nickname = nickname;
         this.until = until;
-        frozenAt = NOT_FROZEN;
+        frozenAt = null;
+    }
+
+    public State getState() {
+        return State.get(until);
     }
 
     public void setUntil(Long until) {
@@ -38,26 +38,30 @@ public class PlayerData {
     }
 
     public Long calculateUntil() {
-        return frozenAt.equals(NOT_FROZEN) ? until : (until - frozenAt + System.currentTimeMillis());
+        return frozenAt == null ? until : (until - frozenAt + System.currentTimeMillis());
     }
 
     public boolean isFrozen() {
-        return !frozenAt.equals(NOT_FROZEN);
+        return getState().equals(State.FROZEN);
+    }
+
+    public boolean isNotInWhitelist() {
+        return getState().equals(State.NOT_IN_WHITELIST);
     }
 
     public boolean isForever() {
-        return until.equals(UNTIL_FOREVER);
+        return getState().equals(State.FOREVER);
     }
 
     public void setNotInWhitelist() {
         if (isFrozen()) {
-            frozenAt = NOT_FROZEN;
+            frozenAt = null;
         }
-        until = UNTIL_NOT_IN_WHITELIST;
+        until = State.NOT_IN_WHITELIST.getUntil();
     }
 
     public void setForever() {
-        until = UNTIL_FOREVER;
+        until = State.FOREVER.getUntil();
     }
 
     public boolean canPlay() {
@@ -71,7 +75,7 @@ public class PlayerData {
 
         if (isFrozen()) {
             until = calculateUntil();
-            frozenAt = NOT_FROZEN;
+            frozenAt = null;
         } else {
             frozenAt = System.currentTimeMillis();
         }
