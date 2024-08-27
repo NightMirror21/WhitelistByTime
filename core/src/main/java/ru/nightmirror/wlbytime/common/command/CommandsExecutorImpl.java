@@ -140,10 +140,8 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                 PlayerData playerData = playerDataOptional.get();
                 playerData.setUntil(0L);
                 return playerAccessor.createOrUpdate(playerData)
-                        .thenRun(() -> {
-                            sender.sendMessage(messages.playerRemovedFromWhitelist
-                                    .replaceAll("%player%", removeNickname));
-                        });
+                        .thenRun(() -> sender.sendMessage(messages.playerRemovedFromWhitelist
+                                .replaceAll("%player%", removeNickname)));
             }
         });
     }
@@ -264,87 +262,104 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             sender.sendMessage(messages.notPermission);
             return;
         }
-
         String nickname = strings[2];
         playerAccessor.getPlayer(nickname).thenAccept(playerOptional -> {
-
             long until = System.currentTimeMillis();
             for (int i = 3; i < strings.length; i++) {
                 until += timeConvertor.getTimeMs(strings[i]);
             }
-
-            handleTimeCommand(strings[1], sender, playerOptional, nickname, until);
+            handleTimeCommand(strings[1], sender, playerOptional.orElse(null), nickname, until);
         });
     }
 
-    private void handleTimeCommand(String commandType, WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
+    private void handleTimeCommand(String commandType, WrappedCommandSender sender, PlayerData player, String nickname, long until) {
         switch (commandType) {
-            case "set" -> handleTimeSet(sender, playerOptional, nickname, until);
-            case "add" -> handleTimeAdd(sender, playerOptional, nickname, until);
-            case "remove" -> handleTimeRemove(sender, playerOptional, nickname, until);
+            case "set" -> {
+                if (player == null) {
+                    handleTimeSetNull(sender, nickname, until);
+                } else {
+                    handleTimeSet(sender, player, nickname, until);
+                }
+            }
+            case "add" -> {
+                if (player == null) {
+                    handleTimeAddNull(sender, nickname, until);
+                } else {
+                    handleTimeAdd(sender, player, nickname, until);
+                }
+            }
+            case "remove" -> {
+                if (player == null) {
+                    handleTimeRemoveNull(sender, nickname, until);
+                } else {
+                    handleTimeRemove(sender, player, nickname, until);
+                }
+            }
             default -> messages.help.forEach(sender::sendMessage);
         }
     }
 
-    private void handleTimeSet(WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
-        playerOptional.ifPresentOrElse(player -> {
-            player.setUntil(until);
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.setTime
-                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                    .replace("%player%", nickname)));
-        }, () -> {
-            PlayerData player = new PlayerData(nickname, until);
-            player.setUntil(until);
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
-                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                    .replace("%player%", nickname)));
-        });
-    }
-
-    private void handleTimeAdd(WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
-        playerOptional.ifPresentOrElse(player -> {
-            if (!player.canPlay()) {
-                player.setUntil(until);
-                playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
-                        .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                        .replace("%player%", nickname)));
-            } else {
-                player.setUntil(player.calculateUntil() + (until - System.currentTimeMillis()));
-                playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.addTime
-                        .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                        .replace("%player%", nickname)));
-            }
-        }, () -> {
-            PlayerData player = new PlayerData(nickname, until);
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
-                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                    .replace("%player%", nickname)));
-        });
-    }
-
-    private void handleTimeRemove(WrappedCommandSender sender, Optional<PlayerData> playerOptional, String nickname, long until) {
-        playerOptional.ifPresentOrElse(player -> {
-            if (player.canPlay()) {
-                player.setUntil(player.calculateUntil() - (until - System.currentTimeMillis()));
-                playerAccessor.createOrUpdate(player).thenRun(() -> {
-                    if ((player.calculateUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
-                        sender.sendMessage(messages.removeTime
-                                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                                .replace("%player%", nickname));
-                    } else {
-                        sender.sendMessage(messages.playerRemovedFromWhitelist
-                                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
-                                .replace("%player%", nickname));
-                    }
-                });
-            } else {
-                sender.sendMessage(messages.playerNotInWhitelist
-                        .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
-                        .replace("%player%", nickname));
-            }
-        }, () -> sender.sendMessage(messages.playerNotInWhitelist
-                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+    private void handleTimeSet(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
+        player.setUntil(until);
+        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.setTime
+                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
+    }
+
+    private void handleTimeSetNull(WrappedCommandSender sender, String nickname, long until) {
+        PlayerData player = new PlayerData(nickname, until);
+        player.setUntil(until);
+        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                .replace("%player%", nickname)));
+    }
+
+    private void handleTimeAdd(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
+        if (!player.canPlay()) {
+            player.setUntil(until);
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                    .replace("%player%", nickname)));
+        } else {
+            player.setUntil(player.calculateUntil() + (until - System.currentTimeMillis()));
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.addTime
+                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                    .replace("%player%", nickname)));
+        }
+    }
+
+    private void handleTimeAddNull(WrappedCommandSender sender, String nickname, long until) {
+        PlayerData player = new PlayerData(nickname, until);
+        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                .replace("%player%", nickname)));
+    }
+
+    private void handleTimeRemove(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
+        if (player.canPlay()) {
+            player.setUntil(player.calculateUntil() - (until - System.currentTimeMillis()));
+            playerAccessor.createOrUpdate(player).thenRun(() -> {
+                if ((player.calculateUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
+                    sender.sendMessage(messages.removeTime
+                            .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                            .replace("%player%", nickname));
+                } else {
+                    sender.sendMessage(messages.playerRemovedFromWhitelist
+                            .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
+                            .replace("%player%", nickname));
+                }
+            });
+        } else {
+            sender.sendMessage(messages.playerNotInWhitelist
+                    .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                    .replace("%player%", nickname));
+        }
+    }
+
+    private void handleTimeRemoveNull(WrappedCommandSender sender, String nickname, long until) {
+        sender.sendMessage(messages.playerNotInWhitelist
+                .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
+                .replace("%player%", nickname));
     }
 
     @Override
@@ -373,7 +388,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     @Override
     public void execute(WrappedCommandSender sender, String[] strings) {
-        if (strings.length == 0 || strings[0].equals("")) {
+        if (strings.length == 0 || strings[0].isEmpty()) {
             help(sender, strings);
         } else if (strings.length > 1 && strings[0].equals("add")) {
             add(sender, strings);
