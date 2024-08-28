@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
+import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -27,11 +27,11 @@ public class TimeConvertor {
         }
     }
 
-    private static boolean endsWith(String string, List<String> patterns) {
+    private static boolean endsWith(String string, Set<String> patterns) {
         return patterns.stream().anyMatch(string::endsWith);
     }
 
-    private static String clear(String string, List<String> patterns) {
+    private static String clear(String string, Set<String> patterns) {
         for (String pattern : patterns) {
             string = string.replaceAll(pattern, "");
         }
@@ -41,25 +41,25 @@ public class TimeConvertor {
     public String getTimeLine(long ms) {
         String line = "";
 
-        line = appendTimeUnit(line, ms, YEAR_IN_MS, settings.getYear().get(0));
+        line = appendTimeUnit(line, ms, YEAR_IN_MS, settings.getFirstYearOrDefault());
         ms %= YEAR_IN_MS;
 
-        line = appendTimeUnit(line, ms, MONTH_IN_MS, settings.getMonth().get(0));
+        line = appendTimeUnit(line, ms, MONTH_IN_MS, settings.getFirstMonthOrDefault());
         ms %= MONTH_IN_MS;
 
-        line = appendTimeUnit(line, ms, WEEK_IN_MS, settings.getWeek().get(0));
+        line = appendTimeUnit(line, ms, WEEK_IN_MS, settings.getFirstWeekOrDefault());
         ms %= WEEK_IN_MS;
 
-        line = appendTimeUnit(line, ms, DAY_IN_MS, settings.getDay().get(0));
+            line = appendTimeUnit(line, ms, DAY_IN_MS, settings.getFirstDayOrDefault());
         ms %= DAY_IN_MS;
 
-        line = appendTimeUnit(line, ms, HOUR_IN_MS, settings.getHour().get(0));
+        line = appendTimeUnit(line, ms, HOUR_IN_MS, settings.getFirstHourOrDefault());
         ms %= HOUR_IN_MS;
 
-        line = appendTimeUnit(line, ms, MINUTE_IN_MS, settings.getMinute().get(0));
+        line = appendTimeUnit(line, ms, MINUTE_IN_MS, settings.getFirstMinuteOrDefault());
         ms %= MINUTE_IN_MS;
 
-        if (ms != 0L) line += (ms / 1000L) + settings.getSecond().get(0) + " ";
+        if (ms != 0L) line += (ms / 1000L) + settings.getFirstSecondOrDefault();
         if (ms < 0L) line = settings.getForever();
 
         return line.trim();
@@ -94,7 +94,7 @@ public class TimeConvertor {
         return time;
     }
 
-    private long parseTimeUnit(String timeStr, List<String> unitPatterns, long unitMs) {
+    private long parseTimeUnit(String timeStr, Set<String> unitPatterns, long unitMs) {
         timeStr = clear(timeStr, unitPatterns);
         if (checkLong(timeStr)) {
             return unitMs * Long.parseLong(timeStr);
