@@ -4,24 +4,24 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import net.elytrium.serializer.language.object.YamlSerializable;
-import ru.nightmirror.wlbytime.common.config.configs.*;
+import ru.nightmirror.wlbytime.common.config.configs.DatabaseConfig;
+import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
+import ru.nightmirror.wlbytime.common.config.configs.PlaceholdersConfig;
+import ru.nightmirror.wlbytime.common.config.configs.SettingsConfig;
 
 import java.io.File;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
+@Getter
 public class ConfigsContainer {
 
+    @Getter(value = AccessLevel.NONE)
     final File folder;
 
-    @Getter
     MessagesConfig messages;
-    @Getter
     DatabaseConfig database;
-    @Getter
     PlaceholdersConfig placeholders;
-    @Getter
     SettingsConfig settings;
 
     public void load() {

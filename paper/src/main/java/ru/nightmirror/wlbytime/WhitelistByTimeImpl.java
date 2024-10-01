@@ -33,6 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -65,14 +66,14 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         configs = new ConfigsContainer(getDataFolder());
         configs.load();
 
-        whitelistEnabled = configs.getSettings().enabled;
+        whitelistEnabled = configs.getSettings().isEnabled();
 
         initTimeConvertor();
 
         try {
             initDatabase();
         } catch (SQLException exception) {
-            exception.printStackTrace();
+            getLogger().log(Level.SEVERE, "Can't init database", exception);
             getServer().getPluginManager().disablePlugin(this);
         }
 
@@ -121,14 +122,14 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
 
     private void initTimeConvertor() {
         timeSettings = TimeUnitsConvertorSettings.builder()
-                .year(getConfigs().getSettings().timeUnitsYear)
-                .month(getConfigs().getSettings().timeUnitsMonth)
-                .week(getConfigs().getSettings().timeUnitsWeek)
-                .day(getConfigs().getSettings().timeUnitsDay)
-                .hour(getConfigs().getSettings().timeUnitsHour)
-                .minute(getConfigs().getSettings().timeUnitsMinute)
-                .second(getConfigs().getSettings().timeUnitsSecond)
-                .forever(getConfigs().getMessages().forever)
+                .year(getConfigs().getSettings().getTimeUnitsYear())
+                .month(getConfigs().getSettings().getTimeUnitsMonth())
+                .week(getConfigs().getSettings().getTimeUnitsWeek())
+                .day(getConfigs().getSettings().getTimeUnitsDay())
+                .hour(getConfigs().getSettings().getTimeUnitsHour())
+                .minute(getConfigs().getSettings().getTimeUnitsMinute())
+                .second(getConfigs().getSettings().getTimeUnitsSecond())
+                .forever(getConfigs().getMessages().getForever())
                 .build();
 
         timeConvertor = new TimeConvertor(timeSettings);
@@ -137,16 +138,16 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     private void initDatabase() throws SQLException {
         DatabaseSettings settings = DatabaseSettings.builder()
                 .localStorageDir(getDataFolder())
-                .type(getConfigs().getDatabase().type)
-                .address(getConfigs().getDatabase().address)
-                .databaseName(getConfigs().getDatabase().name)
-                .userUserAndPassword(getConfigs().getDatabase().useUserAndPassword)
-                .user(getConfigs().getDatabase().user)
-                .password(getConfigs().getDatabase().password)
-                .params(getConfigs().getDatabase().params)
+                .type(getConfigs().getDatabase().getType())
+                .address(getConfigs().getDatabase().getAddress())
+                .databaseName(getConfigs().getDatabase().getName())
+                .userUserAndPassword(getConfigs().getDatabase().isUseUserAndPassword())
+                .user(getConfigs().getDatabase().getUser())
+                .password(getConfigs().getDatabase().getPassword())
+                .params(getConfigs().getDatabase().getParams())
                 .build();
-        
-        database = new DatabaseImpl(settings, configs.getSettings().caseSensitive);
+
+        database = new DatabaseImpl(settings, configs.getSettings().isCaseSensitive());
         database.loadPlayersToCache(Arrays.stream(getServer().getOfflinePlayers())
                 .map(OfflinePlayer::getName)
                 .filter(Objects::nonNull)
@@ -157,7 +158,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         getServer().getPluginManager().registerEvents(new WhitelistCmdListener(new CommandsExecutorImpl(database, this, timeConvertor)), this);
         Predicate<ConnectingPlayersFilter.ConnectingPlayer> filter = new ConnectingPlayersFilter(
                 database,
-                configs.getSettings().caseSensitive,
+                configs.getSettings().isCaseSensitive(),
                 this
         );
         getServer().getPluginManager().registerEvents(new PlayerLoginListener(this, database, filter), this);
@@ -167,7 +168,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     }
 
     private void initChecker() {
-        PlayerKicker playerKicker = new PlayerKicker(syncer, this, getConfigs().getSettings().caseSensitive, getConfigs().getMessages().youNotInWhitelistKick);
+        PlayerKicker playerKicker = new PlayerKicker(syncer, this, getConfigs().getSettings().isCaseSensitive(), getConfigs().getMessages().youNotInWhitelistKick);
         database.addListener(playerKicker);
 
         onlinePlayersFilter = new OnlinePlayersFilter(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
@@ -204,14 +205,17 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         whitelistEnabled = mode;
     }
 
+    @SuppressWarnings("unused")
     public static void info(String message) {
         if (log != null) log.info(message);
     }
 
+    @SuppressWarnings("unused")
     public static void warn(String message) {
         if (log != null) log.warning(message);
     }
 
+    @SuppressWarnings("unused")
     public static void error(String message) {
         if (log != null) log.severe(message);
     }

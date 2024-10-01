@@ -26,7 +26,7 @@ public class ConnectingPlayersFilter implements Predicate<ConnectingPlayersFilte
                 .thenApply(playerOptional -> playerOptional.map(player -> {
                     if (!player.canPlay()) {
                         return false;
-                    } else if (player.isFrozen() && plugin.getPluginConfig().unfreezeOnJoin) {
+                    } else if (player.isFrozen() && plugin.getPluginConfig().isUnfreezeOnJoin()) {
                         player.switchFreeze();
                         playerAccessor.createOrUpdate(player);
                     }

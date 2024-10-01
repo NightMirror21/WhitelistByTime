@@ -50,7 +50,7 @@ public class TimeConvertor {
         line = appendTimeUnit(line, ms, WEEK_IN_MS, settings.getFirstWeekOrDefault());
         ms %= WEEK_IN_MS;
 
-            line = appendTimeUnit(line, ms, DAY_IN_MS, settings.getFirstDayOrDefault());
+        line = appendTimeUnit(line, ms, DAY_IN_MS, settings.getFirstDayOrDefault());
         ms %= DAY_IN_MS;
 
         line = appendTimeUnit(line, ms, HOUR_IN_MS, settings.getFirstHourOrDefault());

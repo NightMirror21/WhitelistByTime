@@ -34,28 +34,28 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     @Override
     public void reload(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.reload"))) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
         whitelistByTime.reload();
-        sender.sendMessage(messages.pluginReloaded);
+        sender.sendMessage(messages.getPluginReloaded());
     }
 
     @Override
     public void help(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.help"))) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
-        messages.help.forEach(sender::sendMessage);
+        messages.getHelp().forEach(sender::sendMessage);
     }
 
     @Override
     public void getAll(WrappedCommandSender sender, String[] strings) {
         if (!sender.hasPermission("whitelistbytime.getall")) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
@@ -67,7 +67,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     private void handlePlayerList(WrappedCommandSender sender, String[] strings, List<PlayerData> players) {
         if (players.isEmpty()) {
-            sender.sendMessage(messages.listEmpty);
+            sender.sendMessage(messages.getListEmpty());
             return;
         }
 
@@ -76,7 +76,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         int maxPage = calculateMaxPage(players.size(), displayOnPage);
 
         if (page > maxPage) {
-            sender.sendMessage(messages.pageNotExists.replaceAll("%page%", String.valueOf(page)));
+            sender.sendMessage(messages.getPageNotExists().replaceAll("%page%", String.valueOf(page)));
             return;
         }
 
@@ -99,25 +99,25 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     }
 
     private void sendPlayerList(WrappedCommandSender sender, List<PlayerData> players, int page, int maxPage) {
-        sender.sendMessage(messages.listTitle);
+        sender.sendMessage(messages.getListTitle());
 
         players.forEach(player -> {
             String time = getPlayerTime(player);
-            sender.sendMessage(messages.listPlayer.replace("%player%", player.getNickname()).replace("%time%", time.trim()));
+            sender.sendMessage(messages.getListPlayer().replace("%player%", player.getNickname()).replace("%time%", time.trim()));
         });
 
         if (maxPage > 1) {
-            sender.sendMessage(messages.listPageableCommands.replace("%current-page%", String.valueOf(page)).replace("%max-page%", String.valueOf(maxPage)));
+            sender.sendMessage(messages.getListPageableCommands().replace("%current-page%", String.valueOf(page)).replace("%max-page%", String.valueOf(maxPage)));
         }
     }
 
     private String getPlayerTime(PlayerData player) {
         if (player.isForever()) {
-            return messages.forever;
+            return messages.getForever();
         } else if (player.isFrozen()) {
-            return messages.frozen;
+            return messages.getFrozen();
         } else if (player.isNotInWhitelist()) {
-            return messages.expired;
+            return messages.getExpired();
         } else {
             return timeConvertor.getTimeLine(player.calculateUntil() - System.currentTimeMillis());
         }
@@ -126,21 +126,21 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     @Override
     public void remove(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.remove"))) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
         String removeNickname = strings[1];
         playerAccessor.getPlayer(removeNickname).thenCompose(playerDataOptional -> {
             if (playerDataOptional.isEmpty()) {
-                sender.sendMessage(messages.playerNotInWhitelist
+                sender.sendMessage(messages.getPlayerNotInWhitelist()
                         .replaceAll("%player%", removeNickname));
                 return CompletableFuture.completedFuture(null);
             } else {
                 PlayerData playerData = playerDataOptional.get();
                 playerData.setUntil(0L);
                 return playerAccessor.createOrUpdate(playerData)
-                        .thenRun(() -> sender.sendMessage(messages.playerRemovedFromWhitelist
+                        .thenRun(() -> sender.sendMessage(messages.getPlayerRemovedFromWhitelist()
                                 .replaceAll("%player%", removeNickname)));
             }
         });
@@ -149,7 +149,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     @Override
     public void switchFreeze(WrappedCommandSender sender, String[] strings) {
         if (!sender.hasPermission("whitelistbytime.switchfreeze")) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
@@ -159,12 +159,12 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                 PlayerData data = dataOptional.get();
                 data.switchFreeze();
 
-                String messageKey = data.isFrozen() ? messages.playerFrozen : messages.playerUnfrozen;
+                String messageKey = data.isFrozen() ? messages.getPlayerFrozen() : messages.getPlayerUnfrozen();
                 sender.sendMessage(messageKey.replaceAll("%player%", nickname));
 
                 return playerAccessor.createOrUpdate(data);
             } else {
-                sender.sendMessage(messages.playerNotInWhitelist.replaceAll("%player%", nickname));
+                sender.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%player%", nickname));
                 return CompletableFuture.completedFuture(null);
             }
         });
@@ -173,67 +173,67 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     @Override
     public void check(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.check"))) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
         String checkNickname = strings[1];
         playerAccessor.getPlayer(checkNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (!player.canPlay()) {
-                sender.sendMessage(messages.playerNotInWhitelist
+                sender.sendMessage(messages.getPlayerNotInWhitelist()
                         .replaceAll("%player%", checkNickname));
             } else if (player.isForever()) {
-                sender.sendMessage(messages.stillInWhitelist
+                sender.sendMessage(messages.getStillInWhitelist()
                         .replaceAll("%player%", checkNickname));
             } else {
                 String time = timeConvertor.getTimeLine(player.calculateUntil() - System.currentTimeMillis());
-                sender.sendMessage(messages.stillInWhitelistForTime
+                sender.sendMessage(messages.getStillInWhitelistForTime()
                         .replaceAll("%player%", checkNickname)
                         .replaceAll("%time%", time));
             }
-        }, () -> sender.sendMessage(messages.playerNotInWhitelist
+        }, () -> sender.sendMessage(messages.getPlayerNotInWhitelist()
                 .replaceAll("%player%", checkNickname))));
     }
 
     @Override
     public void checkme(WrappedCommandSender sender) {
         if (!(sender.hasPermission("whitelistbytime.checkme"))) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
         playerAccessor.getPlayer(sender.getNickname()).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (!player.canPlay()) {
-                sender.sendMessage(messages.playerNotInWhitelist
+                sender.sendMessage(messages.getPlayerNotInWhitelist()
                         .replaceAll("%player%", sender.getNickname()));
             } else if (player.isForever()) {
-                sender.sendMessage(messages.checkMeStillInWhitelist);
+                sender.sendMessage(messages.getCheckMeStillInWhitelist());
             } else {
                 String time = timeConvertor.getTimeLine(player.calculateUntil() - System.currentTimeMillis());
-                sender.sendMessage(messages.checkMeStillInWhitelistForTime
+                sender.sendMessage(messages.getCheckMeStillInWhitelistForTime()
                         .replaceAll("%time%", time));
             }
-        }, () -> sender.sendMessage(messages.playerNotInWhitelist
+        }, () -> sender.sendMessage(messages.getPlayerNotInWhitelist()
                 .replaceAll("%player%", sender.getNickname()))));
     }
 
     @Override
     public void add(WrappedCommandSender sender, String[] strings) {
         if (!sender.hasPermission("whitelistbytime.add")) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
         String addNickname = strings[1];
         playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> {
             if (playerOptional.isPresent()) {
-                sender.sendMessage(messages.playerAlreadyInWhitelist.replaceAll("%player%", addNickname));
+                sender.sendMessage(messages.getPlayerAlreadyInWhitelist().replaceAll("%player%", addNickname));
             } else {
                 long until = parseUntil(strings);
                 PlayerData newPlayerData = new PlayerData(addNickname, until);
                 playerAccessor.createOrUpdate(newPlayerData).thenRun(() -> {
-                    String message = (until == -1L) ? messages.successfullyAdded.replaceAll("%player%", addNickname)
-                            : messages.successfullyAddedForTime
+                    String message = (until == -1L) ? messages.getSuccessfullyAdded().replaceAll("%player%", addNickname)
+                            : messages.getSuccessfullyAddedForTime()
                             .replaceAll("%player%", addNickname)
                             .replaceAll("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L));
                     sender.sendMessage(message);
@@ -259,7 +259,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     @Override
     public void time(WrappedCommandSender sender, String[] strings) {
         if (!sender.hasPermission("whitelistbytime.time")) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
         String nickname = strings[2];
@@ -295,13 +295,13 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                     handleTimeRemove(sender, player, nickname, until);
                 }
             }
-            default -> messages.help.forEach(sender::sendMessage);
+            default -> messages.getHelp().forEach(sender::sendMessage);
         }
     }
 
     private void handleTimeSet(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
         player.setUntil(until);
-        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.setTime
+        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSetTime()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
     }
@@ -309,7 +309,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     private void handleTimeSetNull(WrappedCommandSender sender, String nickname, long until) {
         PlayerData player = new PlayerData(nickname, until);
         player.setUntil(until);
-        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
     }
@@ -317,12 +317,12 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     private void handleTimeAdd(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
         if (!player.canPlay()) {
             player.setUntil(until);
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
                     .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                     .replace("%player%", nickname)));
         } else {
             player.setUntil(player.calculateUntil() + (until - System.currentTimeMillis()));
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.addTime
+            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getAddTime()
                     .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                     .replace("%player%", nickname)));
         }
@@ -330,7 +330,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     private void handleTimeAddNull(WrappedCommandSender sender, String nickname, long until) {
         PlayerData player = new PlayerData(nickname, until);
-        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.successfullyAddedForTime
+        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
     }
@@ -340,24 +340,24 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             player.setUntil(player.calculateUntil() - (until - System.currentTimeMillis()));
             playerAccessor.createOrUpdate(player).thenRun(() -> {
                 if ((player.calculateUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
-                    sender.sendMessage(messages.removeTime
+                    sender.sendMessage(messages.getRemoveTime()
                             .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replace("%player%", nickname));
                 } else {
-                    sender.sendMessage(messages.playerRemovedFromWhitelist
+                    sender.sendMessage(messages.getPlayerRemovedFromWhitelist()
                             .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                             .replace("%player%", nickname));
                 }
             });
         } else {
-            sender.sendMessage(messages.playerNotInWhitelist
+            sender.sendMessage(messages.getPlayerNotInWhitelist()
                     .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
                     .replace("%player%", nickname));
         }
     }
 
     private void handleTimeRemoveNull(WrappedCommandSender sender, String nickname, long until) {
-        sender.sendMessage(messages.playerNotInWhitelist
+        sender.sendMessage(messages.getPlayerNotInWhitelist()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis()))
                 .replace("%player%", nickname));
     }
@@ -365,22 +365,22 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     @Override
     public void turn(WrappedCommandSender sender, String[] strings) {
         if (!(sender.hasPermission("whitelistbytime.turn"))) {
-            sender.sendMessage(messages.notPermission);
+            sender.sendMessage(messages.getNotPermission());
             return;
         }
 
         if (strings[0].equalsIgnoreCase("on")) {
             if (whitelistByTime.isWhitelistEnabled()) {
-                sender.sendMessage(messages.whitelistAlreadyEnabled);
+                sender.sendMessage(messages.getWhitelistAlreadyEnabled());
             } else {
-                sender.sendMessage(messages.whitelistEnabled);
+                sender.sendMessage(messages.getWhitelistEnabled());
                 whitelistByTime.setWhitelistEnabled(true);
             }
         } else {
             if (!whitelistByTime.isWhitelistEnabled()) {
-                sender.sendMessage(messages.whitelistAlreadyDisabled);
+                sender.sendMessage(messages.getWhitelistAlreadyDisabled());
             } else {
-                sender.sendMessage(messages.whitelistDisabled);
+                sender.sendMessage(messages.getWhitelistDisabled());
                 whitelistByTime.setWhitelistEnabled(false);
             }
         }

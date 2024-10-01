@@ -28,7 +28,7 @@ public class PlayerLoginListener implements EventListener {
     @EventHandler
     private void allowOrDisallow(AsyncPlayerPreLoginEvent event) {
         if (!filter.test(new ConnectingPlayersFilter.ConnectingPlayer(event.getName(), event.getUniqueId()))) {
-            List<Component> message = ColorsConvertor.convert(plugin.getMessages().youNotInWhitelistKick);
+            List<Component> message = ColorsConvertor.convert(plugin.getMessages().getYouNotInWhitelistKick());
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, ComponentUtils.join(message, Component.text("\n")));
         }
     }

@@ -42,8 +42,8 @@ public class PlaceholderHook extends PlaceholderExpansion {
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         if (params.equalsIgnoreCase("in_whitelist")) {
             String output =  playerAccessor.getPlayerCached(player.getName())
-                    .map(d -> d.isFrozen() ? config.frozen : config.inWhitelistTrue)
-                    .orElse(config.inWhitelistFalse);
+                    .map(d -> d.isFrozen() ? config.getFrozen() : config.getInWhitelistTrue())
+                    .orElse(config.getInWhitelistFalse());
 
             return ColorsConvertor.checkLegacy(output);
         } else if (params.equalsIgnoreCase("time_left")) {
@@ -51,7 +51,7 @@ public class PlaceholderHook extends PlaceholderExpansion {
                     .map(whitelistedPlayer -> timeConvertor.getTimeLine(whitelistedPlayer.calculateUntil() - System.currentTimeMillis()))
                     .orElse("");
 
-            return ColorsConvertor.checkLegacy(config.timeLeft.replaceAll("%time%", output));
+            return ColorsConvertor.checkLegacy(config.getTimeLeft().replaceAll("%time%", output));
         }
 
         return "{ERR_PARAM}";
