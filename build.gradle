@@ -15,13 +15,13 @@ repositories {
 }
 
 tasks.register('shadowJarAll') {
-    dependsOn([":core", ":paper", ":folia"].stream()
+    dependsOn([":core", ":paper"].stream()
             .map { project(it).tasks.getByName('shadowJar') }
             .toArray())
 }
 
 tasks.register('cleanAll') {
-    dependsOn([":core", ":paper", ":folia"].stream()
+    dependsOn([":core", ":paper"].stream()
             .map { project(it).tasks.getByName('clean') }
             .toArray())
 }
