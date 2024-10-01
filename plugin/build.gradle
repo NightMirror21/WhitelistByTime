@@ -9,7 +9,7 @@ targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
 version = rootProject.version
-description = 'WhitelistByTime-Paper'
+description = 'WhitelistByTime'
 
 compileJava.options.encoding = "UTF-8"
 compileTestJava.options.encoding = "UTF-8"

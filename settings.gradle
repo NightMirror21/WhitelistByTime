@@ -1,4 +1,4 @@
 rootProject.name = 'WhitelistByTime'
 include 'core'
-include 'paper'
+include 'plugin'
 
