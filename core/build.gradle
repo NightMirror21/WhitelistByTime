@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '8.3.2'
 }
 
-def javaVersion = JavaVersion.VERSION_16;
+def javaVersion = JavaVersion.VERSION_21;
 sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
@@ -24,8 +24,8 @@ dependencies {
     implementation 'com.j256.ormlite:ormlite-core:6.1'
     implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
     compileOnly 'org.jetbrains:annotations:24.0.1'
-    compileOnly 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
@@ -37,4 +37,8 @@ dependencies {
     testCompileOnly 'org.jetbrains:annotations:24.0.1'
     testCompileOnly 'org.projectlombok:lombok:1.18.26'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }

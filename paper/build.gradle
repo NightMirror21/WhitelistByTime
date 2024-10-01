@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '8.3.2'
 }
 
 def javaVersion = JavaVersion.VERSION_21;
@@ -23,7 +23,7 @@ repositories {
     }
 
     maven {
-        url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
 
     maven {
@@ -36,10 +36,10 @@ dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.21.1-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
-    compileOnly 'me.clip:placeholderapi:2.11.3'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
     compileOnly 'org.jetbrains:annotations:24.0.1'
-    compileOnly 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
 
 shadowJar {

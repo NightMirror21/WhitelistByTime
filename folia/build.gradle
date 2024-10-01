@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'com.gradleup.shadow' version '8.3.2'
 }
 
-def javaVersion = JavaVersion.VERSION_17;
+def javaVersion = JavaVersion.VERSION_21;
 sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
@@ -28,7 +28,7 @@ repositories {
     }
 
     maven {
-        url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
 
     maven {
@@ -47,17 +47,17 @@ processResources {
 
 dependencies {
     shadow project(path: ':core', configuration: 'default')
-    compileOnly 'dev.folia:folia-api:1.20.2-R0.1-SNAPSHOT'
+    compileOnly 'dev.folia:folia-api:1.20.1-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
     implementation 'org.bstats:bstats-bukkit:3.0.1'
-    compileOnly 'me.clip:placeholderapi:2.11.3'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
     compileOnly 'org.jetbrains:annotations:24.0.1'
-    compileOnly 'org.projectlombok:lombok:1.18.26'
-    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
 }
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 shadowJar {

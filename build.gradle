@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-def javaVersion = JavaVersion.VERSION_16;
+def javaVersion = JavaVersion.VERSION_21;
 sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
@@ -12,4 +12,20 @@ description = 'WhitelistByTime'
 
 repositories {
     mavenLocal()
+}
+
+tasks.register('shadowJarAll') {
+    dependsOn([":core", ":spigot", ":paper", ":folia"].stream()
+            .map { project(it).tasks.getByName('shadowJar') }
+            .toArray())
+}
+
+tasks.register('cleanAll') {
+    dependsOn([":core", ":spigot", ":paper", ":folia"].stream()
+            .map { project(it).tasks.getByName('clean') }
+            .toArray())
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
