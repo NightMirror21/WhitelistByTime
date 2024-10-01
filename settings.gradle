@@ -1,5 +1,4 @@
 rootProject.name = 'WhitelistByTime'
-include 'spigot'
 include 'core'
 include 'paper'
 include 'folia'
