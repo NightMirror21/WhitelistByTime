@@ -48,6 +48,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     DatabaseImpl database;
     Switchable onlinePlayersFilter;
     PlaceholderHook placeholderHook;
+    TimeUnitsConvertorSettings timeSettings;
 
     public static void info(String message) {
         if (log != null) log.info(message);
@@ -114,7 +115,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     }
 
     private void initTimeConvertor() {
-        TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
+        timeSettings = TimeUnitsConvertorSettings.builder()
                 .year(getConfigs().getSettings().timeUnitsYear)
                 .month(getConfigs().getSettings().timeUnitsMonth)
                 .week(getConfigs().getSettings().timeUnitsWeek)
@@ -125,7 +126,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
                 .forever(getConfigs().getMessages().forever)
                 .build();
 
-        timeConvertor = new TimeConvertor(settings);
+        timeConvertor = new TimeConvertor(timeSettings);
     }
 
     private void initDatabase() throws SQLException {
@@ -157,7 +158,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         getServer().getPluginManager().registerEvents(new PlayerLoginListener(this, database, filter), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutorImpl(database, this, timeConvertor)));
-        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, this)));
+        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, timeSettings, this)));
     }
 
     private void initChecker() {

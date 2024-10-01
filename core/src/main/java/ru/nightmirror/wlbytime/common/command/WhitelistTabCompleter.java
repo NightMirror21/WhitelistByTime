@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
+import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.TabCompleter;
@@ -28,6 +29,7 @@ public class WhitelistTabCompleter implements TabCompleter {
     private static final String PERM_TIME = "whitelistbytime.time";
 
     PlayerAccessor playerAccessor;
+    TimeUnitsConvertorSettings timeSettings;
     WhitelistByTime plugin;
 
     @Override
@@ -105,10 +107,10 @@ public class WhitelistTabCompleter implements TabCompleter {
 
     private void handleThirdArgument(WrappedCommandSender commandSender, String[] args, List<String> suggestions) {
         if (commandSender.hasPermission(PERM_ADD) && "add".equals(args[0])) {
-            suggestions.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
-            suggestions.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
-            suggestions.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
-            suggestions.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
+            suggestions.add("1" + timeSettings.getFirstMonthOrDefault());
+            suggestions.add("1" + timeSettings.getFirstWeekOrDefault());
+            suggestions.add("1" + timeSettings.getFirstDayOrDefault());
+            suggestions.add("12" + timeSettings.getFirstHourOrDefault());
         }
         if (commandSender.hasPermission(PERM_TIME)) {
             if ("set".equals(args[1]) || "add".equals(args[1]) || "remove".equals(args[1])) {
@@ -120,10 +122,10 @@ public class WhitelistTabCompleter implements TabCompleter {
     private void handleFourthArgument(WrappedCommandSender commandSender, String[] args, List<String> suggestions) {
         if (commandSender.hasPermission(PERM_TIME)) {
             if ("set".equals(args[1]) || "add".equals(args[1]) || "remove".equals(args[1])) {
-                suggestions.add("1" + plugin.getPluginConfig().timeUnitsMonth.get(0));
-                suggestions.add("1" + plugin.getPluginConfig().timeUnitsWeek.get(0));
-                suggestions.add("1" + plugin.getPluginConfig().timeUnitsDay.get(0));
-                suggestions.add("12" + plugin.getPluginConfig().timeUnitsHour.get(0));
+                suggestions.add("1" + timeSettings.getFirstMonthOrDefault());
+                suggestions.add("1" + timeSettings.getFirstWeekOrDefault());
+                suggestions.add("1" + timeSettings.getFirstDayOrDefault());
+                suggestions.add("12" + timeSettings.getFirstHourOrDefault());
             }
         }
     }

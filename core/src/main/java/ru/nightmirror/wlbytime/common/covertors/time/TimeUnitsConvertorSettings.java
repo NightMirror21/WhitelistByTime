@@ -3,14 +3,14 @@ package ru.nightmirror.wlbytime.common.covertors.time;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
 
-@Data
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
+@Getter
 @Builder
 public class TimeUnitsConvertorSettings {
     Set<String> year;

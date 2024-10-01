@@ -8,7 +8,7 @@ import net.elytrium.serializer.annotations.CommentValue;
 import net.elytrium.serializer.annotations.NewLine;
 import net.elytrium.serializer.language.object.YamlSerializable;
 
-import java.util.List;
+import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PUBLIC)
 public class SettingsConfig extends YamlSerializable {
@@ -46,11 +46,11 @@ public class SettingsConfig extends YamlSerializable {
     @Comment(value = {
             @CommentValue("Time units")
     }, at = Comment.At.PREPEND)
-    List<String> timeUnitsYear = List.of("y");
-    List<String> timeUnitsMonth = List.of("mo");
-    List<String> timeUnitsWeek = List.of("w");
-    List<String> timeUnitsDay = List.of("d");
-    List<String> timeUnitsHour = List.of("h");
-    List<String> timeUnitsMinute = List.of("m");
-    List<String> timeUnitsSecond = List.of("s");
+    Set<String> timeUnitsYear = Set.of("y");
+    Set<String> timeUnitsMonth = Set.of("mo");
+    Set<String> timeUnitsWeek = Set.of("w");
+    Set<String> timeUnitsDay = Set.of("d");
+    Set<String> timeUnitsHour = Set.of("h");
+    Set<String> timeUnitsMinute = Set.of("m");
+    Set<String> timeUnitsSecond = Set.of("s");
 }
