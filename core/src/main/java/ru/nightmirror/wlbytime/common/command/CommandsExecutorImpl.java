@@ -8,7 +8,7 @@ import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
-import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,13 +19,13 @@ import java.util.concurrent.CompletableFuture;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommandsExecutorImpl implements CommandsExecutor {
 
-    PlayerAccessor playerAccessor;
+    PlayerDao playerDao;
     WhitelistByTime whitelistByTime;
     TimeConvertor timeConvertor;
     MessagesConfig messages;
 
-    public CommandsExecutorImpl(PlayerAccessor playerAccessor, WhitelistByTime whitelistByTime, TimeConvertor timeConvertor) {
-        this.playerAccessor = playerAccessor;
+    public CommandsExecutorImpl(PlayerDao playerDao, WhitelistByTime whitelistByTime, TimeConvertor timeConvertor) {
+        this.playerDao = playerDao;
         this.whitelistByTime = whitelistByTime;
         messages = whitelistByTime.getMessages();
         this.timeConvertor = timeConvertor;
@@ -59,7 +59,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             return;
         }
 
-        playerAccessor.getPlayers()
+        playerDao.getPlayers()
                 .thenApply(list -> list.stream().filter(PlayerData::canPlay).toList())
                 .thenApply(list -> list.stream().sorted(Comparator.comparingLong(PlayerData::calculateUntil).reversed()).toList())
                 .thenAccept(players -> handlePlayerList(sender, strings, players));
@@ -131,7 +131,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         }
 
         String removeNickname = strings[1];
-        playerAccessor.getPlayer(removeNickname).thenCompose(playerDataOptional -> {
+        playerDao.getPlayer(removeNickname).thenCompose(playerDataOptional -> {
             if (playerDataOptional.isEmpty()) {
                 sender.sendMessage(messages.getPlayerNotInWhitelist()
                         .replaceAll("%player%", removeNickname));
@@ -139,7 +139,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             } else {
                 PlayerData playerData = playerDataOptional.get();
                 playerData.setUntil(0L);
-                return playerAccessor.createOrUpdate(playerData)
+                return playerDao.createOrUpdate(playerData)
                         .thenRun(() -> sender.sendMessage(messages.getPlayerRemovedFromWhitelist()
                                 .replaceAll("%player%", removeNickname)));
             }
@@ -154,7 +154,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         }
 
         String nickname = strings[1];
-        playerAccessor.getPlayer(nickname).thenCompose(dataOptional -> {
+        playerDao.getPlayer(nickname).thenCompose(dataOptional -> {
             if (dataOptional.isPresent() && dataOptional.get().canPlay()) {
                 PlayerData data = dataOptional.get();
                 data.switchFreeze();
@@ -162,7 +162,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
                 String messageKey = data.isFrozen() ? messages.getPlayerFrozen() : messages.getPlayerUnfrozen();
                 sender.sendMessage(messageKey.replaceAll("%player%", nickname));
 
-                return playerAccessor.createOrUpdate(data);
+                return playerDao.createOrUpdate(data);
             } else {
                 sender.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%player%", nickname));
                 return CompletableFuture.completedFuture(null);
@@ -178,7 +178,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         }
 
         String checkNickname = strings[1];
-        playerAccessor.getPlayer(checkNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
+        playerDao.getPlayer(checkNickname).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (!player.canPlay()) {
                 sender.sendMessage(messages.getPlayerNotInWhitelist()
                         .replaceAll("%player%", checkNickname));
@@ -202,7 +202,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             return;
         }
 
-        playerAccessor.getPlayer(sender.getNickname()).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
+        playerDao.getPlayer(sender.getNickname()).thenAccept(playerOptional -> playerOptional.ifPresentOrElse(player -> {
             if (!player.canPlay()) {
                 sender.sendMessage(messages.getPlayerNotInWhitelist()
                         .replaceAll("%player%", sender.getNickname()));
@@ -225,13 +225,13 @@ public class CommandsExecutorImpl implements CommandsExecutor {
         }
 
         String addNickname = strings[1];
-        playerAccessor.getPlayer(addNickname).thenAccept(playerOptional -> {
+        playerDao.getPlayer(addNickname).thenAccept(playerOptional -> {
             if (playerOptional.isPresent()) {
                 sender.sendMessage(messages.getPlayerAlreadyInWhitelist().replaceAll("%player%", addNickname));
             } else {
                 long until = parseUntil(strings);
                 PlayerData newPlayerData = new PlayerData(addNickname, until);
-                playerAccessor.createOrUpdate(newPlayerData).thenRun(() -> {
+                playerDao.createOrUpdate(newPlayerData).thenRun(() -> {
                     String message = (until == -1L) ? messages.getSuccessfullyAdded().replaceAll("%player%", addNickname)
                             : messages.getSuccessfullyAddedForTime()
                             .replaceAll("%player%", addNickname)
@@ -263,7 +263,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
             return;
         }
         String nickname = strings[2];
-        playerAccessor.getPlayer(nickname).thenAccept(playerOptional -> {
+        playerDao.getPlayer(nickname).thenAccept(playerOptional -> {
             long until = System.currentTimeMillis();
             for (int i = 3; i < strings.length; i++) {
                 until += timeConvertor.getTimeMs(strings[i]);
@@ -301,7 +301,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     private void handleTimeSet(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
         player.setUntil(until);
-        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSetTime()
+        playerDao.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSetTime()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
     }
@@ -309,7 +309,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     private void handleTimeSetNull(WrappedCommandSender sender, String nickname, long until) {
         PlayerData player = new PlayerData(nickname, until);
         player.setUntil(until);
-        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
+        playerDao.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
     }
@@ -317,12 +317,12 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     private void handleTimeAdd(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
         if (!player.canPlay()) {
             player.setUntil(until);
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
+            playerDao.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
                     .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                     .replace("%player%", nickname)));
         } else {
             player.setUntil(player.calculateUntil() + (until - System.currentTimeMillis()));
-            playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getAddTime()
+            playerDao.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getAddTime()
                     .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                     .replace("%player%", nickname)));
         }
@@ -330,7 +330,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
 
     private void handleTimeAddNull(WrappedCommandSender sender, String nickname, long until) {
         PlayerData player = new PlayerData(nickname, until);
-        playerAccessor.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
+        playerDao.createOrUpdate(player).thenRun(() -> sender.sendMessage(messages.getSuccessfullyAddedForTime()
                 .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))
                 .replace("%player%", nickname)));
     }
@@ -338,7 +338,7 @@ public class CommandsExecutorImpl implements CommandsExecutor {
     private void handleTimeRemove(WrappedCommandSender sender, PlayerData player, String nickname, long until) {
         if (player.canPlay()) {
             player.setUntil(player.calculateUntil() - (until - System.currentTimeMillis()));
-            playerAccessor.createOrUpdate(player).thenRun(() -> {
+            playerDao.createOrUpdate(player).thenRun(() -> {
                 if ((player.calculateUntil() - (until - System.currentTimeMillis())) > System.currentTimeMillis()) {
                     sender.sendMessage(messages.getRemoveTime()
                             .replace("%time%", timeConvertor.getTimeLine(until - System.currentTimeMillis() + 1000L))

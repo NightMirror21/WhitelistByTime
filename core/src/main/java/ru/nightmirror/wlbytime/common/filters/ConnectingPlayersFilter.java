@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
-import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConnectingPlayersFilter implements Predicate<ConnectingPlayersFilter.ConnectingPlayer> {
 
-    PlayerAccessor playerAccessor;
+    PlayerDao playerDao;
     boolean caseSensitive;
     WhitelistByTime plugin;
 
@@ -22,13 +22,13 @@ public class ConnectingPlayersFilter implements Predicate<ConnectingPlayersFilte
     public boolean test(ConnectingPlayer connectingPlayer) {
         if (!plugin.isWhitelistEnabled()) return true;
 
-        return playerAccessor.getPlayer(connectingPlayer.getNickname())
+        return playerDao.getPlayer(connectingPlayer.getNickname())
                 .thenApply(playerOptional -> playerOptional.map(player -> {
                     if (!player.canPlay()) {
                         return false;
                     } else if (player.isFrozen() && plugin.getPluginConfig().isUnfreezeOnJoin()) {
                         player.switchFreeze();
-                        playerAccessor.createOrUpdate(player);
+                        playerDao.createOrUpdate(player);
                     }
                     return true;
                 }).orElse(false)).join();

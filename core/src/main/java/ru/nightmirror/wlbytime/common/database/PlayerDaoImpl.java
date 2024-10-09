@@ -15,16 +15,13 @@ import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.common.database.misc.PlayerDataMapper;
 import ru.nightmirror.wlbytime.common.database.misc.PlayerDataTable;
-import ru.nightmirror.wlbytime.interfaces.database.Database;
 import ru.nightmirror.wlbytime.interfaces.database.Mapper;
-import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
-import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
-import ru.nightmirror.wlbytime.interfaces.listener.PlayerListenersContainer;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 
+import java.io.Closeable;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -32,22 +29,17 @@ import java.util.concurrent.CompletionException;
 
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersContainer {
+public class PlayerDaoImpl implements PlayerDao, Closeable {
 
     final DatabaseSettings settings;
     final Boolean caseSensitive;
+    final Mapper<PlayerDataTable, PlayerData> mapper;
+    final AsyncLoadingCache<String, PlayerData> cache;
     @Getter
     boolean connected = false;
-
-    final Mapper<PlayerDataTable, PlayerData> mapper;
-
     JdbcPooledConnectionSource connection;
 
-    final AsyncLoadingCache<String, PlayerData> cache;
-
-    final List<PlayerListener> listeners = new ArrayList<>();
-
-    public DatabaseImpl(DatabaseSettings settings, Boolean caseSensitive) throws SQLException {
+    public PlayerDaoImpl(DatabaseSettings settings, Boolean caseSensitive) throws SQLException {
         this.settings = settings;
         this.caseSensitive = caseSensitive;
         com.j256.ormlite.logger.Logger.setGlobalLogLevel(Level.OFF);
@@ -93,18 +85,14 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
     }
 
     @Override
-    public CompletableFuture<Boolean> close() {
-        return CompletableFuture.supplyAsync(() -> {
-            if (isConnected()) {
-                try {
-                    connection.close();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                    return false;
-                }
+    public void close() {
+        if (isConnected()) {
+            try {
+                connection.close();
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
-            return true;
-        });
+        }
     }
 
     @Override
@@ -211,10 +199,5 @@ public class DatabaseImpl implements PlayerAccessor, Database, PlayerListenersCo
     @Override
     public List<PlayerData> getPlayersCached() {
         return cache.synchronous().asMap().values().stream().toList();
-    }
-
-    @Override
-    public void addListener(PlayerListener listener) {
-        listeners.add(listener);
     }
 }

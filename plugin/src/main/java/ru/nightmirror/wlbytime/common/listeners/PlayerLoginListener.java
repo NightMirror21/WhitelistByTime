@@ -11,7 +11,7 @@ import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
-import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
 
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 public class PlayerLoginListener implements EventListener {
 
     WhitelistByTime plugin;
-    PlayerAccessor playerAccessor;
+    PlayerDao playerDao;
     Predicate<ConnectingPlayersFilter.ConnectingPlayer> filter;
 
     @EventHandler
@@ -35,7 +35,7 @@ public class PlayerLoginListener implements EventListener {
 
     @EventHandler
     private void loadToCache(PlayerJoinEvent event) {
-        playerAccessor.loadPlayerToCache(event.getPlayer().getName());
+        playerDao.loadPlayerToCache(event.getPlayer().getName());
     }
 
     @Override

@@ -9,7 +9,7 @@ import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.TabCompleter;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
-import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class WhitelistTabCompleter implements TabCompleter {
     private static final String PERM_GETALL = "whitelistbytime.getall";
     private static final String PERM_TIME = "whitelistbytime.time";
 
-    PlayerAccessor playerAccessor;
+    PlayerDao playerDao;
     TimeUnitsConvertorSettings timeSettings;
     WhitelistByTime plugin;
 
@@ -68,12 +68,12 @@ public class WhitelistTabCompleter implements TabCompleter {
     }
 
     private void handleSecondArgument(WrappedCommandSender commandSender, String[] args, List<String> suggestions) {
-        List<PlayerData> inWhitelist = playerAccessor.getPlayersCached();
+        List<PlayerData> inWhitelist = playerDao.getPlayersCached();
         List<String> notInWhitelist = new ArrayList<>();
 
         if (!plugin.isWhitelistEnabled()) {
             for (String nickname : commandSender.getAllPlayerNicknamesOnServer()) {
-                if (playerAccessor.getPlayerCached(nickname).isEmpty()) {
+                if (playerDao.getPlayerCached(nickname).isEmpty()) {
                     notInWhitelist.add(nickname);
                 }
             }
@@ -114,7 +114,7 @@ public class WhitelistTabCompleter implements TabCompleter {
         }
         if (commandSender.hasPermission(PERM_TIME)) {
             if ("set".equals(args[1]) || "add".equals(args[1]) || "remove".equals(args[1])) {
-                suggestions.addAll(playerAccessor.getPlayersCached().stream().map(PlayerData::getNickname).toList());
+                suggestions.addAll(playerDao.getPlayersCached().stream().map(PlayerData::getNickname).toList());
             }
         }
     }

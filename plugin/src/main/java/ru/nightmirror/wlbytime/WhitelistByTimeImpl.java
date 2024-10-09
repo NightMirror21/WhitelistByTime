@@ -14,7 +14,7 @@ import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleterExecutor;
 import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
-import ru.nightmirror.wlbytime.common.database.DatabaseImpl;
+import ru.nightmirror.wlbytime.common.database.PlayerDaoImpl;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
 import ru.nightmirror.wlbytime.common.filters.OnlinePlayersFilter;
@@ -51,7 +51,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     @Getter
     ConfigsContainer configs;
 
-    DatabaseImpl database;
+    PlayerDaoImpl database;
     Switchable onlinePlayersFilter;
     PlaceholderHook placeholderHook;
 
@@ -147,7 +147,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
                 .params(getConfigs().getDatabase().getParams())
                 .build();
 
-        database = new DatabaseImpl(settings, configs.getSettings().isCaseSensitive());
+        database = new PlayerDaoImpl(settings, configs.getSettings().isCaseSensitive());
         database.loadPlayersToCache(Arrays.stream(getServer().getOfflinePlayers())
                 .map(OfflinePlayer::getName)
                 .filter(Objects::nonNull)
@@ -169,7 +169,6 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
 
     private void initChecker() {
         PlayerKicker playerKicker = new PlayerKicker(syncer, this, getConfigs().getSettings().isCaseSensitive(), getConfigs().getMessages().youNotInWhitelistKick);
-        database.addListener(playerKicker);
 
         onlinePlayersFilter = new OnlinePlayersFilter(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
         onlinePlayersFilter.start();

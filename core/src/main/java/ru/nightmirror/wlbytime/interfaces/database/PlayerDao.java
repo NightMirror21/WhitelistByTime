@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public interface PlayerAccessor {
+public interface PlayerDao {
     CompletableFuture<Optional<PlayerData>> getPlayer(@NotNull String nickname);
 
     Optional<PlayerData> getPlayerCached(@NotNull String nickname);

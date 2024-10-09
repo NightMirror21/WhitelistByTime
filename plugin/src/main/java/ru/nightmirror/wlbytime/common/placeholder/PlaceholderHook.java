@@ -11,7 +11,7 @@ import ru.nightmirror.wlbytime.common.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
-import ru.nightmirror.wlbytime.interfaces.database.PlayerAccessor;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
 
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
 public class PlaceholderHook extends PlaceholderExpansion {
 
     VersionGetter versionGetter;
-    PlayerAccessor playerAccessor;
+    PlayerDao playerDao;
     TimeConvertor timeConvertor;
     PlaceholdersConfig config;
 
@@ -41,13 +41,13 @@ public class PlaceholderHook extends PlaceholderExpansion {
     @Override
     public @Nullable String onPlaceholderRequest(Player player, @NotNull String params) {
         if (params.equalsIgnoreCase("in_whitelist")) {
-            String output =  playerAccessor.getPlayerCached(player.getName())
+            String output =  playerDao.getPlayerCached(player.getName())
                     .map(d -> d.isFrozen() ? config.getFrozen() : config.getInWhitelistTrue())
                     .orElse(config.getInWhitelistFalse());
 
             return ColorsConvertor.checkLegacy(output);
         } else if (params.equalsIgnoreCase("time_left")) {
-            String output = playerAccessor.getPlayerCached(player.getName())
+            String output = playerDao.getPlayerCached(player.getName())
                     .map(whitelistedPlayer -> timeConvertor.getTimeLine(whitelistedPlayer.calculateUntil() - System.currentTimeMillis()))
                     .orElse("");
 
