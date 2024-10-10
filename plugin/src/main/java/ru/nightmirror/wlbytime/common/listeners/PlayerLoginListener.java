@@ -8,11 +8,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersPredicate;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.interfaces.listener.EventListener;
+import ru.nightmirror.wlbytime.predicates.ConnectingPlayersPredicate;
 
 import java.util.List;
 import java.util.function.Predicate;

@@ -2,12 +2,15 @@ package ru.nightmirror.wlbytime.predicates;
 
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 
-import java.util.function.Predicate;
+public class PlayerAccessPredicate  {
 
-public class InactivePlayerPredicate implements Predicate<PlayerDao> {
-    @Override
     public boolean test(PlayerDao playerDao) {
         // todo implements
-        return false;
+        return true;
+    }
+
+    public boolean test(String nickname) {
+        // todo implements
+        return true;
     }
 }

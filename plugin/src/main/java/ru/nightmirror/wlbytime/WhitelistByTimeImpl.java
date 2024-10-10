@@ -17,7 +17,6 @@ import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
 import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.PlayerDaoImpl;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
-import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersPredicate;
 import ru.nightmirror.wlbytime.common.filters.InactivePlayerRemover;
 import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
@@ -26,6 +25,7 @@ import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
+import ru.nightmirror.wlbytime.predicates.ConnectingPlayersPredicate;
 
 import java.sql.SQLException;
 import java.time.Duration;
