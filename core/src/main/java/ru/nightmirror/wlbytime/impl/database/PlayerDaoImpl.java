@@ -22,10 +22,12 @@ import java.io.Closeable;
 import java.io.File;
 import java.sql.SQLException;
 import java.time.Duration;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
 
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -150,7 +152,7 @@ public class PlayerDaoImpl implements PlayerDao, Closeable {
     }
 
     @Override
-    public void loadPlayersToCache(@NotNull List<String> nicknames) {
+    public void loadPlayersToCache(@NotNull Set<String> nicknames) {
         nicknames.forEach(this::loadPlayerToCache);
     }
 
@@ -170,34 +172,20 @@ public class PlayerDaoImpl implements PlayerDao, Closeable {
         });
     }
 
-    private void invalidateFromCache(String nickname) {
-        if (caseSensitive) {
-            cache.synchronous().invalidate(nickname);
-        } else {
-            cache.synchronous()
-                    .asMap()
-                    .values()
-                    .stream()
-                    .map(PlayerData::getNickname)
-                    .filter(dataNickname -> dataNickname.equalsIgnoreCase(nickname))
-                    .forEach(dataNickname -> cache.synchronous().invalidate(dataNickname));
-        }
-    }
-
     @Override
-    public CompletableFuture<List<PlayerData>> getPlayers() {
+    public CompletableFuture<Set<PlayerData>> getPlayers() {
         return getDao().thenApply((dao) -> {
             try {
-                return dao.queryForAll().stream().map(mapper::toEntity).toList();
+                return dao.queryForAll().stream().map(mapper::toEntity).collect(Collectors.toSet());
             } catch (Exception exception) {
                 exception.printStackTrace();
-                return List.of();
+                return Set.of();
             }
         });
     }
 
     @Override
-    public List<PlayerData> getPlayersCached() {
-        return cache.synchronous().asMap().values().stream().toList();
+    public Set<PlayerData> getPlayersCached() {
+        return new HashSet<>(cache.synchronous().asMap().values());
     }
 }

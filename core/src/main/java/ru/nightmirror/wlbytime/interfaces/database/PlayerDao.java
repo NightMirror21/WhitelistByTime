@@ -3,8 +3,8 @@ package ru.nightmirror.wlbytime.interfaces.database;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.models.PlayerData;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 public interface PlayerDao {
@@ -14,11 +14,11 @@ public interface PlayerDao {
 
     void loadPlayerToCache(@NotNull String nickname);
 
-    void loadPlayersToCache(@NotNull List<String> nicknames);
+    void loadPlayersToCache(@NotNull Set<String> nicknames);
 
     CompletableFuture<Boolean> createOrUpdate(@NotNull PlayerData player);
 
-    CompletableFuture<List<PlayerData>> getPlayers();
+    CompletableFuture<Set<PlayerData>> getPlayers();
 
-    List<PlayerData> getPlayersCached();
+    Set<PlayerData> getPlayersCached();
 }
