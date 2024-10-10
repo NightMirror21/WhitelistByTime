@@ -1,15 +1,15 @@
-package ru.nightmirror.wlbytime.common.command;
+package ru.nightmirror.wlbytime.impl.command;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
-import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.TabCompleter;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
+import ru.nightmirror.wlbytime.models.PlayerData;
+import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class WhitelistTabCompleter implements TabCompleter {
+public class TabCompleterImpl implements TabCompleter {
     private static final String PERM_ADD = "whitelistbytime.add";
     private static final String PERM_SWITCHFREEZE = "whitelistbytime.switchfreeze";
     private static final String PERM_TURN = "whitelistbytime.turn";

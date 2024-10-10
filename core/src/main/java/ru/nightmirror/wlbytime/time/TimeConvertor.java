@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.covertors.time;
+package ru.nightmirror.wlbytime.time;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

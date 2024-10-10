@@ -8,24 +8,24 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
-import ru.nightmirror.wlbytime.common.command.CommandsExecutorImpl;
 import ru.nightmirror.wlbytime.common.command.WhitelistCommandExecutor;
-import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleter;
 import ru.nightmirror.wlbytime.common.command.WhitelistTabCompleterExecutor;
-import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
-import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
-import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
-import ru.nightmirror.wlbytime.common.database.PlayerDaoImpl;
-import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
-import ru.nightmirror.wlbytime.common.filters.InactivePlayerRemover;
 import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
+import ru.nightmirror.wlbytime.config.ConfigsContainer;
+import ru.nightmirror.wlbytime.filters.InactivePlayerRemover;
+import ru.nightmirror.wlbytime.impl.command.CommandsExecutorImpl;
+import ru.nightmirror.wlbytime.impl.command.TabCompleterImpl;
+import ru.nightmirror.wlbytime.impl.database.PlayerDaoImpl;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
+import ru.nightmirror.wlbytime.models.DatabaseSettings;
 import ru.nightmirror.wlbytime.predicates.ConnectingPlayersPredicate;
+import ru.nightmirror.wlbytime.time.TimeConvertor;
+import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
 
 import java.sql.SQLException;
 import java.time.Duration;
@@ -173,7 +173,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
         getServer().getPluginManager().registerEvents(new PlayerLoginListener(this, database, filter), this);
 
         getCommand("whitelist").setExecutor(new WhitelistCommandExecutor(new CommandsExecutorImpl(database, this, timeConvertor)));
-        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new WhitelistTabCompleter(database, timeSettings, this)));
+        getCommand("whitelist").setTabCompleter(new WhitelistTabCompleterExecutor(new TabCompleterImpl(database, timeSettings, this)));
     }
 
     private void initChecker() {

@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.database.misc;
+package ru.nightmirror.wlbytime.models;
 
 import ru.nightmirror.wlbytime.interfaces.database.Mapper;
 

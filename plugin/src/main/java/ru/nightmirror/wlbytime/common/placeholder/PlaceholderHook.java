@@ -7,12 +7,12 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import ru.nightmirror.wlbytime.common.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
+import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
+import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

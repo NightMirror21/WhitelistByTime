@@ -1,14 +1,14 @@
-package ru.nightmirror.wlbytime.common.command;
+package ru.nightmirror.wlbytime.impl.command;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.common.covertors.time.TimeConvertor;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.command.CommandsExecutor;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
+import ru.nightmirror.wlbytime.models.PlayerData;
+import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 import java.util.ArrayList;
 import java.util.Comparator;

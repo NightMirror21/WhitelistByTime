@@ -1,10 +1,10 @@
-package ru.nightmirror.wlbytime.common.filters;
+package ru.nightmirror.wlbytime.filters;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.interfaces.misc.PlayersOnSeverAccessor;
+import ru.nightmirror.wlbytime.models.PlayerData;
 
 import java.util.List;
 

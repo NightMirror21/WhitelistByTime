@@ -9,12 +9,12 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.listener.PlayerListener;
 import ru.nightmirror.wlbytime.interfaces.misc.PlayersOnSeverAccessor;
+import ru.nightmirror.wlbytime.models.PlayerData;
 
 import java.util.List;
 

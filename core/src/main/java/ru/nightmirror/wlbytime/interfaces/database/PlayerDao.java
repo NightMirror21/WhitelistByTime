@@ -1,7 +1,7 @@
 package ru.nightmirror.wlbytime.interfaces.database;
 
 import org.jetbrains.annotations.NotNull;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
+import ru.nightmirror.wlbytime.models.PlayerData;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.database;
+package ru.nightmirror.wlbytime.impl.database;
 
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -11,12 +11,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
-import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerDataMapper;
-import ru.nightmirror.wlbytime.common.database.misc.PlayerDataTable;
 import ru.nightmirror.wlbytime.interfaces.database.Mapper;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
+import ru.nightmirror.wlbytime.models.DatabaseSettings;
+import ru.nightmirror.wlbytime.models.PlayerData;
+import ru.nightmirror.wlbytime.models.PlayerDataMapper;
+import ru.nightmirror.wlbytime.models.PlayerDataTable;
 
 import java.io.Closeable;
 import java.io.File;

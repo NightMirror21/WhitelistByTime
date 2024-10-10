@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.config.configs;
+package ru.nightmirror.wlbytime.config.configs;
 
 import lombok.AccessLevel;
 import lombok.Getter;

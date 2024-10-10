@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.database.misc;
+package ru.nightmirror.wlbytime.models;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;

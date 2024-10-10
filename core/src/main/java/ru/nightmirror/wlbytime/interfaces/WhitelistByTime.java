@@ -1,8 +1,8 @@
 package ru.nightmirror.wlbytime.interfaces;
 
-import ru.nightmirror.wlbytime.common.config.ConfigsContainer;
-import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.common.config.configs.SettingsConfig;
+import ru.nightmirror.wlbytime.config.ConfigsContainer;
+import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
+import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
 import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
 
 public interface WhitelistByTime extends VersionGetter {

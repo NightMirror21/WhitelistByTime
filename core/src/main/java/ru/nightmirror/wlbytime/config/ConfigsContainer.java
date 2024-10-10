@@ -1,13 +1,13 @@
-package ru.nightmirror.wlbytime.common.config;
+package ru.nightmirror.wlbytime.config;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.common.config.configs.DatabaseConfig;
-import ru.nightmirror.wlbytime.common.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.common.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.common.config.configs.SettingsConfig;
+import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
+import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
+import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
+import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
 
 import java.io.File;
 
