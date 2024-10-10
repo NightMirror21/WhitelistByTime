@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.interfaces.database;
+package ru.nightmirror.wlbytime.misc;
 
 public interface Mapper<T, E> {
     E toEntity(T table);

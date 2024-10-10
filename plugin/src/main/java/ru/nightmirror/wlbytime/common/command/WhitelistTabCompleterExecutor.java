@@ -7,7 +7,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.common.command.wrappers.WrapperCommandSenderImpl;
-import ru.nightmirror.wlbytime.interfaces.command.wrappers.TabCompleter;
+import ru.nightmirror.wlbytime.interfaces.command.TabCompleter;
 
 import java.util.List;
 

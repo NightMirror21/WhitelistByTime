@@ -1,8 +1,8 @@
 package ru.nightmirror.wlbytime.models;
 
-import ru.nightmirror.wlbytime.interfaces.database.Mapper;
+import ru.nightmirror.wlbytime.interfaces.database.PlayerDataMapper;
 
-public class PlayerDataMapper implements Mapper<PlayerDataTable, PlayerData> {
+public class PlayerDataMapperImpl implements PlayerDataMapper {
     @Override
     public PlayerData toEntity(PlayerDataTable table) {
         return new PlayerData(table.getId(), table.getNickname(), table.getUntil(), table.getFrozenAt());

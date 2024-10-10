@@ -11,7 +11,7 @@ import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
-import ru.nightmirror.wlbytime.interfaces.misc.VersionGetter;
+import ru.nightmirror.wlbytime.misc.VersionGetter;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 @RequiredArgsConstructor

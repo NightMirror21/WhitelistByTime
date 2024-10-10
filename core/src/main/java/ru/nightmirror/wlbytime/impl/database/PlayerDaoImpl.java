@@ -11,11 +11,11 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
-import ru.nightmirror.wlbytime.interfaces.database.Mapper;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
+import ru.nightmirror.wlbytime.misc.Mapper;
 import ru.nightmirror.wlbytime.models.DatabaseSettings;
 import ru.nightmirror.wlbytime.models.PlayerData;
-import ru.nightmirror.wlbytime.models.PlayerDataMapper;
+import ru.nightmirror.wlbytime.models.PlayerDataMapperImpl;
 import ru.nightmirror.wlbytime.models.PlayerDataTable;
 
 import java.io.Closeable;
@@ -43,7 +43,7 @@ public class PlayerDaoImpl implements PlayerDao, Closeable {
         this.settings = settings;
         this.caseSensitive = caseSensitive;
         com.j256.ormlite.logger.Logger.setGlobalLogLevel(Level.OFF);
-        mapper = new PlayerDataMapper();
+        mapper = new PlayerDataMapperImpl();
         if (!createConnection()) throw new SQLException("Can't create connection");
         cache = Caffeine.newBuilder()
                 .refreshAfterWrite(Duration.ofMinutes(5))

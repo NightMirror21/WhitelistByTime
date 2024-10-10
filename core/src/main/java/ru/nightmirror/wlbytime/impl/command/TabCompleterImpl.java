@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
-import ru.nightmirror.wlbytime.interfaces.command.wrappers.TabCompleter;
+import ru.nightmirror.wlbytime.interfaces.command.TabCompleter;
 import ru.nightmirror.wlbytime.interfaces.command.wrappers.WrappedCommandSender;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.models.PlayerData;
