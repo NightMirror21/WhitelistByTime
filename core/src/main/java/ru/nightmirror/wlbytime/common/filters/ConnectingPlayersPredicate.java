@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ConnectingPlayersFilter implements Predicate<ConnectingPlayersFilter.ConnectingPlayer> {
+public class ConnectingPlayersPredicate implements Predicate<ConnectingPlayersPredicate.ConnectingPlayer> {
 
     PlayerDao playerDao;
     boolean caseSensitive;

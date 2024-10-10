@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import ru.nightmirror.wlbytime.common.convertor.ColorsConvertor;
-import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
+import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersPredicate;
 import ru.nightmirror.wlbytime.common.utils.ComponentUtils;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
@@ -23,11 +23,11 @@ public class PlayerLoginListener implements EventListener {
 
     WhitelistByTime plugin;
     PlayerDao playerDao;
-    Predicate<ConnectingPlayersFilter.ConnectingPlayer> filter;
+    Predicate<ConnectingPlayersPredicate.ConnectingPlayer> filter;
 
     @EventHandler
     private void allowOrDisallow(AsyncPlayerPreLoginEvent event) {
-        if (!filter.test(new ConnectingPlayersFilter.ConnectingPlayer(event.getName(), event.getUniqueId()))) {
+        if (!filter.test(new ConnectingPlayersPredicate.ConnectingPlayer(event.getName(), event.getUniqueId()))) {
             List<Component> message = ColorsConvertor.convert(plugin.getMessages().getYouNotInWhitelistKick());
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, ComponentUtils.join(message, Component.text("\n")));
         }
