@@ -22,7 +22,7 @@ public class PlayerData {
     public PlayerData(@NotNull String nickname, @NotNull Long until) {
         this.nickname = nickname;
         this.until = until;
-        frozenAt = null;
+        this.frozenAt = null;
     }
 
     public State getState() {
@@ -31,26 +31,22 @@ public class PlayerData {
 
     public void setUntil(Long until) {
         this.until = until;
-
         if (isFrozen()) {
             frozenAt = System.currentTimeMillis();
         }
     }
 
-    public Long calculateUntil() {
-        return frozenAt == null ? until : (until - frozenAt + System.currentTimeMillis());
+    public Long calculateElapsedTime() {
+        long currentTime = System.currentTimeMillis();
+        return frozenAt == null ? until : (until - frozenAt + currentTime);
     }
 
     public boolean isFrozen() {
-        return getState().equals(State.FROZEN);
+        return isState(State.FROZEN);
     }
 
-    public boolean isNotInWhitelist() {
-        return getState().equals(State.NOT_IN_WHITELIST);
-    }
-
-    public boolean isForever() {
-        return getState().equals(State.FOREVER);
+    private boolean isState(State state) {
+        return getState().equals(state);
     }
 
     public void setNotInWhitelist() {
@@ -65,19 +61,20 @@ public class PlayerData {
     }
 
     public boolean canPlay() {
-        return isForever() || calculateUntil() > System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
+        return isState(State.FOREVER) || calculateElapsedTime() > currentTime;
     }
 
-    public void switchFreeze() {
-        if (isForever()) {
+    public void toggleFrozenState() {
+        long currentTime = System.currentTimeMillis();
+        if (isState(State.FOREVER)) {
             return;
         }
-
         if (isFrozen()) {
-            until = calculateUntil();
+            until = calculateElapsedTime();
             frozenAt = null;
         } else {
-            frozenAt = System.currentTimeMillis();
+            frozenAt = currentTime;
         }
     }
 }
