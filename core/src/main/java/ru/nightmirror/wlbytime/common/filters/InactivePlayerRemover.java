@@ -1,31 +1,22 @@
 package ru.nightmirror.wlbytime.common.filters;
 
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.common.database.misc.PlayerData;
-import ru.nightmirror.wlbytime.interfaces.checker.Switchable;
 import ru.nightmirror.wlbytime.interfaces.database.PlayerDao;
 import ru.nightmirror.wlbytime.interfaces.misc.PlayersOnSeverAccessor;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor
-public class OnlinePlayersFilter implements Switchable, Runnable {
+public class InactivePlayerRemover implements Runnable {
 
     PlayerDao playerDao;
     PlayersOnSeverAccessor playersOnSeverAccessor;
-    Duration delay;
-    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 
-    @Override
-    public void start() {
-        executor.scheduleWithFixedDelay(this, delay.toMillis(), delay.toMillis(), TimeUnit.MILLISECONDS);
+    public InactivePlayerRemover(PlayerDao playerDao, PlayersOnSeverAccessor playersOnSeverAccessor) {
+        this.playerDao = playerDao;
+        this.playersOnSeverAccessor = playersOnSeverAccessor;
     }
 
     @Override
@@ -52,10 +43,5 @@ public class OnlinePlayersFilter implements Switchable, Runnable {
                 }
             }
         }).join();
-    }
-
-    @Override
-    public void stop() {
-        executor.shutdown();
     }
 }

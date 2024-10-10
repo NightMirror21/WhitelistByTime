@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,7 @@ import ru.nightmirror.wlbytime.common.covertors.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.common.database.PlayerDaoImpl;
 import ru.nightmirror.wlbytime.common.database.misc.DatabaseSettings;
 import ru.nightmirror.wlbytime.common.filters.ConnectingPlayersFilter;
-import ru.nightmirror.wlbytime.common.filters.OnlinePlayersFilter;
+import ru.nightmirror.wlbytime.common.filters.InactivePlayerRemover;
 import ru.nightmirror.wlbytime.common.listeners.PlayerKicker;
 import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
@@ -25,13 +26,15 @@ import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
 import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
 import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
-import ru.nightmirror.wlbytime.interfaces.checker.Switchable;
 
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,12 +55,16 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     ConfigsContainer configs;
 
     PlayerDaoImpl database;
-    Switchable onlinePlayersFilter;
     PlaceholderHook placeholderHook;
 
+    ScheduledExecutorService scheduler;
+
     @Override
+    @SneakyThrows
     public void onEnable() {
         log = getLogger();
+
+        scheduler = Executors.newSingleThreadScheduledExecutor();
 
         checkCompatibility();
 
@@ -95,12 +102,14 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     }
 
     @Override
+    @SneakyThrows
     public void onDisable() {
         HandlerList.unregisterAll(this);
 
         if (placeholderHook != null) placeholderHook.unregister();
-        if (onlinePlayersFilter != null) onlinePlayersFilter.stop();
         if (database != null) database.close();
+
+        scheduler.shutdown();
 
         info("Disabled");
     }
@@ -170,8 +179,9 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     private void initChecker() {
         PlayerKicker playerKicker = new PlayerKicker(syncer, this, getConfigs().getSettings().isCaseSensitive(), getConfigs().getMessages().youNotInWhitelistKick);
 
-        onlinePlayersFilter = new OnlinePlayersFilter(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
-        onlinePlayersFilter.start();
+        Runnable inactivePlayerRemover = new InactivePlayerRemover(database, playerKicker, Duration.of(getConfigs().getSettings().checkerDelay, ChronoUnit.MILLIS));
+        long delayBetweenChecksInMs = getConfigs().getSettings().getCheckerDelay();
+        scheduler.scheduleWithFixedDelay(inactivePlayerRemover, delayBetweenChecksInMs, delayBetweenChecksInMs, TimeUnit.MILLISECONDS);
     }
 
     private void hookPlaceholder() {
