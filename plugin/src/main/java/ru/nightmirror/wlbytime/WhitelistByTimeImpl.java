@@ -15,7 +15,7 @@ import ru.nightmirror.wlbytime.common.listeners.PlayerLoginListener;
 import ru.nightmirror.wlbytime.common.listeners.WhitelistCmdListener;
 import ru.nightmirror.wlbytime.common.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.common.utils.BukkitSyncer;
-import ru.nightmirror.wlbytime.common.utils.MetricsLoader;
+import ru.nightmirror.wlbytime.common.utils.MetricsUtils;
 import ru.nightmirror.wlbytime.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.filters.InactivePlayerRemover;
 import ru.nightmirror.wlbytime.impl.command.CommandsExecutorImpl;
@@ -197,11 +197,7 @@ public class WhitelistByTimeImpl extends JavaPlugin implements WhitelistByTime {
     }
 
     private void initMetrics() {
-        try {
-            new MetricsLoader(this);
-        } catch (Exception exception) {
-            info("Failed to start collecting metrics. The plugin will continue working, but metrics will not be collected.");
-        }
+        MetricsUtils.tryToLoad(this);
     }
 
     @Override
