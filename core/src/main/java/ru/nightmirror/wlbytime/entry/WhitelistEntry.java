@@ -102,6 +102,24 @@ public class WhitelistEntry {
         return new Timestamp(until);
     }
 
+    public long getRemainingTime() {
+        if (isFrozen()) {
+            throw new UnsupportedOperationException("Entry is frozen");
+        }
+        if (isForever()) {
+            throw new UnsupportedOperationException("Entry is forever");
+        }
+        return until - System.currentTimeMillis();
+    }
+
+    public long getRemainingTimeOfFreeze() {
+        if (!isFrozen()) {
+            throw new UnsupportedOperationException("Entry is not frozen");
+        }
+        return frozenAt.map(time -> time - System.currentTimeMillis())
+                .orElseThrow(() -> new UnsupportedOperationException("Entry is not frozen"));
+    }
+
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
     @Getter
     @RequiredArgsConstructor
