@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.convertor;
+package ru.nightmirror.wlbytime.common.utils;
 
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 @UtilityClass
-public class ColorsConverter {
+public class ColorsUtils {
     private static boolean legacyColorsNotified = false;
 
     private static final List<String> LEGACY_COLOR_WARNINGS = List.of(
@@ -39,7 +39,7 @@ public class ColorsConverter {
     );
 
     public static List<Component> convert(List<String> messages) {
-        return messages.stream().map(ColorsConverter::convertMessage).toList();
+        return messages.stream().map(ColorsUtils::convertMessage).toList();
     }
 
     public static Component convertMessage(String message) {

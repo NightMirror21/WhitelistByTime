@@ -46,7 +46,7 @@ public class PlayerKicker implements PlayerListener, PlayersOnSeverAccessor {
             if (toKick) {
                 syncer.sync(() -> {
                     List<Component> message = ColorsConvertor.convert(kickMessage);
-                    player.kick(ComponentUtils.join(message, Component.text("\n")), PlayerKickEvent.Cause.WHITELIST);
+                    player.kick(ComponentUtils.joinWithDelimiter(message), PlayerKickEvent.Cause.WHITELIST);
                 });
             }
         });
