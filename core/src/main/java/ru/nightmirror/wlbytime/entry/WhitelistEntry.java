@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.models;
+package ru.nightmirror.wlbytime.entry;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
