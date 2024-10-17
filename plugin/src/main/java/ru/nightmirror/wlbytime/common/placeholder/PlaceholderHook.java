@@ -15,7 +15,7 @@ import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PlaceholderHook extends PlaceholderExpansion {
+public final class PlaceholderHook extends PlaceholderExpansion {
     private static final String EMPTY = "";
     private static final String IN_WHITELIST_PARAM = "in_whitelist";
     private static final String TIME_LEFT_PARAM = "time_left";
