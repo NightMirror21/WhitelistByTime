@@ -42,7 +42,7 @@ public class WrapperCommandSenderImpl implements WrappedCommandSender {
 
     @Override
     public void sendMessage(@NotNull String message) {
-        commandSender.sendMessage(ColorsConvertor.convert(message));
+        commandSender.sendMessage(ColorsConvertor.convertMessage(message));
     }
 
     @Override
