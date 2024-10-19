@@ -3,21 +3,21 @@ package ru.nightmirror.wlbytime.impl.finder;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.entry.WhitelistEntry;
-import ru.nightmirror.wlbytime.interfaces.database.WhitelistEntryDao;
-import ru.nightmirror.wlbytime.interfaces.finder.WhitelistEntryFinder;
+import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.interfaces.database.EntryDao;
+import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 
 import java.util.Optional;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class WhitelistEntryFinderImpl implements WhitelistEntryFinder {
+public class EntryFinderImpl implements EntryFinder {
 
     boolean caseSensitive;
-    WhitelistEntryDao dao;
+    EntryDao dao;
 
     @Override
-    public Optional<WhitelistEntry> find(String nickname) {
+    public Optional<Entry> find(String nickname) {
         if (caseSensitive) {
             return dao.get(nickname);
         } else {

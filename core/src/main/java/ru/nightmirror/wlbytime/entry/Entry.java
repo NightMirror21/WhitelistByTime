@@ -12,7 +12,7 @@ import java.util.Arrays;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @RequiredArgsConstructor
-public class WhitelistEntry {
+public class Entry {
     @Getter
     long id;
     @Getter

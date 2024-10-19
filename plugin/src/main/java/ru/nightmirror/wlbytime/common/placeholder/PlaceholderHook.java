@@ -8,8 +8,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.entry.WhitelistEntry;
-import ru.nightmirror.wlbytime.interfaces.finder.WhitelistEntryFinder;
+import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 @RequiredArgsConstructor
@@ -19,7 +19,7 @@ public final class PlaceholderHook extends PlaceholderExpansion {
     private static final String IN_WHITELIST_PARAM = "in_whitelist";
     private static final String TIME_LEFT_PARAM = "time_left";
 
-    WhitelistEntryFinder finder;
+    EntryFinder finder;
     TimeConvertor timeConvertor;
     PlaceholdersConfig config;
     String version;
@@ -45,7 +45,7 @@ public final class PlaceholderHook extends PlaceholderExpansion {
             return EMPTY;
         }
 
-        WhitelistEntry entry = finder.find(player.getName()).orElse(null);
+        Entry entry = finder.find(player.getName()).orElse(null);
         if (entry == null) {
             return config.getInWhitelistFalse();
         }
@@ -57,7 +57,7 @@ public final class PlaceholderHook extends PlaceholderExpansion {
         };
     }
 
-    private String handleInWhitelistParam(WhitelistEntry entry) {
+    private String handleInWhitelistParam(Entry entry) {
         if (entry.isFrozen()) {
             return config.getFrozen();
         } else if (entry.isActive()) {
@@ -67,7 +67,7 @@ public final class PlaceholderHook extends PlaceholderExpansion {
         }
     }
 
-    private String handleTimeLeftParam(WhitelistEntry entry) {
+    private String handleTimeLeftParam(Entry entry) {
         long remainingTime;
         String output;
 

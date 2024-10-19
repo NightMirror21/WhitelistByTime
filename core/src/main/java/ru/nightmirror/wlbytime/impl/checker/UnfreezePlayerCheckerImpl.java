@@ -3,19 +3,19 @@ package ru.nightmirror.wlbytime.impl.checker;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.entry.WhitelistEntry;
+import ru.nightmirror.wlbytime.entry.Entry;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezePlayerChecker;
-import ru.nightmirror.wlbytime.interfaces.database.WhitelistEntryDao;
+import ru.nightmirror.wlbytime.interfaces.database.EntryDao;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class UnfreezePlayerCheckerImpl implements UnfreezePlayerChecker {
 
     boolean unfreezeIfFrozen;
-    WhitelistEntryDao dao;
+    EntryDao dao;
 
     @Override
-    public void unfreezeIfRequired(WhitelistEntry entry) {
+    public void unfreezeIfRequired(Entry entry) {
         if (unfreezeIfFrozen && entry.isFrozen()) {
             entry.unfreeze();
             dao.update(entry);

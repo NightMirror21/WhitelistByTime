@@ -1,7 +1,7 @@
 package ru.nightmirror.wlbytime.interfaces.checker;
 
-import ru.nightmirror.wlbytime.entry.WhitelistEntry;
+import ru.nightmirror.wlbytime.entry.Entry;
 
 public interface UnfreezePlayerChecker {
-    void unfreezeIfRequired(WhitelistEntry entry);
+    void unfreezeIfRequired(Entry entry);
 }
