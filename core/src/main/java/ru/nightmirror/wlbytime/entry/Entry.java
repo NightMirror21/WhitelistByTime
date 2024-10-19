@@ -1,10 +1,8 @@
 package ru.nightmirror.wlbytime.entry;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -12,13 +10,20 @@ import java.util.Arrays;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @RequiredArgsConstructor
+@Builder
+@EqualsAndHashCode(of = {"id", "nickname"})
 public class Entry {
+
     @Getter
     long id;
+
     @Getter
     String nickname;
     long until;
-    Long frozenAt; // Changed from Optional<Long> to Long
+
+    @Nullable
+    @Builder.Default
+    Long frozenAt = null;
 
     private State getState() {
         return State.get(until);
