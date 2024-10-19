@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.entry.WhitelistEntry;
-import ru.nightmirror.wlbytime.interfaces.WhitelistByTime;
 import ru.nightmirror.wlbytime.interfaces.finder.WhitelistEntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
@@ -27,7 +26,7 @@ public final class PlaceholderHook extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getIdentifier() {
-        return WhitelistByTime.getPAPIIdentifier();
+        return "wlbytime";
     }
 
     @Override
