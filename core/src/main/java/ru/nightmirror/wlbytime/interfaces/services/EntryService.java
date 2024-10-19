@@ -5,7 +5,7 @@ import ru.nightmirror.wlbytime.entry.Entry;
 public interface EntryService {
     void remove(Entry entry);
 
-    Entry add(String nickname);
+    Entry create(String nickname);
 
-    Entry add(String nickname, long milliseconds);
+    Entry create(String nickname, long milliseconds);
 }
