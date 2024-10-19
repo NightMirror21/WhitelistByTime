@@ -19,53 +19,53 @@ public class MessagesConfig extends YamlSerializable {
     private static final SerializerConfig CONFIG = new SerializerConfig.Builder()
             .build();
 
-    String pluginReloaded = "&6Plugin reloaded!";
-    String notPermission = "&cYou do not have permission!";
+    String pluginReloaded = "Plugin reloaded!";
+    String notPermission = "You do not have permission!";
 
     @NewLine
-    String whitelistEnabled = "&bWhitelistByTime enabled";
-    String whitelistAlreadyEnabled = "&bWhitelistByTime already enabled";
-    String whitelistDisabled = "&bWhitelistByTime disabled";
-    String whitelistAlreadyDisabled = "&bWhitelistByTime already disabled";
+    String whitelistEnabled = "WhitelistByTime enabled";
+    String whitelistAlreadyEnabled = "WhitelistByTime already enabled";
+    String whitelistDisabled = "WhitelistByTime disabled";
+    String whitelistAlreadyDisabled = "WhitelistByTime already disabled";
 
     @NewLine
     List<String> youNotInWhitelistKick = List.of(
-            "&6Sorry, but you are not in whitelist",
+            "Sorry, but you are not in whitelist",
             "Bye!"
     );
 
     @NewLine
-    String playerRemovedFromWhitelist = "&e%player% &fsuccessfully removed from whitelist";
-    String playerAlreadyInWhitelist = "&e%player% &falready in whitelist";
-    String playerNotInWhitelist = "&e%player% &fnot in whitelist";
+    String playerRemovedFromWhitelist = "%player% successfully removed from whitelist";
+    String playerAlreadyInWhitelist = "%player% already in whitelist";
+    String playerNotInWhitelist = "%player% not in whitelist";
 
     @NewLine
     @Comment(value = {
             @CommentValue("For command with time")
     }, at = Comment.At.PREPEND)
-    String successfullyAddedForTime = "&b%player% &fadded to whitelist for &b%time%";
-    String stillInWhitelistForTime = "&b%player% &fwill be in whitelist still &b%time%";
-    String checkMeStillInWhitelistForTime = "&fYou will remain on the whitelist for &b%time%";
+    String successfullyAddedForTime = "%player% added to whitelist for %time%";
+    String stillInWhitelistForTime = "%player% will be in whitelist still %time%";
+    String checkMeStillInWhitelistForTime = "You will remain on the whitelist for %time%";
 
     @NewLine
     @Comment(value = {
             @CommentValue("For command without time")
     }, at = Comment.At.PREPEND)
-    String successfullyAdded = "&b%player% &fadded to whitelist forever";
-    String stillInWhitelist = "&b%player% &fwill be in whitelist forever";
-    String checkMeStillInWhitelist = "&fYou are permanently whitelisted";
+    String successfullyAdded = "%player% added to whitelist forever";
+    String stillInWhitelist = "%player% will be in whitelist forever";
+    String checkMeStillInWhitelist = "You are permanently whitelisted";
 
     @NewLine
-    String listTitle = "&b> Whitelist:";
-    String listPlayer = "&b| &f%player% &7[%time%]";
-    String listEmpty = "&bWhitelist is empty";
-    String listPageableCommands = "&fPage &b%current-page% &f/ &b%max-page% &7(To show another page run /whitelist getall <page>)";
-    String pageNotExists = "&fPage &b%page% &fnot exists";
+    String listTitle = "> Whitelist:";
+    String listPlayer = "| %player% [%time%]";
+    String listEmpty = "Whitelist is empty";
+    String listPageableCommands = "Page %current-page% / %max-page% (To show another page run /whitelist getall <page>)";
+    String pageNotExists = "Page %page% not exists";
 
     @NewLine
-    String setTime = "Now &b%player% &fwill be in whitelist for &b%time%";
-    String addTime = "Added &b%time% &fto &b%player%";
-    String removeTime = "Removed &b%time% &ffrom &b%player%";
+    String setTime = "Now %player% will be in whitelist for %time%";
+    String addTime = "Added %time% to %player%";
+    String removeTime = "Removed %time% from %player%";
 
     @NewLine
     String forever = "forever";
@@ -73,24 +73,24 @@ public class MessagesConfig extends YamlSerializable {
     String expired = "expired";
 
     @NewLine
-    String playerUnfrozen = "Player &f%player% &funfrozen";
-    String playerFrozen = "Player &f%player% &ffrozen";
+    String playerUnfrozen = "Player %player% unfrozen";
+    String playerFrozen = "Player %player% frozen";
 
     @NewLine
     List<String> help = List.of(
-            "&b> WhitelistByTime - Help",
-            "&b| &f/whitelist on/off",
-            "&b| &f/whitelist add [nickname] (time)",
-            "&b| &f/whitelist remove [nickname]",
-            "&b| &f/whitelist check [nickname]",
-            "&b| &f/whitelist checkme",
-            "&b| &f/whitelist reload",
-            "&b| &f/whitelist getall",
-            "&b| &f/whitelist switchfreeze [nickname]",
-            "&b| &f/whitelist time set/add/remove [nickname] [time]",
-            "&b| &f(time) - time for which the player will be added to the whitelist",
-            "&b| &fExample: 2d 3h 10m",
-            "&b| &fLeave this value empty if you want to add player forever"
+            "> WhitelistByTime - Help",
+            "| /whitelist on/off",
+            "| /whitelist add [nickname] (time)",
+            "| /whitelist remove [nickname]",
+            "| /whitelist check [nickname]",
+            "| /whitelist checkme",
+            "| /whitelist reload",
+            "| /whitelist getall",
+            "| /whitelist switchfreeze [nickname]",
+            "| /whitelist time set/add/remove [nickname] [time]",
+            "| (time) - time for which the player will be added to the whitelist",
+            "| Example: 2d 3h 10m",
+            "| Leave this value empty if you want to add player forever"
     );
 
     public MessagesConfig() {
