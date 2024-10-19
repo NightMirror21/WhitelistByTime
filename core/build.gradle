@@ -3,19 +3,20 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.2'
 }
 
-def javaVersion = JavaVersion.VERSION_21;
-sourceCompatibility = javaVersion;
-targetCompatibility = javaVersion;
+def javaVersion = JavaVersion.VERSION_21
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
 
 group 'ru.nightmirror'
 version = rootProject.version
 
 repositories {
     mavenCentral()
+    maven { url = uri('https://repo.maven.apache.org/maven2/') }
+}
 
-    maven {
-        url = uri('https://repo.maven.apache.org/maven2/')
-    }
+configurations {
+    mockitoAgent
 }
 
 dependencies {
@@ -23,22 +24,42 @@ dependencies {
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
     implementation 'com.j256.ormlite:ormlite-core:6.1'
     implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
+
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
     testImplementation 'org.xerial:sqlite-jdbc:3.42.0.0'
     testImplementation 'net.elytrium:serializer:1.1.1'
     testImplementation 'com.github.ben-manes.caffeine:caffeine:3.1.6'
     testImplementation 'com.j256.ormlite:ormlite-core:6.1'
     testImplementation 'com.j256.ormlite:ormlite-jdbc:6.1'
-    testCompileOnly 'org.jetbrains:annotations:24.0.1'
-    testCompileOnly 'org.projectlombok:lombok:1.18.26'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
+    testImplementation 'org.junit.vintage:junit-vintage-engine:5.10.0'
+    testImplementation 'org.assertj:assertj-core:3.24.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    mockitoAgent 'org.mockito:mockito-core:5.14.2'
 }
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+
+        doFirst {
+            def mockitoCoreJar = configurations.mockitoAgent.find { it.name.contains('mockito-core') }
+            if (mockitoCoreJar) {
+                jvmArgs "-javaagent:${mockitoCoreJar}"
+                jvmArgs '-XX:+EnableDynamicAgentLoading', '-Xshare:off'
+            } else {
+                throw new GradleException("Mockito agent jar not found.")
+            }
+        }
+    }
 }

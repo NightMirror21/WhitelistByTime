@@ -8,24 +8,16 @@ import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class TimeConvertor {
-    private static final long YEAR_IN_MS = 31536000000L;
-    private static final long MONTH_IN_MS = 2592000000L;
-    private static final long WEEK_IN_MS = 604800000L;
-    private static final long DAY_IN_MS = 86400000L;
-    private static final long HOUR_IN_MS = 3600000L;
-    private static final long MINUTE_IN_MS = 60000L;
+public final class TimeConvertor {
+    static long YEAR_IN_MS = 31536000000L;
+    static long MONTH_IN_MS = 2592000000L;
+    static long WEEK_IN_MS = 604800000L;
+    static long DAY_IN_MS = 86400000L;
+    static long HOUR_IN_MS = 3600000L;
+    static long MINUTE_IN_MS = 60000L;
+    static long SECOND_IN_MS = 1000L;
 
     TimeUnitsConvertorSettings settings;
-
-    public static boolean checkLong(String number) {
-        try {
-            Long.parseLong(number);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
 
     private static boolean endsWith(String string, Set<String> patterns) {
         return patterns.stream().anyMatch(string::endsWith);
@@ -36,6 +28,15 @@ public class TimeConvertor {
             string = string.replaceAll(pattern, "");
         }
         return string;
+    }
+
+    private static boolean checkLong(String number) {
+        try {
+            Long.parseLong(number);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public String getTimeLine(long ms) {
@@ -59,10 +60,11 @@ public class TimeConvertor {
         line = appendTimeUnit(line, ms, MINUTE_IN_MS, settings.getFirstMinuteOrDefault());
         ms %= MINUTE_IN_MS;
 
-        if (ms != 0L) line += (ms / 1000L) + settings.getFirstSecondOrDefault();
-        if (ms < 0L) line = settings.getForever();
+        if (ms != 0L) {
+            line += (ms / 1000L) + settings.getFirstSecondOrDefault();
+        }
 
-        return line.trim();
+        return ms < 0L ? settings.getForever() : line.trim();
     }
 
     private String appendTimeUnit(String line, long ms, long unitMs, String unitLabel) {
@@ -75,23 +77,23 @@ public class TimeConvertor {
     public long getTimeMs(String line) {
         long time = 0;
         for (String timeStr : line.split(" ")) {
-            if (endsWith(timeStr, settings.getYear())) {
-                time += parseTimeUnit(timeStr, settings.getYear(), YEAR_IN_MS);
-            } else if (endsWith(timeStr, settings.getMonth())) {
-                time += parseTimeUnit(timeStr, settings.getMonth(), MONTH_IN_MS);
-            } else if (endsWith(timeStr, settings.getWeek())) {
-                time += parseTimeUnit(timeStr, settings.getWeek(), WEEK_IN_MS);
-            } else if (endsWith(timeStr, settings.getDay())) {
-                time += parseTimeUnit(timeStr, settings.getDay(), DAY_IN_MS);
-            } else if (endsWith(timeStr, settings.getHour())) {
-                time += parseTimeUnit(timeStr, settings.getHour(), HOUR_IN_MS);
-            } else if (endsWith(timeStr, settings.getMinute())) {
-                time += parseTimeUnit(timeStr, settings.getMinute(), MINUTE_IN_MS);
-            } else if (endsWith(timeStr, settings.getSecond())) {
-                time += parseTimeUnit(timeStr, settings.getSecond(), 1000L);
-            }
+            time += getTimeForUnit(timeStr, settings.getYear(), YEAR_IN_MS);
+            time += getTimeForUnit(timeStr, settings.getMonth(), MONTH_IN_MS);
+            time += getTimeForUnit(timeStr, settings.getWeek(), WEEK_IN_MS);
+            time += getTimeForUnit(timeStr, settings.getDay(), DAY_IN_MS);
+            time += getTimeForUnit(timeStr, settings.getHour(), HOUR_IN_MS);
+            time += getTimeForUnit(timeStr, settings.getMinute(), MINUTE_IN_MS);
+            time += getTimeForUnit(timeStr, settings.getSecond(), SECOND_IN_MS);
         }
         return time;
+    }
+
+    private long getTimeForUnit(String timeStr, Set<String> patterns, long unitMs) {
+        if (endsWith(timeStr, patterns)) {
+            timeStr = clear(timeStr, patterns);
+            return checkLong(timeStr) ? unitMs * Long.parseLong(timeStr) : 0;
+        }
+        return 0;
     }
 
     private long parseTimeUnit(String timeStr, Set<String> unitPatterns, long unitMs) {
