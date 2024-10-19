@@ -1,9 +1,9 @@
 package ru.nightmirror.wlbytime.impl.checker;
 
 import ru.nightmirror.wlbytime.entry.Entry;
-import ru.nightmirror.wlbytime.interfaces.checker.AccessChecker;
+import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
 
-public class AccessCheckerImpl implements AccessChecker {
+public class AccessEntryCheckerImpl implements AccessEntryChecker {
 
     @Override
     public boolean isAllowed(Entry entry) {

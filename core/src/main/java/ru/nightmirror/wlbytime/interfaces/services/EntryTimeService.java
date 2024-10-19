@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.interfaces.services;
 
 import ru.nightmirror.wlbytime.entry.Entry;
 
-public interface TimeService {
+public interface EntryTimeService {
     void add(Entry entry, long milliseconds);
 
     boolean canAdd(Entry entry, long milliseconds);
