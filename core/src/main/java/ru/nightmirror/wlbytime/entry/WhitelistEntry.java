@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Optional;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -19,14 +18,14 @@ public class WhitelistEntry {
     @Getter
     String nickname;
     long until;
-    Optional<Long> frozenAt;
+    Long frozenAt; // Changed from Optional<Long> to Long
 
     private State getState() {
         return State.get(until);
     }
 
     public boolean isFrozen() {
-        return frozenAt.isPresent();
+        return frozenAt != null;
     }
 
     public boolean isNotInWhitelist() {
@@ -38,8 +37,10 @@ public class WhitelistEntry {
     }
 
     public Timestamp getFrozenAt() {
-        return frozenAt.map(Timestamp::new)
-                .orElseThrow(() -> new UnsupportedOperationException("Entry is not frozen"));
+        if (frozenAt == null) {
+            throw new UnsupportedOperationException("Entry is not frozen");
+        }
+        return new Timestamp(frozenAt);
     }
 
     public void freeze() {
@@ -49,16 +50,16 @@ public class WhitelistEntry {
         if (isForever()) {
             throw new UnsupportedOperationException("Entry is forever");
         }
-        frozenAt = Optional.of(System.currentTimeMillis());
+        frozenAt = System.currentTimeMillis();
     }
 
     public void unfreeze() {
         if (!isFrozen()) {
             throw new UnsupportedOperationException("Entry is not frozen");
         }
-        long elapsedTime = System.currentTimeMillis() - frozenAt.orElseThrow();
+        long elapsedTime = System.currentTimeMillis() - frozenAt;
         until += elapsedTime;
-        frozenAt = Optional.empty();
+        frozenAt = null;
     }
 
     public void setNotInWhitelist() {
@@ -116,8 +117,7 @@ public class WhitelistEntry {
         if (!isFrozen()) {
             throw new UnsupportedOperationException("Entry is not frozen");
         }
-        return frozenAt.map(time -> time - System.currentTimeMillis())
-                .orElseThrow(() -> new UnsupportedOperationException("Entry is not frozen"));
+        return frozenAt - System.currentTimeMillis();
     }
 
     @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
