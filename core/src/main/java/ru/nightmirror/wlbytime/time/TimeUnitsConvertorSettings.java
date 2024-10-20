@@ -12,7 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Builder
-public class TimeUnitsConvertorSettings {
+public final class TimeUnitsConvertorSettings {
     Set<String> year;
     Set<String> month;
     Set<String> week;
