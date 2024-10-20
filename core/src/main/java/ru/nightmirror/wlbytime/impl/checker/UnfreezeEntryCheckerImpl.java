@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.entry.Entry;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
-import ru.nightmirror.wlbytime.interfaces.database.EntryDao;
+import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor

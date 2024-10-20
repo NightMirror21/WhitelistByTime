@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.entry.Entry;
-import ru.nightmirror.wlbytime.interfaces.database.EntryDao;
+import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 
 import java.util.Optional;

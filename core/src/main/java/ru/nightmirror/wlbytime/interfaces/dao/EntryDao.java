@@ -1,6 +1,5 @@
-package ru.nightmirror.wlbytime.interfaces.database;
+package ru.nightmirror.wlbytime.interfaces.dao;
 
-import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.entry.Entry;
 
 import java.util.Optional;
@@ -13,10 +12,10 @@ public interface EntryDao {
 
     Optional<Entry> get(String nickname);
 
-    Entry create(String nickname, @Nullable Long milliseconds);
+    Entry create(String nickname, long milliseconds);
 
     default Entry create(String nickname) {
-        return create(nickname, null);
+        return create(nickname, Entry.FOREVER);
     }
 
     default void create(Set<String> nicknames) {
