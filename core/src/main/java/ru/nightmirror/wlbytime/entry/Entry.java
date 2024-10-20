@@ -14,6 +14,8 @@ import java.util.Arrays;
 @EqualsAndHashCode(of = {"id", "nickname"})
 public class Entry {
 
+    public static final long FOREVER = -1L;
+
     @Getter
     long id;
 
@@ -43,6 +45,18 @@ public class Entry {
 
     public boolean isForever() {
         return getState().equals(State.FOREVER);
+    }
+
+    public Long getFrozenAtOrNull() {
+        return frozenAt;
+    }
+
+    public Long getFrozenUntilOrNull() {
+        return frozenUntil;
+    }
+
+    public Long getUntilOrNull() {
+        return until;
     }
 
     public Timestamp getFrozenAt() {
@@ -150,7 +164,7 @@ public class Entry {
     @Getter
     @RequiredArgsConstructor
     private enum State {
-        FOREVER(-1L),
+        FOREVER(Entry.FOREVER),
         NOT_IN_WHITELIST(-2L),
         TIME(null);
 
