@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.config.configs;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import net.elytrium.serializer.SerializerConfig;
 import net.elytrium.serializer.annotations.Comment;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
-@SuppressWarnings("FieldMayBeFinal")
+@Setter
 public class DatabaseConfig extends YamlSerializable {
 
     private static final SerializerConfig CONFIG = new SerializerConfig.Builder()
