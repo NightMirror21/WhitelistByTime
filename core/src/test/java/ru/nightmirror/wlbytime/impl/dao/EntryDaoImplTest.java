@@ -13,13 +13,13 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class EntryDaoImplTest {
+public class EntryDaoImplTest {
 
     private EntryDaoImpl entryDao;
     private DatabaseConfig config;
 
     @BeforeEach
-    void setUp() throws SQLException {
+    public void setUp() throws SQLException {
         config = new DatabaseConfig();
         config.setParams(new ArrayList<>());
         config.setName(":memory:");
@@ -29,19 +29,19 @@ class EntryDaoImplTest {
     }
 
     @AfterEach
-    void tearDown() {
+    public void tearDown() {
         entryDao.closeConnection();
     }
 
     @Test
-    void testCloseConnection() {
+    public void testCloseConnection() {
         entryDao.closeConnection();
 
         assertDoesNotThrow(() -> entryDao.closeConnection());
     }
 
     @Test
-    void testCreateAndGetEntry() {
+    public void testCreateAndGetEntry() {
         Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
         Optional<Entry> retrieved = entryDao.get("testUser");
 
@@ -51,7 +51,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testUpdateEntry() {
+    public void testUpdateEntry() {
         Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
         created.setNotInWhitelist();
         entryDao.update(created);
@@ -62,7 +62,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetLike() {
+    public void testGetLike() {
         entryDao.create("TESTUSER", System.currentTimeMillis() + 100000);
         entryDao.create("testuser", System.currentTimeMillis() + 100000);
 
@@ -73,7 +73,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetNotLike() {
+    public void testGetNotLike() {
         entryDao.create("TESTUSER", System.currentTimeMillis() + 100000);
         entryDao.create("testuser", System.currentTimeMillis() + 100000);
 
@@ -87,7 +87,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetAll() {
+    public void testGetAll() {
         entryDao.create("testUser1", System.currentTimeMillis() + 100000);
         entryDao.create("testUser2", System.currentTimeMillis() + 100000);
 
@@ -97,7 +97,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testCreateEntryWithNoneMilliseconds() {
+    public void testCreateEntryWithNoneMilliseconds() {
         Entry created = entryDao.create("testUser");
 
         assertNotNull(created);
@@ -105,28 +105,28 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetEntryNotFound() {
+    public void testGetEntryNotFound() {
         Optional<Entry> retrieved = entryDao.get("nonExistentUser");
 
         assertFalse(retrieved.isPresent());
     }
 
     @Test
-    void testGetLikeEntryNotFound() {
+    public void testGetLikeEntryNotFound() {
         Optional<Entry> retrieved = entryDao.getLike("nonExistent");
 
         assertFalse(retrieved.isPresent());
     }
 
     @Test
-    void testCreateEntryWithSQLException() {
+    public void testCreateEntryWithSQLException() {
         entryDao.closeConnection();
 
         assertNull(entryDao.create("testUser", System.currentTimeMillis() + 100000));
     }
 
     @Test
-    void testUpdateEntryWithSQLException() {
+    public void testUpdateEntryWithSQLException() {
         Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
         entryDao.closeConnection();
 
@@ -134,7 +134,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetAllWithSQLException() {
+    public void testGetAllWithSQLException() {
         entryDao.closeConnection();
 
         assertTrue(entryDao.getAll().isEmpty());
