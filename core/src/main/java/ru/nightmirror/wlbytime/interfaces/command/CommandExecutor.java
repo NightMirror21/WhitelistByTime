@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.interfaces.command.wrappers;
+package ru.nightmirror.wlbytime.interfaces.command;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public interface WrappedCommandSender {
+public interface CommandExecutor {
     boolean isConsole();
 
     boolean isPlayer();
