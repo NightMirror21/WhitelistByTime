@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.interfaces.command;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface CommandExecutor {
+public interface CommandIssuer {
     boolean isConsole();
 
     boolean isPlayer();
