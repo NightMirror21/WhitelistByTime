@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.placeholder;
+package ru.nightmirror.wlbytime.placeholder;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

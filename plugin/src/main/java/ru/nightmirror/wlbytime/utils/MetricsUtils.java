@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.utils;
+package ru.nightmirror.wlbytime.utils;
 
 
 import lombok.experimental.UtilityClass;

@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.common.utils;
+package ru.nightmirror.wlbytime.syncer;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -8,7 +8,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
-public class BukkitSyncer {
+public final class BukkitSyncer {
 
     Plugin plugin;
 
