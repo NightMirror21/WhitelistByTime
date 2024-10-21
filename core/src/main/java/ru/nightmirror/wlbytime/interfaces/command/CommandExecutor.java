@@ -1,9 +1,6 @@
 package ru.nightmirror.wlbytime.interfaces.command;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CommandExecutor {
@@ -11,13 +8,11 @@ public interface CommandExecutor {
 
     boolean isPlayer();
 
-    @NotNull String getNickname();
+    String getNickname();
 
-    @Nullable UUID getUuid();
+    Optional<UUID> getUuid();
 
-    void sendMessage(@NotNull String message);
+    void sendMessage(String message);
 
-    boolean hasPermission(@NotNull String permission);
-
-    List<String> getAllPlayerNicknamesOnServer();
+    boolean hasPermission(String permission);
 }
