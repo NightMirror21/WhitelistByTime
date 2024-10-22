@@ -16,7 +16,7 @@ public class EntryTest {
         entry = Entry.builder()
                 .id(1L)
                 .nickname("testUser")
-                .until(System.currentTimeMillis() + 100000) // entry is not expired
+                .until(System.currentTimeMillis() + 100000)
                 .build();
     }
 
@@ -109,7 +109,7 @@ public class EntryTest {
         entry = Entry.builder()
                 .id(1L)
                 .nickname("testUser")
-                .until(System.currentTimeMillis() - 10000) // already expired
+                .until(System.currentTimeMillis() - 10000)
                 .build();
 
         assertTrue(entry.isExpiredIncludeFreeze());
@@ -117,7 +117,7 @@ public class EntryTest {
 
     @Test
     public void testIsExpiredIncludeFreeze_false_whenFrozenTimePassed() {
-        entry.freeze(-10000L); // simulate frozen time in the past
+        entry.freeze(-10000L);
         assertTrue(entry.isExpiredIncludeFreeze());
     }
 
@@ -131,7 +131,7 @@ public class EntryTest {
         entry = Entry.builder()
                 .id(1L)
                 .nickname("testUser")
-                .until(System.currentTimeMillis() - 10000) // already expired
+                .until(System.currentTimeMillis() - 10000)
                 .build();
 
         assertFalse(entry.isActive());

@@ -61,17 +61,14 @@ public class UnfreezeEntryCheckerImplTest {
 
     @Test
     public void testUnfreezeIfRequired_WhenUnfreezeIfFrozenIsFalse_AndEntryIsNotFrozen_ShouldNotUnfreezeOrUpdate() {
-        // Arrange
         boolean unfreezeIfFrozen = false;
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryDao);
 
         Entry entry = mock(Entry.class);
         when(entry.isFrozen()).thenReturn(false);
 
-        // Act
         unfreezeEntryChecker.unfreezeIfRequired(entry);
 
-        // Assert
         verify(entry, never()).unfreeze();
         verify(entryDao, never()).update(entry);
     }
