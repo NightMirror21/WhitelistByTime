@@ -21,6 +21,7 @@ public class MessagesConfig extends YamlSerializable {
 
     String pluginReloaded = "Plugin reloaded!";
     String notPermission = "You do not have permission!";
+    String incorrectArguments = "Incorrect argument(s)";
 
     @NewLine
     String whitelistEnabled = "WhitelistByTime enabled";
@@ -35,37 +36,37 @@ public class MessagesConfig extends YamlSerializable {
     );
 
     @NewLine
-    String playerRemovedFromWhitelist = "%player% successfully removed from whitelist";
-    String playerAlreadyInWhitelist = "%player% already in whitelist";
-    String playerNotInWhitelist = "%player% not in whitelist";
+    String playerRemovedFromWhitelist = "%nickname% successfully removed from whitelist";
+    String playerAlreadyInWhitelist = "%nickname% already in whitelist";
+    String playerNotInWhitelist = "%nickname% not in whitelist";
 
     @NewLine
     @Comment(value = {
             @CommentValue("For command with time")
     }, at = Comment.At.PREPEND)
-    String successfullyAddedForTime = "%player% added to whitelist for %time%";
-    String stillInWhitelistForTime = "%player% will be in whitelist still %time%";
+    String successfullyAddedForTime = "%nickname% added to whitelist for %time%";
+    String stillInWhitelistForTime = "%nickname% will be in whitelist still %time%";
     String checkMeStillInWhitelistForTime = "You will remain on the whitelist for %time%";
 
     @NewLine
     @Comment(value = {
             @CommentValue("For command without time")
     }, at = Comment.At.PREPEND)
-    String successfullyAdded = "%player% added to whitelist forever";
-    String stillInWhitelist = "%player% will be in whitelist forever";
+    String successfullyAdded = "%nickname% added to whitelist forever";
+    String stillInWhitelist = "%nickname% will be in whitelist forever";
     String checkMeStillInWhitelist = "You are permanently whitelisted";
 
     @NewLine
     String listTitle = "> Whitelist:";
-    String listPlayer = "| %player% [%time%]";
+    String listPlayer = "| %nickname% [%time%]";
     String listEmpty = "Whitelist is empty";
     String listPageableCommands = "Page %current-page% / %max-page% (To show another page run /whitelist getall <page>)";
     String pageNotExists = "Page %page% not exists";
 
     @NewLine
-    String setTime = "Now %player% will be in whitelist for %time%";
-    String addTime = "Added %time% to %player%";
-    String removeTime = "Removed %time% from %player%";
+    String setTime = "Now %nickname% will be in whitelist for %time%";
+    String addTime = "Added %time% to %nickname%";
+    String removeTime = "Removed %time% from %nickname%";
 
     @NewLine
     String forever = "forever";
@@ -73,8 +74,8 @@ public class MessagesConfig extends YamlSerializable {
     String expired = "expired";
 
     @NewLine
-    String playerUnfrozen = "Player %player% unfrozen";
-    String playerFrozen = "Player %player% frozen";
+    String playerUnfrozen = "Player %nickname% unfrozen";
+    String playerFrozen = "Player %nickname% frozen";
 
     @NewLine
     List<String> help = List.of(
