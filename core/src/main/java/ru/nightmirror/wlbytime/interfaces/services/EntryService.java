@@ -7,5 +7,5 @@ public interface EntryService {
 
     Entry create(String nickname);
 
-    Entry create(String nickname, long milliseconds);
+    Entry create(String nickname, long untilMs);
 }
