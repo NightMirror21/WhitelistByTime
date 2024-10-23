@@ -67,6 +67,11 @@ public class MessagesConfig extends YamlSerializable {
     String setTime = "Now %nickname% will be in whitelist for %time%";
     String addTime = "Added %time% to %nickname%";
     String removeTime = "Removed %time% from %nickname%";
+    String cantAddTimeCausePlayerIsForever = "Can't add time cause %nickname% is forever";
+    String cantRemoveTimeCausePlayerIsForever = "Can't add time cause %nickname% is forever";
+    String timeIsIncorrect = "Time is incorrect";
+    String cantAddTime = "Can't add time";
+    String cantRemoveTime = "Can't remove time";
 
     @NewLine
     String forever = "forever";
