@@ -39,60 +39,71 @@ public class TimeCommand implements Command {
 
     @Override
     public void execute(CommandIssuer issuer, String[] args) {
-        if (args.length < 3) {
-            issuer.sendMessage(messages.getIncorrectArguments());
-            return;
-        }
+        if (!areArgsValid(args, issuer)) return;
 
         String operation = args[0].toLowerCase();
         String nickname = args[1];
-        StringBuilder timeArgument = new StringBuilder();
-        for (int i = 2; i < args.length; i++) {
-            timeArgument.append(args[i]);
-        }
+        String timeArgument = concatenateArgs(args);
 
         Optional<Entry> entry = finder.find(nickname);
         if (entry.isEmpty()) {
-            issuer.sendMessage(messages.getPlayerNotInWhitelist()
-                    .replaceAll("%nickname%", nickname));
+            issuer.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%nickname%", nickname));
             return;
         }
-
         if (!OPERATIONS.contains(operation)) {
             issuer.sendMessage(messages.getIncorrectArguments());
             return;
         }
 
-        long timeInMillis = convertor.getTimeMs(timeArgument.toString());
+        long timeInMillis = convertor.getTimeMs(timeArgument);
         if (timeInMillis <= 0) {
             issuer.sendMessage(messages.getTimeIsIncorrect());
             return;
         }
-        String timeAsString = convertor.getTimeLine(timeInMillis);
 
-        if (operation.equals("add")) {
-            if (timeService.canAdd(entry.get(), timeInMillis)) {
-                timeService.add(entry.get(), timeInMillis);
-                issuer.sendMessage(messages.getAddTime()
-                        .replaceAll("%nickname%", nickname)
-                        .replaceAll("%time%", timeAsString));
-            } else {
-                issuer.sendMessage(messages.getCantAddTime());
+        String timeAsString = convertor.getTimeLine(timeInMillis);
+        processOperation(issuer, entry.get(), operation, nickname, timeInMillis, timeAsString);
+    }
+
+    private boolean areArgsValid(String[] args, CommandIssuer issuer) {
+        if (args.length < 3) {
+            issuer.sendMessage(messages.getIncorrectArguments());
+            return false;
+        }
+        return true;
+    }
+
+    private String concatenateArgs(String[] args) {
+        StringBuilder timeArgument = new StringBuilder();
+        for (int i = 2; i < args.length; i++) {
+            timeArgument.append(args[i]);
+        }
+        return timeArgument.toString();
+    }
+
+    private void processOperation(CommandIssuer issuer, Entry entry, String operation, String nickname, long timeInMillis, String timeAsString) {
+        switch (operation) {
+            case "add" -> {
+                if (timeService.canAdd(entry, timeInMillis)) {
+                    timeService.add(entry, timeInMillis);
+                    issuer.sendMessage(messages.getAddTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
+                } else {
+                    issuer.sendMessage(messages.getCantAddTime());
+                }
             }
-        } else if (operation.equals("remove")) {
-            if (timeService.canRemove(entry.get(), timeInMillis)) {
-                timeService.remove(entry.get(), timeInMillis);
-                issuer.sendMessage(messages.getRemoveTime()
-                        .replaceAll("%nickname%", nickname)
-                        .replaceAll("%time%", timeAsString));
-            } else {
-                issuer.sendMessage(messages.getCantRemoveTime());
+            case "remove" -> {
+                if (timeService.canRemove(entry, timeInMillis)) {
+                    timeService.remove(entry, timeInMillis);
+                    issuer.sendMessage(messages.getRemoveTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
+                } else {
+                    issuer.sendMessage(messages.getCantRemoveTime());
+                }
             }
-        } else if (operation.equals("set")) {
-            timeService.set(entry.get(), timeInMillis);
-            issuer.sendMessage(messages.getSetTime()
-                    .replaceAll("%nickname%", nickname)
-                    .replaceAll("%time%", timeAsString));
+            case "set" -> {
+                timeService.set(entry, timeInMillis);
+                issuer.sendMessage(messages.getSetTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
+            }
+            default -> issuer.sendMessage(messages.getIncorrectArguments());
         }
     }
 
