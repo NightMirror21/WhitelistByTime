@@ -3,22 +3,12 @@ package ru.nightmirror.wlbytime.utils;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import ru.nightmirror.wlbytime.WhitelistByTimeImpl;
 
 import java.util.List;
 import java.util.Map;
 
 @UtilityClass
-public class ColorsUtils {
-    private static boolean legacyColorsNotified = false;
-
-    private static final List<String> LEGACY_COLOR_WARNINGS = List.of(
-            "Remove legacy color(s) (starts with '&' or '§') from config!",
-            "Paper and paper family don't support legacy color formats",
-            "Use MiniMessage by kyori and make life easier!",
-            "https://docs.advntr.dev/minimessage/format.html"
-    );
-
+public final class ColorsUtils {
     private static final Map<String, String> COLOR_MAPPINGS = Map.ofEntries(
             Map.entry("&0", "<black>"), Map.entry("§0", "<black>"),
             Map.entry("&1", "<dark_blue>"), Map.entry("§1", "<dark_blue>"),
@@ -49,17 +39,9 @@ public class ColorsUtils {
     private static String checkAndReplaceLegacyColors(String message) {
         message = message.replaceAll("&", "§");
         if (message.contains("&") || message.contains("§")) {
-            if (!legacyColorsNotified) {
-                warnAboutLegacyColors();
-                legacyColorsNotified = true;
-            }
             return replaceLegacyColors(message);
         }
         return message;
-    }
-
-    private static void warnAboutLegacyColors() {
-        LEGACY_COLOR_WARNINGS.forEach(WhitelistByTimeImpl::warn);
     }
 
     private static String replaceLegacyColors(String text) {
