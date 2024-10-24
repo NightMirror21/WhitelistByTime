@@ -39,6 +39,8 @@ public class MessagesConfig extends YamlSerializable {
     String playerRemovedFromWhitelist = "%nickname% successfully removed from whitelist";
     String playerAlreadyInWhitelist = "%nickname% already in whitelist";
     String playerNotInWhitelist = "%nickname% not in whitelist";
+    String checkMeNotInWhitelist = "You are not in whitelist";
+    String checkMeFrozen = "You are frozen for %time%";
 
     @NewLine
     @Comment(value = {
@@ -54,7 +56,7 @@ public class MessagesConfig extends YamlSerializable {
     }, at = Comment.At.PREPEND)
     String successfullyAdded = "%nickname% added to whitelist forever";
     String stillInWhitelist = "%nickname% will be in whitelist forever";
-    String checkMeStillInWhitelist = "You are permanently whitelisted";
+    String checkMeStillInWhitelistForever = "You are permanently whitelisted";
 
     @NewLine
     String listTitle = "> Whitelist:";
