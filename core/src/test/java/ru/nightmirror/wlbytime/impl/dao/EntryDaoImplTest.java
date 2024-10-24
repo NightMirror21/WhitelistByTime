@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.entry.Entry;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +18,7 @@ public class EntryDaoImplTest {
     private DatabaseConfig config;
 
     @BeforeEach
-    public void setUp() throws SQLException {
+    public void setUp() {
         config = new DatabaseConfig();
         config.setParams(new ArrayList<>());
         config.setName(":memory:");
@@ -30,19 +29,18 @@ public class EntryDaoImplTest {
 
     @AfterEach
     public void tearDown() {
-        entryDao.closeConnection();
+        entryDao.close();
     }
 
     @Test
     public void testCloseConnection() {
-        entryDao.closeConnection();
-
-        assertDoesNotThrow(() -> entryDao.closeConnection());
+        assertDoesNotThrow(() -> entryDao.close());
     }
 
     @Test
     public void testCreateAndGetEntry() {
-        Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
+        long futureTime = System.currentTimeMillis() + 100000;
+        Entry created = entryDao.create("testUser", futureTime);
         Optional<Entry> retrieved = entryDao.get("testUser");
 
         assertTrue(retrieved.isPresent());
@@ -65,40 +63,40 @@ public class EntryDaoImplTest {
     public void testGetLike() {
         entryDao.create("TESTUSER", System.currentTimeMillis() + 100000);
         entryDao.create("testuser", System.currentTimeMillis() + 100000);
+        entryDao.create("anotherUser", System.currentTimeMillis() + 100000);
 
         Optional<Entry> retrieved = entryDao.getLike("testuser");
 
         assertTrue(retrieved.isPresent());
-        assertTrue(retrieved.get().getNickname().contains("testuser") || retrieved.get().getNickname().contains("TESTUSER"));
+        String nickname = retrieved.get().getNickname();
+        assertTrue(nickname.toLowerCase().contains("testuser"));
     }
 
     @Test
-    public void testGetNotLike() {
-        entryDao.create("TESTUSER", System.currentTimeMillis() + 100000);
-        entryDao.create("testuser", System.currentTimeMillis() + 100000);
+    public void testGetExact() {
+        entryDao.create("ExactUser", System.currentTimeMillis() + 100000);
 
-        Optional<Entry> retrieved1 = entryDao.get("TESTUSER");
-        Optional<Entry> retrieved2 = entryDao.get("testuser");
+        Optional<Entry> retrieved = entryDao.get("ExactUser");
+        Optional<Entry> notRetrieved = entryDao.get("exactuser");
 
-        assertTrue(retrieved1.isPresent());
-        assertTrue(retrieved2.isPresent());
-        assertTrue(retrieved1.get().getNickname().contains("TESTUSER"));
-        assertTrue(retrieved2.get().getNickname().contains("testuser"));
+        assertTrue(retrieved.isPresent());
+        assertFalse(notRetrieved.isPresent());
     }
 
     @Test
     public void testGetAll() {
         entryDao.create("testUser1", System.currentTimeMillis() + 100000);
         entryDao.create("testUser2", System.currentTimeMillis() + 100000);
+        entryDao.create("testUser3", System.currentTimeMillis() + 100000);
 
         Set<Entry> allEntries = entryDao.getAll();
 
-        assertEquals(2, allEntries.size());
+        assertEquals(3, allEntries.size());
     }
 
     @Test
-    public void testCreateEntryWithNoneMilliseconds() {
-        Entry created = entryDao.create("testUser");
+    public void testCreateEntryWithDefaultMilliseconds() {
+        Entry created = entryDao.create("testUser", Entry.FOREVER);
 
         assertNotNull(created);
         assertEquals(Entry.FOREVER, created.getUntilOrNull());
@@ -120,23 +118,52 @@ public class EntryDaoImplTest {
 
     @Test
     public void testCreateEntryWithSQLException() {
-        entryDao.closeConnection();
+        entryDao.close();
 
-        assertNull(entryDao.create("testUser", System.currentTimeMillis() + 100000));
+        Exception exception = assertThrows(EntryDaoImpl.DataAccessException.class, () ->
+                entryDao.create("testUser", System.currentTimeMillis() + 100000)
+        );
+
+        assertTrue(exception.getMessage().contains("Failed to create entry"));
     }
 
     @Test
     public void testUpdateEntryWithSQLException() {
         Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
-        entryDao.closeConnection();
+        entryDao.close();
 
-        assertDoesNotThrow(() -> entryDao.update(created));
+        Exception exception = assertThrows(EntryDaoImpl.DataAccessException.class, () ->
+                entryDao.update(created)
+        );
+
+        assertTrue(exception.getMessage().contains("Failed to update entry"));
     }
 
     @Test
     public void testGetAllWithSQLException() {
-        entryDao.closeConnection();
+        entryDao.close();
 
-        assertTrue(entryDao.getAll().isEmpty());
+        Exception exception = assertThrows(EntryDaoImpl.DataAccessException.class, () ->
+                entryDao.getAll()
+        );
+
+        assertTrue(exception.getMessage().contains("Failed to retrieve all entries"));
+    }
+
+    @Test
+    public void testReopenConnection() {
+        entryDao.close();
+        DatabaseConfig newConfig = new DatabaseConfig();
+        newConfig.setParams(new ArrayList<>());
+        newConfig.setName(":memory:");
+        newConfig.setType("sqlite");
+
+        assertDoesNotThrow(() -> entryDao.reopenConnection(newConfig));
+
+        entryDao.create("reopenUser", System.currentTimeMillis() + 100000);
+        Optional<Entry> retrieved = entryDao.get("reopenUser");
+
+        assertTrue(retrieved.isPresent());
+        assertEquals("reopenUser", retrieved.get().getNickname());
     }
 }

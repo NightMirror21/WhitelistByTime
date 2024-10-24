@@ -7,8 +7,10 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.entry.Entry;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
@@ -20,9 +22,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EntryDaoImpl implements EntryDao {
+public class EntryDaoImpl implements EntryDao, AutoCloseable {
 
-    private static final Logger LOGGER = Logger.getLogger(EntryDaoImpl.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(EntryDaoImpl.class.getSimpleName());
 
     private ConnectionSource connectionSource;
     private Dao<EntryTable, Long> entryDao;
@@ -32,44 +34,46 @@ public class EntryDaoImpl implements EntryDao {
             initConnection(config);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error initializing database connection", e);
+            throw new DatabaseInitializationException("Failed to initialize database connection", e);
         }
     }
 
     private void initConnection(DatabaseConfig config) throws SQLException {
-        if (config.getType().equalsIgnoreCase("sqlite")) {
-            String databaseUrl;
-            if (config.getName().equals(":memory:")) {
-                databaseUrl = "jdbc:sqlite::memory:";
-            } else {
-                databaseUrl = "jdbc:sqlite:" + config.getName() + ".db";
-            }
+        if ("sqlite".equalsIgnoreCase(config.getType())) {
+            String databaseUrl = config.getName().equals(":memory:") ?
+                    "jdbc:sqlite::memory:" :
+                    "jdbc:sqlite:" + config.getName() + ".db";
             connectionSource = new JdbcConnectionSource(databaseUrl);
-        } else {
-            String databaseUrl = "jdbc:mysql://" + config.getAddress() + "/" + config.getName()
-                    + "?" + String.join("&", config.getParams());
+        } else if ("mysql".equalsIgnoreCase(config.getType())) {
+            String params = String.join("&", config.getParams());
+            String databaseUrl = String.format("jdbc:mysql://%s/%s?%s", config.getAddress(), config.getName(), params);
             connectionSource = new JdbcConnectionSource(databaseUrl, config.getUser(), config.getPassword());
+        } else {
+            throw new UnsupportedDatabaseTypeException("Unsupported database type: " + config.getType());
         }
 
         entryDao = DaoManager.createDao(connectionSource, EntryTable.class);
         TableUtils.createTableIfNotExists(connectionSource, EntryTable.class);
     }
 
-    public void reopenConnection(DatabaseConfig newConfig) {
+    public synchronized void reopenConnection(DatabaseConfig newConfig) {
         try {
-            closeConnection();
+            close();
             initConnection(newConfig);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error reopening database connection", e);
+            throw new DatabaseInitializationException("Failed to reopen database connection", e);
         }
     }
 
-    public void closeConnection() {
-        try {
-            if (connectionSource != null) {
+    @Override
+    public synchronized void close() {
+        if (connectionSource != null) {
+            try {
                 connectionSource.close();
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error closing database connection", e);
             }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error closing database connection", e);
         }
     }
 
@@ -80,30 +84,39 @@ public class EntryDaoImpl implements EntryDao {
             entryDao.createOrUpdate(entryTable);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating entry", e);
+            throw new DataAccessException("Failed to update entry", e);
         }
     }
 
     @Override
     public Optional<Entry> getLike(String nickname) {
         try {
-            return entryDao.queryBuilder().where()
-                    .like(EntryTable.NICKNAME_COLUMN, nickname).query()
-                    .stream().findFirst().map(this::fromEntryTable);
+            return entryDao.queryBuilder()
+                    .where()
+                    .like(EntryTable.NICKNAME_COLUMN, "%" + nickname + "%")
+                    .query()
+                    .stream()
+                    .findFirst()
+                    .map(this::fromEntryTable);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error querying by like", e);
-            return Optional.empty();
+            throw new DataAccessException("Failed to query entries with like", e);
         }
     }
 
     @Override
     public Optional<Entry> get(String nickname) {
         try {
-            return entryDao.queryBuilder().where()
-                    .eq(EntryTable.NICKNAME_COLUMN, nickname).query()
-                    .stream().findFirst().map(this::fromEntryTable);
+            return entryDao.queryBuilder()
+                    .where()
+                    .eq(EntryTable.NICKNAME_COLUMN, nickname)
+                    .query()
+                    .stream()
+                    .findFirst()
+                    .map(this::fromEntryTable);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error querying by nickname", e);
-            return Optional.empty();
+            throw new DataAccessException("Failed to query entry by nickname", e);
         }
     }
 
@@ -115,7 +128,7 @@ public class EntryDaoImpl implements EntryDao {
             return fromEntryTable(entryTable);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error creating entry", e);
-            return null;
+            throw new DataAccessException("Failed to create entry", e);
         }
     }
 
@@ -129,7 +142,7 @@ public class EntryDaoImpl implements EntryDao {
             return entries;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error getting all entries", e);
-            return Set.of();
+            throw new DataAccessException("Failed to retrieve all entries", e);
         }
     }
 
@@ -148,14 +161,31 @@ public class EntryDaoImpl implements EntryDao {
                 .frozenUntil(entryTable.getFrozenUntil())
                 .build();
     }
+    
+    public static class DataAccessException extends RuntimeException {
+        public DataAccessException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class DatabaseInitializationException extends RuntimeException {
+        public DatabaseInitializationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class UnsupportedDatabaseTypeException extends RuntimeException {
+        public UnsupportedDatabaseTypeException(String message) {
+            super(message);
+        }
+    }
 
     @DatabaseTable(tableName = "wlbytime_players")
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    @AllArgsConstructor
     @Data
     @NoArgsConstructor
+    @AllArgsConstructor
     @ToString
-    private static final class EntryTable {
+    private static class EntryTable {
         public static final String ID_COLUMN = "id";
         public static final String NICKNAME_COLUMN = "nickname";
         public static final String UNTIL_COLUMN = "until";
@@ -163,18 +193,18 @@ public class EntryDaoImpl implements EntryDao {
         public static final String FROZEN_UNTIL_COLUMN = "frozen_until";
 
         @DatabaseField(generatedId = true, columnName = ID_COLUMN, canBeNull = false)
-        Long id;
+        private Long id;
 
         @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false)
-        String nickname;
+        private String nickname;
 
         @DatabaseField(columnName = UNTIL_COLUMN, canBeNull = false)
-        Long until;
+        private Long until;
 
         @DatabaseField(columnName = FROZEN_AT_COLUMN)
-        Long frozenAt;
+        private Long frozenAt;
 
         @DatabaseField(columnName = FROZEN_UNTIL_COLUMN)
-        Long frozenUntil;
+        private Long frozenUntil;
     }
 }
