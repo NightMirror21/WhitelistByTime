@@ -14,7 +14,7 @@ public class TimeConvertorTest {
     private TimeConvertor timeConvertor;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         TimeUnitsConvertorSettings settings = mock(TimeUnitsConvertorSettings.class);
         when(settings.getFirstYearOrDefault()).thenReturn("y");
         when(settings.getFirstMonthOrDefault()).thenReturn("mo");
@@ -39,14 +39,14 @@ public class TimeConvertorTest {
     public void testGetTimeLine_ZeroMilliseconds() {
         long ms = 0L;
         String result = timeConvertor.getTimeLine(ms);
-        assertEquals("", result, "Expected empty string for 0 milliseconds");
+        assertEquals("", result);
     }
 
     @Test
     public void testGetTimeLine_OneYear() {
         long ms = TimeConvertor.YEAR_IN_MS;
         String result = timeConvertor.getTimeLine(ms);
-        assertEquals("1y", result.trim(), "Expected '1y' for one year in milliseconds");
+        assertEquals("1y", result.trim());
     }
 
     @Test
@@ -54,21 +54,21 @@ public class TimeConvertorTest {
         long ms = TimeConvertor.YEAR_IN_MS + 2 * TimeConvertor.MONTH_IN_MS + 3 * TimeConvertor.DAY_IN_MS +
                 4 * TimeConvertor.HOUR_IN_MS + 5 * TimeConvertor.MINUTE_IN_MS + 6 * TimeConvertor.SECOND_IN_MS;
         String result = timeConvertor.getTimeLine(ms);
-        assertEquals("1y 2mo 3d 4h 5m 6s", result.trim(), "Expected correct formatted time string");
+        assertEquals("1y 2mo 3d 4h 5m 6s", result.trim());
     }
 
     @Test
     public void testGetTimeLine_NegativeTime() {
         long ms = -1L;
         String result = timeConvertor.getTimeLine(ms);
-        assertEquals("forever", result, "Expected 'forever' for negative milliseconds");
+        assertEquals("forever", result);
     }
 
     @Test
     public void testGetTimeMs_SimpleString() {
         String timeLine = "1y";
         long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(TimeConvertor.YEAR_IN_MS, result, "Expected 1 year in milliseconds");
+        assertEquals(TimeConvertor.YEAR_IN_MS, result);
     }
 
     @Test
@@ -77,20 +77,20 @@ public class TimeConvertorTest {
         long expectedMs = TimeConvertor.YEAR_IN_MS + 2 * TimeConvertor.MONTH_IN_MS + 3 * TimeConvertor.DAY_IN_MS +
                 4 * TimeConvertor.HOUR_IN_MS + 5 * TimeConvertor.MINUTE_IN_MS + 6 * TimeConvertor.SECOND_IN_MS;
         long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(expectedMs, result, "Expected correct milliseconds for complex time string");
+        assertEquals(expectedMs, result);
     }
 
     @Test
     public void testGetTimeMs_EmptyString() {
         String timeLine = "";
         long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(0L, result, "Expected 0 milliseconds for empty string");
+        assertEquals(0L, result);
     }
 
     @Test
     public void testGetTimeMs_InvalidString() {
         String timeLine = "abc";
         long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(0L, result, "Expected 0 milliseconds for invalid time string");
+        assertEquals(0L, result);
     }
 }
