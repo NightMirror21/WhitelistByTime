@@ -95,12 +95,4 @@ public final class TimeConvertor {
         }
         return 0;
     }
-
-    private long parseTimeUnit(String timeStr, Set<String> unitPatterns, long unitMs) {
-        timeStr = clear(timeStr, unitPatterns);
-        if (checkLong(timeStr)) {
-            return unitMs * Long.parseLong(timeStr);
-        }
-        return 0;
-    }
 }
