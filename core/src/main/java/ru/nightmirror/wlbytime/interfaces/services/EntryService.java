@@ -8,4 +8,8 @@ public interface EntryService {
     Entry create(String nickname);
 
     Entry create(String nickname, long untilMs);
+
+    void freeze(Entry entry, long durationMs);
+
+    void unfreeze(Entry entry);
 }
