@@ -82,7 +82,10 @@ public class MessagesConfig extends YamlSerializable {
 
     @NewLine
     String playerUnfrozen = "Player %nickname% unfrozen";
-    String playerFrozen = "Player %nickname% frozen";
+    String playerFrozen = "Player %nickname% frozen for %time%";
+    String playerAlreadyFrozen = "Player %nickname% already frozen";
+    String playerNotFrozen = "Player %nickname% not frozen";
+    String playerExpired = "Player %nickname% expired";
 
     @NewLine
     List<String> help = List.of(
