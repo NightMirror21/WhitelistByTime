@@ -2,6 +2,8 @@ package ru.nightmirror.wlbytime.interfaces.services;
 
 import ru.nightmirror.wlbytime.entry.Entry;
 
+import java.util.Set;
+
 public interface EntryService {
     void remove(Entry entry);
 
@@ -12,4 +14,6 @@ public interface EntryService {
     void freeze(Entry entry, long durationMs);
 
     void unfreeze(Entry entry);
+
+    Set<Entry> getEntries();
 }
