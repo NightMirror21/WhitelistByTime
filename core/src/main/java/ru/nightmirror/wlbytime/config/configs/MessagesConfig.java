@@ -59,11 +59,26 @@ public class MessagesConfig extends YamlSerializable {
     String checkMeStillInWhitelistForever = "You are permanently whitelisted";
 
     @NewLine
-    String listTitle = "> Whitelist:";
-    String listPlayer = "| %nickname% [%time%]";
+    String listHeader = "> Whitelist:";
+    String listElement = "| %nickname% [%time-or-status%]";
     String listEmpty = "Whitelist is empty";
-    String listPageableCommands = "Page %current-page% / %max-page% (To show another page run /whitelist getall <page>)";
-    String pageNotExists = "Page %page% not exists";
+    String listFooter = "Page %current-page% / %max-page% (To show another page run /whitelist getall <page>)";
+    String pageNotExists = "Page %page% not exists, max page is %max-page%";
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("How many records will be displayed per page")
+    }, at = Comment.At.PREPEND)
+    int entriesForPage = 10;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("For '%time-or-status%' in list")
+    }, at = Comment.At.PREPEND)
+    String forever = "forever";
+    String frozen = "frozen for %time%";
+    String active = "active for %time%";
+    String expired = "expired";
 
     @NewLine
     String setTime = "Now %nickname% will be in whitelist for %time%";
@@ -74,11 +89,6 @@ public class MessagesConfig extends YamlSerializable {
     String timeIsIncorrect = "Time is incorrect";
     String cantAddTime = "Can't add time";
     String cantRemoveTime = "Can't remove time";
-
-    @NewLine
-    String forever = "forever";
-    String frozen = "frozen";
-    String expired = "expired";
 
     @NewLine
     String playerUnfrozen = "Player %nickname% unfrozen";
