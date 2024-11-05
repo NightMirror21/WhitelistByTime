@@ -58,9 +58,9 @@ public final class PlaceholderHook extends PlaceholderExpansion {
     }
 
     private String handleInWhitelistParam(Entry entry) {
-        if (entry.isCurrentlyFrozen()) {
+        if (entry.isFreezeActive()) {
             return config.getFrozen();
-        } else if (entry.isCurrentlyActive()) {
+        } else if (entry.isActive()) {
             return config.getInWhitelistTrue();
         } else {
             return config.getInWhitelistFalse();
@@ -71,10 +71,10 @@ public final class PlaceholderHook extends PlaceholderExpansion {
         long remainingTime;
         String output;
 
-        if (entry.isCurrentlyFrozen()) {
+        if (entry.isFreezeActive()) {
             remainingTime = entry.getRemainingFreezeTime();
             output = config.getTimeLeftWithFreeze();
-        } else if (entry.isCurrentlyActive()) {
+        } else if (entry.isActive()) {
             remainingTime = entry.getRemainingActiveTime();
             output = config.getTimeLeft();
         } else {

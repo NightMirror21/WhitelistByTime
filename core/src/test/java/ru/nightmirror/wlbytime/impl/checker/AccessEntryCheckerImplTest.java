@@ -21,8 +21,8 @@ public class AccessEntryCheckerImplTest {
     @Test
     public void testIsAllowed_WhenEntryIsCurrentlyActiveAndNotFrozen_ShouldReturnTrue() {
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(false);
-        when(entry.isCurrentlyActive()).thenReturn(true);
+        when(entry.isFreezeActive()).thenReturn(false);
+        when(entry.isActive()).thenReturn(true);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 
@@ -32,8 +32,8 @@ public class AccessEntryCheckerImplTest {
     @Test
     public void testIsAllowed_WhenEntryIsCurrentlyActiveButFrozen_ShouldReturnFalse() {
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(true);
-        when(entry.isCurrentlyActive()).thenReturn(true);
+        when(entry.isFreezeActive()).thenReturn(true);
+        when(entry.isActive()).thenReturn(true);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 
@@ -43,8 +43,8 @@ public class AccessEntryCheckerImplTest {
     @Test
     public void testIsAllowed_WhenEntryIsInactiveAndNotFrozen_ShouldReturnFalse() {
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(false);
-        when(entry.isCurrentlyActive()).thenReturn(false);
+        when(entry.isFreezeActive()).thenReturn(false);
+        when(entry.isActive()).thenReturn(false);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 
@@ -54,8 +54,8 @@ public class AccessEntryCheckerImplTest {
     @Test
     public void testIsAllowed_WhenEntryIsInactiveAndFrozen_ShouldReturnFalse() {
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(true);
-        when(entry.isCurrentlyActive()).thenReturn(false);
+        when(entry.isFreezeActive()).thenReturn(true);
+        when(entry.isActive()).thenReturn(false);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 

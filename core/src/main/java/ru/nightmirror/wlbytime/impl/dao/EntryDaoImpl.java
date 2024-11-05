@@ -235,6 +235,18 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     }
 
     @Override
+    public Entry create(String nickname) {
+        try {
+            EntryTable entryTable = new EntryTable(null, nickname);
+            entryDao.create(entryTable);
+            return get(nickname).orElseThrow();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error creating entry", e);
+            throw new DataAccessException("Failed to create entry", e);
+        }
+    }
+
+    @Override
     public Set<Entry> getAll() {
         try {
             Set<Entry> entries = new HashSet<>();

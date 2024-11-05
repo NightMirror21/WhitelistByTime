@@ -14,9 +14,7 @@ public interface EntryDao {
 
     Entry create(String nickname, long milliseconds);
 
-    default Entry create(String nickname) {
-        return create(nickname, Entry.FOREVER);
-    }
+    Entry create(String nickname);
 
     default void create(Set<String> nicknames) {
         nicknames.forEach(this::create);

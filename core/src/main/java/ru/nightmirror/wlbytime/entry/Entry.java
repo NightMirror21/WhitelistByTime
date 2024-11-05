@@ -41,7 +41,7 @@ public class Entry {
         }
     }
 
-    public boolean isExpired() {
+    public boolean isInactive() {
         return !isActive();
     }
 
@@ -77,11 +77,42 @@ public class Entry {
         freezing = new Freezing(id, time);
     }
 
+    public void unfreeze() {
+        if (isNotFrozen()) {
+            throw new IllegalStateException("Entry is not frozen.");
+        }
+
+        expiration = new Expiration(id, new Timestamp(System.currentTimeMillis() + freezing.getTimeOfFreeze()));
+
+        freezing = null;
+    }
+
     public void updateLastJoin() {
         lastJoin = new LastJoin(id);
     }
 
     public boolean isJoined() {
         return lastJoin != null;
+    }
+    
+    public long getLeftActiveTime() {
+        long offset = 0L;
+        
+        if (isFreezeActive()) {
+            offset = freezing.getTimeOfFreeze();
+        }
+        
+        if (isForever()) {
+            throw new IllegalStateException("Can't get left expiration time cause entry is forever");
+        }
+        
+        return offset + expiration.getExpirationTime().getTime() - System.currentTimeMillis();
+    }
+
+    public long getLeftFreezeTime() {
+        if (isFreezeInactive()) {
+            throw new IllegalStateException("Can't get left freeze time cause entry is not frozen");
+        }
+        return freezing.getTimeOfFreeze() - System.currentTimeMillis();
     }
 }

@@ -6,199 +6,123 @@ import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 public class EntryTest {
 
     private Entry entry;
 
     @BeforeEach
-    public void setup() {
+    public void setUp() {
         entry = Entry.builder()
                 .id(1L)
-                .nickname("testUser")
-                .until(System.currentTimeMillis() + 100000)
+                .nickname("TestPlayer")
                 .build();
     }
 
     @Test
-    public void testApplyFreeze_setsFrozenTimestamps() {
-        entry.applyFreeze(10000L);
-        assertNotNull(entry.getFreezeStartTime());
-        assertNotNull(entry.getFreezeEndTime());
-    }
-
-    @Test
-    public void testGetFrozenAt_throws_whenNotFrozen() {
-        assertThrows(UnsupportedOperationException.class, entry::getFreezeStartTime);
-    }
-
-    @Test
-    public void testGetFrozenAt_returnsTimestamp_whenFrozen() {
-        entry.applyFreeze(10000L);
-        assertNotNull(entry.getFreezeStartTime());
-    }
-
-    @Test
-    public void testGetFrozenUntil_throws_whenNotFrozen() {
-        assertThrows(UnsupportedOperationException.class, entry::getFreezeEndTime);
-    }
-
-    @Test
-    public void testGetFrozenUntil_returnsTimestamp_whenFrozen() {
-        entry.applyFreeze(10000L);
-        assertNotNull(entry.getFreezeEndTime());
-    }
-
-    @Test
-    public void testIsExcludedFromWhitelist() {
-        assertFalse(entry.isExcludedFromWhitelist());
-    }
-
-    @Test
-    public void testIsNotInWhitelist_true_whenExcludedFromWhitelist() {
-        entry.markAsNotInWhitelist();
-        assertTrue(entry.isExcludedFromWhitelist());
-    }
-
-    @Test
-    public void testMarkAsNotInWhitelist_throws_whenFrozen() {
-        entry.applyFreeze(10000L);
-        assertThrows(UnsupportedOperationException.class, entry::markAsNotInWhitelist);
-    }
-
-    @Test
-    public void testMarkAsNotInWhitelist_throws_whenForever() {
+    public void testIsForever_WhenExpirationIsNull_ShouldReturnTrue() {
         entry.setForever();
-        assertThrows(UnsupportedOperationException.class, entry::markAsNotInWhitelist);
+        assertTrue(entry.isForever());
     }
 
     @Test
-    public void testHasNoExpiration() {
+    public void testIsForever_WhenExpirationIsNotNull_ShouldReturnFalse() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis()));
+        assertFalse(entry.isForever());
+    }
+
+    @Test
+    public void testIsActive_WhenForever_ShouldReturnTrue() {
         entry.setForever();
-        assertTrue(entry.hasNoExpiration());
+        assertTrue(entry.isActive());
     }
 
     @Test
-    public void testSetForever_throws_whenFrozen() {
-        entry.applyFreeze(10000L);
-        assertThrows(UnsupportedOperationException.class, entry::setForever);
+    public void testIsActive_WhenNotExpired_ShouldReturnTrue() {
+        Expiration expiration = mock(Expiration.class);
+        when(expiration.isNotExpired()).thenReturn(true);
+        entry.setExpiration(new Timestamp(System.currentTimeMillis()));
+        entry.setExpiration(expiration.getExpirationTime());
+        assertTrue(entry.isActive());
     }
 
     @Test
-    public void testSetForever_throws_whenNotInWhitelist() {
-        entry.markAsNotInWhitelist();
-        assertThrows(UnsupportedOperationException.class, entry::setForever);
+    public void testIsActive_WhenExpiredAndFrozen_ShouldCheckFreezeTime() {
+        Expiration expiration = mock(Expiration.class);
+        when(expiration.isNotExpired()).thenReturn(false);
+        when(expiration.isNotExpired(any(Long.class))).thenReturn(true);
+        entry.setExpiration(expiration.getExpirationTime());
+        entry.freeze(1000L);
+        assertTrue(entry.isActive());
     }
 
     @Test
-    public void testIsExpiredIncludeApplyFreeze_false_whenNotExpired() {
-        assertFalse(entry.isExpiredConsideringFreeze());
+    public void testIsInactive_WhenNotActive_ShouldReturnTrue() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() - 10000));
+        assertTrue(entry.isInactive());
     }
 
     @Test
-    public void testIsExpiredIncludeApplyFreeze_true_whenExpired() {
-        entry = Entry.builder()
-                .id(1L)
-                .nickname("testUser")
-                .until(System.currentTimeMillis() - 10000)
-                .build();
-
-        assertTrue(entry.isExpiredConsideringFreeze());
-    }
-
-    @Test
-    public void testIsExpiredIncludeApplyFreeze_false_whenFrozenTimePassed() {
-        entry.applyFreeze(-10000L);
-        assertTrue(entry.isExpiredConsideringFreeze());
-    }
-
-    @Test
-    public void testIsCurrentlyActive_true_whenNotExpiredAndNotFrozen() {
-        assertTrue(entry.isCurrentlyActive());
-    }
-
-    @Test
-    public void testIsCurrentlyActive_false_whenExpired() {
-        entry = Entry.builder()
-                .id(1L)
-                .nickname("testUser")
-                .until(System.currentTimeMillis() - 10000)
-                .build();
-
-        assertFalse(entry.isCurrentlyActive());
-    }
-
-    @Test
-    public void testGetRemainingActiveTime_throws_whenFrozen() {
-        entry.applyFreeze(10000L);
-        assertThrows(UnsupportedOperationException.class, entry::getRemainingActiveTime);
-    }
-
-    @Test
-    public void testGetRemainingTime_returnsActiveTime_whenNotFrozen() {
-        long remainingTime = entry.getRemainingActiveTime();
-        assertTrue(remainingTime > 0);
-    }
-
-    @Test
-    public void testGetRemainingActiveTime_throws_whenForever() {
+    public void testSetForever_ShouldSetExpirationToNull() {
         entry.setForever();
-        assertThrows(UnsupportedOperationException.class, entry::getRemainingActiveTime);
+        assertNull(entry.getExpiration());
     }
 
     @Test
-    public void testGetRemainingActiveTimeOfApplyFreeze_throws_whenNotFrozen() {
-        assertThrows(UnsupportedOperationException.class, entry::getRemainingFreezeTime);
+    public void testSetExpiration_ShouldSetExpirationToNonNull() {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis() + 10000);
+        entry.setExpiration(timestamp);
+        assertNotNull(entry.getExpiration());
     }
 
     @Test
-    public void testGetRemainingTimeOfApplyFreeze_returnsActiveTime_whenFrozen() {
-        entry.applyFreeze(10000L);
-        long remainingFreezeTime = entry.getRemainingFreezeTime();
-        assertTrue(remainingFreezeTime > 0);
+    public void testIsFrozen_WhenFreezingIsNotNull_ShouldReturnTrue() {
+        entry.freeze(1000L);
+        assertTrue(entry.isFrozen());
     }
 
     @Test
-    public void testApplyFreeze_throws_whenAlreadyFrozen() {
-        entry.applyFreeze(10000L);
-        assertThrows(UnsupportedOperationException.class, () -> entry.applyFreeze(10000L));
+    public void testIsNotFrozen_WhenFreezingIsNull_ShouldReturnTrue() {
+        assertTrue(entry.isNotFrozen());
     }
 
     @Test
-    public void testApplyFreeze_throws_whenForever() {
-        entry.setForever();
-        assertThrows(UnsupportedOperationException.class, () -> entry.applyFreeze(10000L));
+    public void testIsFreezeActive_WhenFreezingIsActive_ShouldReturnTrue() {
+        Freezing freezing = mock(Freezing.class);
+        when(freezing.isFrozen()).thenReturn(true);
+        entry.freeze(1000L);
+        assertTrue(entry.isFreezeActive());
     }
 
     @Test
-    public void testRemoveFreeze_resetsFrozenFields() {
-        entry.applyFreeze(10000L);
-        entry.removeFreeze();
-        assertFalse(entry.isCurrentlyFrozen());
-        assertThrows(UnsupportedOperationException.class, () -> entry.getFreezeStartTime());
-        assertThrows(UnsupportedOperationException.class, () -> entry.getFreezeEndTime());
+    public void testIsFreezeInactive_WhenFreezingIsInactive_ShouldReturnTrue() {
+        Freezing freezing = mock(Freezing.class);
+        when(freezing.isFrozen()).thenReturn(false);
+        entry.freeze(1000L);
+        assertTrue(entry.isFreezeInactive());
     }
 
     @Test
-    public void testRemoveFreeze_throws_whenNotFrozen() {
-        assertThrows(UnsupportedOperationException.class, entry::removeFreeze);
+    public void testFreeze_WhenAlreadyFrozen_ShouldThrowIllegalStateException() {
+        entry.freeze(1000L);
+        assertThrows(IllegalStateException.class, () -> entry.freeze(5000L));
     }
 
     @Test
-    public void testGetUntilIncludeApplyFreeze_throws_whenFrozen() {
-        entry.applyFreeze(10000L);
-        assertThrows(UnsupportedOperationException.class, entry::getEffectiveUntilTimestamp);
+    public void testUpdateLastJoin_ShouldSetLastJoinToNonNull() {
+        entry.updateLastJoin();
+        assertNotNull(entry.getLastJoin());
     }
 
     @Test
-    public void testGetUntilIncludeApplyFreeze_returnsTimestamp_whenNotFrozen() {
-        Timestamp untilTimestamp = entry.getEffectiveUntilTimestamp();
-        assertNotNull(untilTimestamp);
+    public void testIsJoined_WhenLastJoinIsNotNull_ShouldReturnTrue() {
+        entry.updateLastJoin();
+        assertTrue(entry.isJoined());
     }
 
     @Test
-    public void testGetUntilIncludeApplyFreeze_throws_whenForever() {
-        entry.setForever();
-        assertThrows(UnsupportedOperationException.class, entry::getEffectiveUntilTimestamp);
+    public void testIsJoined_WhenLastJoinIsNull_ShouldReturnFalse() {
+        assertFalse(entry.isJoined());
     }
 }

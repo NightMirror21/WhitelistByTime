@@ -23,11 +23,11 @@ public class UnfreezeEntryCheckerImplTest {
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryDao);
 
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(true);
+        when(entry.isFreezeActive()).thenReturn(true);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
 
-        verify(entry).removeFreeze();
+        verify(entry).unfreeze();
         verify(entryDao).update(entry);
     }
 
@@ -37,11 +37,11 @@ public class UnfreezeEntryCheckerImplTest {
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryDao);
 
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(false);
+        when(entry.isFreezeActive()).thenReturn(false);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
 
-        verify(entry, never()).removeFreeze();
+        verify(entry, never()).unfreeze();
         verify(entryDao, never()).update(entry);
     }
 
@@ -51,11 +51,11 @@ public class UnfreezeEntryCheckerImplTest {
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryDao);
 
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(true);
+        when(entry.isFreezeActive()).thenReturn(true);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
 
-        verify(entry, never()).removeFreeze();
+        verify(entry, never()).unfreeze();
         verify(entryDao, never()).update(entry);
     }
 
@@ -65,11 +65,11 @@ public class UnfreezeEntryCheckerImplTest {
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryDao);
 
         Entry entry = mock(Entry.class);
-        when(entry.isCurrentlyFrozen()).thenReturn(false);
+        when(entry.isFreezeActive()).thenReturn(false);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
 
-        verify(entry, never()).removeFreeze();
+        verify(entry, never()).unfreeze();
         verify(entryDao, never()).update(entry);
     }
 }
