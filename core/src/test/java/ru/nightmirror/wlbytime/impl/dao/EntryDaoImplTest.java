@@ -224,8 +224,8 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testClose_MultipleTimes_ShouldThrowError() {
+    void testClose_MultipleTimes_ShouldNotThrowError() {
         assertDoesNotThrow(() -> entryDao.close());
-        assertThrows(UnsupportedOperationException.class, () -> entryDao.close());
+        assertDoesNotThrow(() -> entryDao.close());
     }
 }

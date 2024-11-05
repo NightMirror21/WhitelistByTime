@@ -96,12 +96,8 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
 
     @Override
     public synchronized void close() {
-        if (connectionSource == null) {
-            throw new UnsupportedOperationException("Connection already closed");
-        }
         try {
             connectionSource.close();
-            connectionSource = null;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error closing database connection", e);
         }
