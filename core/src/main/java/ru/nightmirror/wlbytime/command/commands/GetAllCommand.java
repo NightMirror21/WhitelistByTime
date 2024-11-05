@@ -112,13 +112,13 @@ public class GetAllCommand implements Command {
     }
 
     private String getTimeOrStatus(Entry entry) {
-        if (entry.isForever()) {
+        if (entry.hasNoExpiration()) {
             return messages.getForever();
-        } else if (entry.isFrozen()) {
-            String remainingTime = convertor.getTimeLine(entry.getRemainingTimeOfFreeze());
+        } else if (entry.isCurrentlyFrozen()) {
+            String remainingTime = convertor.getTimeLine(entry.getRemainingFreezeTime());
             return messages.getFrozen().replace("%time%", remainingTime);
-        } else if (entry.isActive()) {
-            String remainingTime = convertor.getTimeLine(entry.getRemainingTime());
+        } else if (entry.isCurrentlyActive()) {
+            String remainingTime = convertor.getTimeLine(entry.getRemainingActiveTime());
             return messages.getActive().replace("%time%", remainingTime);
         } else {
             return messages.getExpired();

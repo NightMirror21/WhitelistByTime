@@ -58,12 +58,12 @@ public class FreezeCommand implements Command {
         }
 
         Entry userEntry = entry.get();
-        if (!userEntry.isActive()) {
+        if (!userEntry.isCurrentlyActive()) {
             sendPlayerExpiredMessage(issuer, nickname);
             return;
         }
 
-        if (userEntry.isFrozen()) {
+        if (userEntry.isCurrentlyFrozen()) {
             sendPlayerAlreadyFrozenMessage(issuer, nickname);
         } else {
             freezePlayer(issuer, userEntry, timeInMillis, nickname);

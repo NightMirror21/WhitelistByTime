@@ -19,10 +19,10 @@ public class AccessEntryCheckerImplTest {
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsActiveAndNotFrozen_ShouldReturnTrue() {
+    public void testIsAllowed_WhenEntryIsCurrentlyActiveAndNotFrozen_ShouldReturnTrue() {
         Entry entry = mock(Entry.class);
-        when(entry.isFrozen()).thenReturn(false);
-        when(entry.isActive()).thenReturn(true);
+        when(entry.isCurrentlyFrozen()).thenReturn(false);
+        when(entry.isCurrentlyActive()).thenReturn(true);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 
@@ -30,10 +30,10 @@ public class AccessEntryCheckerImplTest {
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsActiveButFrozen_ShouldReturnFalse() {
+    public void testIsAllowed_WhenEntryIsCurrentlyActiveButFrozen_ShouldReturnFalse() {
         Entry entry = mock(Entry.class);
-        when(entry.isFrozen()).thenReturn(true);
-        when(entry.isActive()).thenReturn(true);
+        when(entry.isCurrentlyFrozen()).thenReturn(true);
+        when(entry.isCurrentlyActive()).thenReturn(true);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 
@@ -43,8 +43,8 @@ public class AccessEntryCheckerImplTest {
     @Test
     public void testIsAllowed_WhenEntryIsInactiveAndNotFrozen_ShouldReturnFalse() {
         Entry entry = mock(Entry.class);
-        when(entry.isFrozen()).thenReturn(false);
-        when(entry.isActive()).thenReturn(false);
+        when(entry.isCurrentlyFrozen()).thenReturn(false);
+        when(entry.isCurrentlyActive()).thenReturn(false);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 
@@ -54,8 +54,8 @@ public class AccessEntryCheckerImplTest {
     @Test
     public void testIsAllowed_WhenEntryIsInactiveAndFrozen_ShouldReturnFalse() {
         Entry entry = mock(Entry.class);
-        when(entry.isFrozen()).thenReturn(true);
-        when(entry.isActive()).thenReturn(false);
+        when(entry.isCurrentlyFrozen()).thenReturn(true);
+        when(entry.isCurrentlyActive()).thenReturn(false);
 
         boolean result = accessEntryChecker.isAllowed(entry);
 

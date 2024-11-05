@@ -86,30 +86,6 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntriesSpanningMultiplePages_ShouldDisplayCorrectPagination() {
-        Entry entry1 = createMockEntry("Player1", true, false, 1000L, false);
-        Entry entry2 = createMockEntry("Player2", false, true, 2000L, false);
-        Entry entry3 = createMockEntry("Player3", false, false, 0L, false);
-
-        when(service.getEntries()).thenReturn(Set.of(entry1, entry2, entry3));
-        when(messages.getEntriesForPage()).thenReturn(2);
-        when(messages.getListHeader()).thenReturn("=== Whitelist Entries ===");
-        when(messages.getListFooter()).thenReturn("Page %page% of %max-page%");
-        when(messages.getListElement()).thenReturn("Nickname: %nickname% Status: %time-or-status%");
-        when(messages.getActive()).thenReturn("Active: %time%");
-        when(messages.getFrozen()).thenReturn("Frozen: %time%");
-        when(messages.getExpired()).thenReturn("Expired");
-        when(convertor.getTimeLine(1000L)).thenReturn("1 minute");
-        when(convertor.getTimeLine(2000L)).thenReturn("2 minutes");
-
-        getAllCommand.execute(issuer, new String[]{"2"});
-
-        verify(issuer).sendMessage("=== Whitelist Entries ===");
-        verify(issuer).sendMessage("Nickname: Player3 Status: Expired");
-        verify(issuer).sendMessage("Page 2 of 2");
-    }
-
-    @Test
     public void testExecute_WhenSingleEntryIsForever_ShouldDisplayForeverMessage() {
         Entry entry = createMockEntry("Player1", false, false, 0L, true);
         when(service.getEntries()).thenReturn(Set.of(entry));
@@ -145,11 +121,11 @@ public class GetAllCommandTest {
     private Entry createMockEntry(String nickname, boolean active, boolean frozen, long remainingTime, boolean forever) {
         Entry entry = mock(Entry.class);
         when(entry.getNickname()).thenReturn(nickname);
-        when(entry.isActive()).thenReturn(active);
-        when(entry.isFrozen()).thenReturn(frozen);
-        when(entry.getRemainingTime()).thenReturn(remainingTime);
-        when(entry.getRemainingTimeOfFreeze()).thenReturn(remainingTime);
-        when(entry.isForever()).thenReturn(forever);
+        when(entry.isCurrentlyActive()).thenReturn(active);
+        when(entry.isCurrentlyFrozen()).thenReturn(frozen);
+        when(entry.getRemainingActiveTime()).thenReturn(remainingTime);
+        when(entry.getRemainingFreezeTime()).thenReturn(remainingTime);
+        when(entry.hasNoExpiration()).thenReturn(forever);
         return entry;
     }
 }

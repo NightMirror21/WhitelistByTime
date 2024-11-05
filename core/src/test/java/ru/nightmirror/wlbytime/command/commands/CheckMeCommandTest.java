@@ -47,8 +47,8 @@ public class CheckMeCommandTest {
     public void testExecute_WhenPlayerInWhitelistForever() {
         when(issuer.getNickname()).thenReturn("Player1");
         when(finder.find("Player1")).thenReturn(Optional.of(entry));
-        when(entry.isExpiredIncludeFreeze()).thenReturn(false);
-        when(entry.isForever()).thenReturn(true);
+        when(entry.isExpiredConsideringFreeze()).thenReturn(false);
+        when(entry.hasNoExpiration()).thenReturn(true);
         when(messages.getCheckMeStillInWhitelistForever()).thenReturn("You are in the whitelist forever.");
 
         checkMeCommand.execute(issuer, new String[0]);
@@ -60,9 +60,9 @@ public class CheckMeCommandTest {
     public void testExecute_WhenPlayerIsFrozen() {
         when(issuer.getNickname()).thenReturn("Player1");
         when(finder.find("Player1")).thenReturn(Optional.of(entry));
-        when(entry.isExpiredIncludeFreeze()).thenReturn(false);
-        when(entry.isFrozen()).thenReturn(true);
-        when(entry.getRemainingTimeOfFreeze()).thenReturn(60000L);
+        when(entry.isExpiredConsideringFreeze()).thenReturn(false);
+        when(entry.isCurrentlyFrozen()).thenReturn(true);
+        when(entry.getRemainingFreezeTime()).thenReturn(60000L);
         when(convertor.getTimeLine(60000L)).thenReturn("1 minute");
         when(messages.getCheckMeFrozen()).thenReturn("You are frozen for %time%.");
 
@@ -75,10 +75,10 @@ public class CheckMeCommandTest {
     public void testExecute_WhenPlayerInWhitelistForTime() {
         when(issuer.getNickname()).thenReturn("Player1");
         when(finder.find("Player1")).thenReturn(Optional.of(entry));
-        when(entry.isExpiredIncludeFreeze()).thenReturn(false);
-        when(entry.isForever()).thenReturn(false);
-        when(entry.isFrozen()).thenReturn(false);
-        when(entry.getRemainingTime()).thenReturn(120000L);
+        when(entry.isExpiredConsideringFreeze()).thenReturn(false);
+        when(entry.hasNoExpiration()).thenReturn(false);
+        when(entry.isCurrentlyFrozen()).thenReturn(false);
+        when(entry.getRemainingActiveTime()).thenReturn(120000L);
         when(convertor.getTimeLine(120000L)).thenReturn("2 minutes");
         when(messages.getCheckMeStillInWhitelistForTime()).thenReturn("You are in the whitelist for %time%.");
 

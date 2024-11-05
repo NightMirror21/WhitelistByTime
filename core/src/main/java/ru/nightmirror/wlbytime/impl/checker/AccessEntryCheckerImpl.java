@@ -7,9 +7,9 @@ public class AccessEntryCheckerImpl implements AccessEntryChecker {
 
     @Override
     public boolean isAllowed(Entry entry) {
-        if (entry.isFrozen()) {
+        if (entry.isCurrentlyFrozen()) {
             return false;
         }
-        return entry.isActive();
+        return entry.isCurrentlyActive();
     }
 }

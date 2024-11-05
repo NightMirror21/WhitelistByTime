@@ -148,9 +148,9 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     }
 
     private EntryTable toEntryTable(Entry entry) {
-        return new EntryTable(entry.getId(), entry.getNickname(), entry.getUntilOrNull(),
-                entry.getFrozenAtOrNull(),
-                entry.getFrozenUntilOrNull(),
+        return new EntryTable(entry.getId(), entry.getNickname(), entry.getExpirationOrNull(),
+                entry.getFrozenStartTimeOrNull(),
+                entry.getFreezeEndTimeOrNull(),
                 entry.getLastJoin());
     }
 

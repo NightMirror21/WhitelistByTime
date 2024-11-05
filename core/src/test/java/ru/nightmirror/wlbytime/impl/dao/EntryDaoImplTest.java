@@ -45,18 +45,18 @@ public class EntryDaoImplTest {
 
         assertTrue(retrieved.isPresent());
         assertEquals(created.getNickname(), retrieved.get().getNickname());
-        assertEquals(created.getUntilOrNull(), retrieved.get().getUntilOrNull());
+        assertEquals(created.getExpirationOrNull(), retrieved.get().getExpirationOrNull());
     }
 
     @Test
     public void testUpdateEntry() {
         Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
-        created.setNotInWhitelist();
+        created.markAsNotInWhitelist();
         entryDao.update(created);
 
         Optional<Entry> updated = entryDao.get("testUser");
         assertTrue(updated.isPresent());
-        assertTrue(updated.get().isNotInWhitelist());
+        assertTrue(updated.get().isExcludedFromWhitelist());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class EntryDaoImplTest {
         Entry created = entryDao.create("testUser", Entry.FOREVER);
 
         assertNotNull(created);
-        assertEquals(Entry.FOREVER, created.getUntilOrNull());
+        assertEquals(Entry.FOREVER, created.getExpirationOrNull());
     }
 
     @Test

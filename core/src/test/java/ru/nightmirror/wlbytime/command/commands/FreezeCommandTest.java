@@ -100,14 +100,14 @@ public class FreezeCommandTest {
         Entry entry = mock(Entry.class);
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
-        when(entry.isActive()).thenReturn(false);
+        when(entry.isCurrentlyActive()).thenReturn(false);
         when(messages.getPlayerExpired()).thenReturn("Player %nickname% has expired.");
 
         freezeCommand.execute(issuer, args);
 
         verify(finder).find(nickname);
         verify(convertor).getTimeMs("1h");
-        verify(entry).isActive();
+        verify(entry).isCurrentlyActive();
         verify(issuer).sendMessage("Player Player1 has expired.");
         verify(service, never()).freeze(any(), anyLong());
     }
@@ -119,16 +119,16 @@ public class FreezeCommandTest {
         Entry entry = mock(Entry.class);
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("2h")).thenReturn(7200000L);
-        when(entry.isActive()).thenReturn(true);
-        when(entry.isFrozen()).thenReturn(true);
+        when(entry.isCurrentlyActive()).thenReturn(true);
+        when(entry.isCurrentlyFrozen()).thenReturn(true);
         when(messages.getPlayerAlreadyFrozen()).thenReturn("Player %nickname% is already frozen.");
 
         freezeCommand.execute(issuer, args);
 
         verify(finder).find(nickname);
         verify(convertor).getTimeMs("2h");
-        verify(entry).isActive();
-        verify(entry).isFrozen();
+        verify(entry).isCurrentlyActive();
+        verify(entry).isCurrentlyFrozen();
         verify(issuer).sendMessage("Player Player1 is already frozen.");
         verify(service, never()).freeze(any(), anyLong());
     }
@@ -140,8 +140,8 @@ public class FreezeCommandTest {
         Entry entry = mock(Entry.class);
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("3h")).thenReturn(10800000L);
-        when(entry.isActive()).thenReturn(true);
-        when(entry.isFrozen()).thenReturn(false);
+        when(entry.isCurrentlyActive()).thenReturn(true);
+        when(entry.isCurrentlyFrozen()).thenReturn(false);
         when(convertor.getTimeLine(10800000L)).thenReturn("3 hours");
         when(messages.getPlayerFrozen()).thenReturn("Player %nickname% has been frozen for %time%.");
 
@@ -149,8 +149,8 @@ public class FreezeCommandTest {
 
         verify(finder).find(nickname);
         verify(convertor).getTimeMs("3h");
-        verify(entry).isActive();
-        verify(entry).isFrozen();
+        verify(entry).isCurrentlyActive();
+        verify(entry).isCurrentlyFrozen();
         verify(service).freeze(entry, 10800000L);
         verify(convertor).getTimeLine(10800000L);
         verify(issuer).sendMessage("Player Player1 has been frozen for 3 hours.");

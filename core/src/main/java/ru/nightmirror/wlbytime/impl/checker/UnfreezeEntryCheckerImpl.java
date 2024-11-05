@@ -16,8 +16,8 @@ public class UnfreezeEntryCheckerImpl implements UnfreezeEntryChecker {
 
     @Override
     public void unfreezeIfRequired(Entry entry) {
-        if (unfreezeIfFrozen && entry.isFrozen()) {
-            entry.unfreeze();
+        if (unfreezeIfFrozen && entry.isCurrentlyFrozen()) {
+            entry.removeFreeze();
             dao.update(entry);
         }
     }

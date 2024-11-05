@@ -34,12 +34,12 @@ public class CheckMeCommand implements Command {
     @Override
     public void execute(CommandIssuer issuer, String[] args) {
         Optional<Entry> entry = finder.find(issuer.getNickname());
-        if (entry.isEmpty() || entry.get().isExpiredIncludeFreeze()) {
+        if (entry.isEmpty() || entry.get().isExpiredConsideringFreeze()) {
             issuer.sendMessage(messages.getCheckMeNotInWhitelist());
         } else {
-            if (entry.get().isForever()) {
+            if (entry.get().hasNoExpiration()) {
                 sendForeverMessage(issuer);
-            } else if (entry.get().isFrozen()) {
+            } else if (entry.get().isCurrentlyFrozen()) {
                 sendFrozenMessage(issuer, entry.get());
             } else {
                 sendWhitelistForTimeMessage(issuer, entry.get());
@@ -52,13 +52,13 @@ public class CheckMeCommand implements Command {
     }
 
     private void sendFrozenMessage(CommandIssuer issuer, Entry entry) {
-        long leftOfFreeze = entry.getRemainingTimeOfFreeze();
+        long leftOfFreeze = entry.getRemainingFreezeTime();
         String timeAsString = convertor.getTimeLine(leftOfFreeze);
         issuer.sendMessage(messages.getCheckMeFrozen().replaceAll("%time%", timeAsString));
     }
 
     private void sendWhitelistForTimeMessage(CommandIssuer issuer, Entry entry) {
-        long leftOfTime = entry.getRemainingTime();
+        long leftOfTime = entry.getRemainingActiveTime();
         String timeAsString = convertor.getTimeLine(leftOfTime);
         issuer.sendMessage(messages.getCheckMeStillInWhitelistForTime().replaceAll("%time%", timeAsString));
     }
