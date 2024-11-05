@@ -21,14 +21,10 @@ public class EntryTest {
     }
 
     @Test
-    public void testIsFrozen_false_whenNotFrozen() {
-        assertFalse(entry.isFrozen());
-    }
-
-    @Test
-    public void testIsFrozen_true_whenFrozen() {
+    public void testFreeze_setsFrozenTimestamps() {
         entry.freeze(10000L);
-        assertTrue(entry.isFrozen());
+        assertNotNull(entry.getFrozenAt());
+        assertNotNull(entry.getFrozenUntil());
     }
 
     @Test

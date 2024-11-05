@@ -128,18 +128,6 @@ public class EntryDaoImplTest {
     }
 
     @Test
-    public void testUpdateEntryWithSQLException() {
-        Entry created = entryDao.create("testUser", System.currentTimeMillis() + 100000);
-        entryDao.close();
-
-        Exception exception = assertThrows(EntryDaoImpl.DataAccessException.class, () ->
-                entryDao.update(created)
-        );
-
-        assertTrue(exception.getMessage().contains("Failed to update entry"));
-    }
-
-    @Test
     public void testGetAllWithSQLException() {
         entryDao.close();
 

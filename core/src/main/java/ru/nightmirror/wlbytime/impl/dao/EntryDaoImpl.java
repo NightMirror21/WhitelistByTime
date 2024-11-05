@@ -16,6 +16,7 @@ import ru.nightmirror.wlbytime.entry.Entry;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -123,7 +124,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     @Override
     public Entry create(String nickname, long milliseconds) {
         try {
-            EntryTable entryTable = new EntryTable(null, nickname, milliseconds, null, null);
+            EntryTable entryTable = new EntryTable(null, nickname, milliseconds, null, null, null);
             entryDao.create(entryTable);
             return fromEntryTable(entryTable);
         } catch (SQLException e) {
@@ -149,7 +150,8 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     private EntryTable toEntryTable(Entry entry) {
         return new EntryTable(entry.getId(), entry.getNickname(), entry.getUntilOrNull(),
                 entry.getFrozenAtOrNull(),
-                entry.getFrozenUntilOrNull());
+                entry.getFrozenUntilOrNull(),
+                entry.getLastJoin());
     }
 
     private Entry fromEntryTable(EntryTable entryTable) {
@@ -157,8 +159,9 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
                 .id(entryTable.getId())
                 .nickname(entryTable.getNickname())
                 .until(entryTable.getUntil())
-                .frozenAt(entryTable.getFrozenAt())
-                .frozenUntil(entryTable.getFrozenUntil())
+                .frozenAt(entryTable.getFrozenAt() != null ? new Timestamp(entryTable.getFrozenAt()) : null)
+                .frozenUntil(entryTable.getFrozenUntil() != null ? new Timestamp(entryTable.getFrozenUntil()) : null)
+                .lastJoin(entryTable.getLastJoin())
                 .build();
     }
     
@@ -191,6 +194,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
         public static final String UNTIL_COLUMN = "until";
         public static final String FROZEN_AT_COLUMN = "frozen_at";
         public static final String FROZEN_UNTIL_COLUMN = "frozen_until";
+        public static final String LAST_JOIN_COLUMN = "last_join";
 
         @DatabaseField(generatedId = true, columnName = ID_COLUMN, canBeNull = false)
         private Long id;
@@ -206,5 +210,8 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
 
         @DatabaseField(columnName = FROZEN_UNTIL_COLUMN)
         private Long frozenUntil;
+
+        @DatabaseField(columnName = LAST_JOIN_COLUMN)
+        private Timestamp lastJoin;
     }
 }
