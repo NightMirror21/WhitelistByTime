@@ -42,6 +42,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
 
     public EntryDaoImpl(DatabaseConfig config) {
         try {
+            com.j256.ormlite.logger.Logger.setGlobalLogLevel(com.j256.ormlite.logger.Level.OFF);
             initConnection(config);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error initializing database connection", e);
@@ -95,12 +96,14 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
 
     @Override
     public synchronized void close() {
-        if (connectionSource != null) {
-            try {
-                connectionSource.close();
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Error closing database connection", e);
-            }
+        if (connectionSource == null) {
+            throw new UnsupportedOperationException("Connection already closed");
+        }
+        try {
+            connectionSource.close();
+            connectionSource = null;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error closing database connection", e);
         }
     }
 
@@ -301,7 +304,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    private static class EntryTable {
+    public static class EntryTable {
         public static final String ID_COLUMN = "id";
         public static final String NICKNAME_COLUMN = "nickname";
 
@@ -317,7 +320,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    private static class LastJoinTable {
+    public static class LastJoinTable {
         public static final String ENTRY_ID_COLUMN = "entry_id";
         public static final String LAST_JOIN_COLUMN = "last_join";
 
@@ -336,7 +339,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    private static class FreezingTable {
+    public static class FreezingTable {
         public static final String ENTRY_ID_COLUMN = "entry_id";
         public static final String START_TIME_COLUMN = "start_time";
         public static final String END_TIME_COLUMN = "end_time";
@@ -359,7 +362,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     @NoArgsConstructor
     @AllArgsConstructor
     @ToString
-    private static class ExpirationTable {
+    public static class ExpirationTable {
         public static final String ENTRY_ID_COLUMN = "entry_id";
         public static final String EXPIRATION_TIME_COLUMN = "expiration_time";
 

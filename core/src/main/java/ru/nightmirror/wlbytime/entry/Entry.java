@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.entry;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 
@@ -35,7 +36,7 @@ public class Entry {
         }
 
         if (isFreezeActive()) {
-            return expiration.isNotExpired(freezing.getTimeOfFreeze());
+            return expiration.isNotExpired(freezing.getDurationOfFreeze());
         } else {
             return false;
         }
@@ -49,7 +50,7 @@ public class Entry {
         expiration = null;
     }
 
-    public void setExpiration(Timestamp timestamp) {
+    public void setExpiration(@NotNull Timestamp timestamp) {
         expiration = new Expiration(id, timestamp);
     }
 
@@ -70,6 +71,10 @@ public class Entry {
     }
 
     public void freeze(long time) {
+        if (time <= 0) {
+            throw new IllegalArgumentException("Time for freeze must be positive and not zero.");
+        }
+
         if (isFrozen()) {
             throw new IllegalStateException("Entry is already frozen.");
         }
@@ -82,7 +87,7 @@ public class Entry {
             throw new IllegalStateException("Entry is not frozen.");
         }
 
-        expiration = new Expiration(id, new Timestamp(System.currentTimeMillis() + freezing.getTimeOfFreeze()));
+        expiration = new Expiration(id, new Timestamp(System.currentTimeMillis() + freezing.getDurationOfFreeze()));
 
         freezing = null;
     }
@@ -99,7 +104,7 @@ public class Entry {
         long offset = 0L;
         
         if (isFreezeActive()) {
-            offset = freezing.getTimeOfFreeze();
+            offset = freezing.getDurationOfFreeze();
         }
         
         if (isForever()) {
@@ -113,6 +118,6 @@ public class Entry {
         if (isFreezeInactive()) {
             throw new IllegalStateException("Can't get left freeze time cause entry is not frozen");
         }
-        return freezing.getTimeOfFreeze() - System.currentTimeMillis();
+        return freezing.getDurationOfFreeze();
     }
 }
