@@ -2,193 +2,86 @@ package ru.nightmirror.wlbytime.entry;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
-@RequiredArgsConstructor
+@NoArgsConstructor
+@Getter
 @Builder
 @EqualsAndHashCode(of = {"id", "nickname"})
 public class Entry {
-
-    public static final long FOREVER = -1L;
-
-    @Getter
     long id;
-
-    @Getter
     String nickname;
-    long until;
-
-    @Nullable
     @Builder.Default
-    Timestamp frozenAt = null;
-
-    @Nullable
+    Expiration expiration = null;
     @Builder.Default
-    Timestamp frozenUntil = null;
-
-    @Nullable
+    Freezing freezing = null;
     @Builder.Default
-    @Getter
-    Timestamp lastJoin = null;
+    LastJoin lastJoin = null;
 
-    private State resolveCurrentState() {
-        return State.get(until);
+    public boolean isForever() {
+        return expiration == null;
     }
 
-    public boolean isExcludedFromWhitelist() {
-        return resolveCurrentState().equals(State.NOT_IN_WHITELIST);
-    }
+    public boolean isActive() {
+        if (isForever()) {
+            return true;
+        }
 
-    public boolean hasNoExpiration() {
-        return resolveCurrentState().equals(State.FOREVER);
-    }
+        if (expiration.isNotExpired()) {
+            return true;
+        }
 
-    public boolean isCurrentlyActive() {
-        return !isExpiredConsideringFreeze();
-    }
-
-    public boolean isExpiredConsideringFreeze() {
-        if (hasNoExpiration()) {
+        if (isFreezeActive()) {
+            return expiration.isNotExpired(freezing.getTimeOfFreeze());
+        } else {
             return false;
         }
-        if (isCurrentlyFrozen() && frozenUntil != null && frozenAt != null) {
-            long howLongFrozen = frozenUntil.getTime() - frozenAt.getTime();
-            return howLongFrozen < 0;
-        }
-        return until < System.currentTimeMillis();
     }
 
-    public boolean isCurrentlyFrozen() {
-        return frozenAt != null && frozenUntil != null;
-    }
-
-    public void applyFreeze(long howLongInMilliseconds) {
-        if (isCurrentlyFrozen()) {
-            throw new UnsupportedOperationException("Entry is already frozen");
-        }
-        if (hasNoExpiration()) {
-            throw new UnsupportedOperationException("Entry is forever");
-        }
-        long currentTime = System.currentTimeMillis();
-        frozenAt = new Timestamp(currentTime);
-        frozenUntil = new Timestamp(currentTime + howLongInMilliseconds);
-    }
-
-    public void removeFreeze() {
-        if (!isCurrentlyFrozen()) {
-            throw new UnsupportedOperationException("Entry is not frozen");
-        }
-        long elapsedTime = System.currentTimeMillis() - frozenUntil.getTime();
-        until += elapsedTime;
-        frozenAt = null;
-        frozenUntil = null;
-    }
-
-    public Timestamp getFreezeStartTime() {
-        if (frozenAt == null) {
-            throw new UnsupportedOperationException("Entry is not frozen");
-        }
-        return frozenAt;
-    }
-
-    public @Nullable Timestamp getFreezeStartTimeOrNull() {
-        return frozenAt;
-    }
-
-    public Timestamp getFreezeEndTime() {
-        if (frozenUntil == null) {
-            throw new UnsupportedOperationException("Entry is not frozen");
-        }
-        return frozenUntil;
-    }
-
-    public @Nullable Timestamp getFreezeEndTimeOrNull() {
-        return frozenUntil;
-    }
-
-    public long getRemainingFreezeTime() {
-        if (!isCurrentlyFrozen() || frozenUntil == null || frozenAt == null) {
-            throw new UnsupportedOperationException("Entry is not frozen");
-        }
-        return frozenUntil.getTime() - System.currentTimeMillis();
-    }
-
-    public Timestamp getEffectiveUntilTimestamp() {
-        if (isCurrentlyFrozen()) {
-            throw new UnsupportedOperationException("Entry is frozen");
-        }
-        if (hasNoExpiration()) {
-            throw new UnsupportedOperationException("Entry is forever");
-        }
-        if (isCurrentlyFrozen() && frozenUntil != null && frozenAt != null) {
-            long howLongFrozen = frozenUntil.getTime() - frozenAt.getTime();
-            return new Timestamp(until + howLongFrozen);
-        }
-        return new Timestamp(until);
-    }
-
-    public long getRemainingActiveTime() {
-        if (isCurrentlyFrozen()) {
-            throw new UnsupportedOperationException("Entry is frozen");
-        }
-        if (hasNoExpiration()) {
-            throw new UnsupportedOperationException("Entry is forever");
-        }
-        return until - System.currentTimeMillis();
-    }
-
-    public long getUntilRaw() {
-        return until;
-    }
-
-    public void markAsNotInWhitelist() {
-        if (isCurrentlyFrozen()) {
-            throw new UnsupportedOperationException("Entry is frozen");
-        }
-        if (hasNoExpiration()) {
-            throw new UnsupportedOperationException("Entry is forever");
-        }
-        until = State.NOT_IN_WHITELIST.getUntil();
+    public boolean isExpired() {
+        return !isActive();
     }
 
     public void setForever() {
-        if (isCurrentlyFrozen()) {
-            throw new UnsupportedOperationException("Entry is frozen");
-        }
-        if (isExcludedFromWhitelist()) {
-            throw new UnsupportedOperationException("Entry is not in whitelist");
-        }
-        until = State.FOREVER.getUntil();
+        expiration = null;
     }
 
-    public boolean hasJoinedPreviously() {
+    public void setExpiration(Timestamp timestamp) {
+        expiration = new Expiration(id, timestamp);
+    }
+
+    public boolean isFrozen() {
+        return freezing != null;
+    }
+
+    public boolean isNotFrozen() {
+        return !isFrozen();
+    }
+
+    public boolean isFreezeActive() {
+        return isFrozen() && freezing.isFrozen();
+    }
+
+    public boolean isFreezeInactive() {
+        return isFrozen() && !freezing.isFrozen();
+    }
+
+    public void freeze(long time) {
+        if (isFrozen()) {
+            throw new IllegalStateException("Entry is already frozen.");
+        }
+
+        freezing = new Freezing(id, time);
+    }
+
+    public void updateLastJoin() {
+        lastJoin = new LastJoin(id);
+    }
+
+    public boolean isJoined() {
         return lastJoin != null;
-    }
-
-    public void recordJoinTime() {
-        lastJoin = new Timestamp(System.currentTimeMillis());
-    }
-
-    @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-    @Getter
-    @RequiredArgsConstructor
-    private enum State {
-        FOREVER(Entry.FOREVER),
-        NOT_IN_WHITELIST(-2L),
-        TIME(null);
-
-        Long until;
-
-        private static State get(Long time) {
-            return Arrays.stream(State.values())
-                    .filter(state -> state.getUntil() != null && state.getUntil().equals(time))
-                    .findFirst()
-                    .orElse(TIME);
-        }
     }
 }
