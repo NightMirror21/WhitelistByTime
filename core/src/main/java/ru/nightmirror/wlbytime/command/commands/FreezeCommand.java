@@ -51,12 +51,6 @@ public class FreezeCommand implements Command {
             return;
         }
 
-        long timeInMillis = convertor.getTimeMs(timeString);
-        if (timeInMillis <= 0) {
-            sendTimeIsIncorrectMessage(issuer);
-            return;
-        }
-
         Entry userEntry = entry.get();
         if (!userEntry.isActive()) {
             sendPlayerExpiredMessage(issuer, nickname);
@@ -66,6 +60,11 @@ public class FreezeCommand implements Command {
         if (userEntry.isFreezeActive()) {
             sendPlayerAlreadyFrozenMessage(issuer, nickname);
         } else {
+            long timeInMillis = convertor.getTimeMs(timeString);
+            if (timeInMillis <= 0) {
+                sendTimeIsIncorrectMessage(issuer);
+                return;
+            }
             freezePlayer(issuer, userEntry, timeInMillis, nickname);
         }
     }

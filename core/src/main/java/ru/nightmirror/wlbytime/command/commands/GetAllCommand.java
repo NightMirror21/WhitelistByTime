@@ -10,10 +10,7 @@ import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -42,7 +39,9 @@ public class GetAllCommand implements Command {
             return;
         }
 
-        List<Entry> entries = new ArrayList<>(service.getEntries());
+        List<Entry> entries = new ArrayList<>(service.getEntries())
+                .stream().sorted(Comparator.comparing(Entry::getNickname))
+                .toList();
 
         if (entries.isEmpty()) {
             issuer.sendMessage(messages.getListEmpty());
