@@ -148,8 +148,8 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     }
 
     private EntryTable toEntryTable(Entry entry) {
-        return new EntryTable(entry.getId(), entry.getNickname(), entry.getExpirationOrNull(),
-                entry.getFrozenStartTimeOrNull(),
+        return new EntryTable(entry.getId(), entry.getNickname(), entry.getUntilRaw(),
+                entry.getFreezeStartTimeOrNull(),
                 entry.getFreezeEndTimeOrNull(),
                 entry.getLastJoin());
     }
@@ -159,8 +159,8 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
                 .id(entryTable.getId())
                 .nickname(entryTable.getNickname())
                 .until(entryTable.getUntil())
-                .frozenAt(entryTable.getFrozenAt() != null ? new Timestamp(entryTable.getFrozenAt()) : null)
-                .frozenUntil(entryTable.getFrozenUntil() != null ? new Timestamp(entryTable.getFrozenUntil()) : null)
+                .frozenAt(entryTable.getFrozenAt())
+                .frozenUntil(entryTable.getFrozenUntil())
                 .lastJoin(entryTable.getLastJoin())
                 .build();
     }
@@ -206,10 +206,10 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
         private Long until;
 
         @DatabaseField(columnName = FROZEN_AT_COLUMN)
-        private Long frozenAt;
+        private Timestamp frozenAt;
 
         @DatabaseField(columnName = FROZEN_UNTIL_COLUMN)
-        private Long frozenUntil;
+        private Timestamp frozenUntil;
 
         @DatabaseField(columnName = LAST_JOIN_COLUMN)
         private Timestamp lastJoin;

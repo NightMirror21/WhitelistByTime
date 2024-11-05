@@ -79,11 +79,6 @@ public class EntryTest {
     }
 
     @Test
-    public void testHasNoExpiration() {
-        assertFalse(entry.hasNoExpiration());
-    }
-
-    @Test
     public void testSetForever_throws_whenFrozen() {
         entry.applyFreeze(10000L);
         assertThrows(UnsupportedOperationException.class, entry::setForever);

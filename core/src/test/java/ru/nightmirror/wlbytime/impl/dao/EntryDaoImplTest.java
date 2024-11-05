@@ -45,7 +45,7 @@ public class EntryDaoImplTest {
 
         assertTrue(retrieved.isPresent());
         assertEquals(created.getNickname(), retrieved.get().getNickname());
-        assertEquals(created.getExpirationOrNull(), retrieved.get().getExpirationOrNull());
+        assertEquals(created.getUntilRaw(), retrieved.get().getUntilRaw());
     }
 
     @Test
@@ -99,7 +99,7 @@ public class EntryDaoImplTest {
         Entry created = entryDao.create("testUser", Entry.FOREVER);
 
         assertNotNull(created);
-        assertEquals(Entry.FOREVER, created.getExpirationOrNull());
+        assertEquals(Entry.FOREVER, created.getUntilRaw());
     }
 
     @Test

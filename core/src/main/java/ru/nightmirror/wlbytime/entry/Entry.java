@@ -60,14 +60,6 @@ public class Entry {
         return resolveCurrentState().equals(State.FOREVER);
     }
 
-    public Long getFrozenStartTimeOrNull() {
-        return frozenAt != null ? frozenAt.getTime() : null;
-    }
-
-    public Long getFreezeEndTimeOrNull() {
-        return frozenUntil != null ? frozenUntil.getTime() : null;
-    }
-
     public Timestamp getFreezeStartTime() {
         if (frozenAt == null) {
             throw new UnsupportedOperationException("Entry is not frozen");
@@ -75,10 +67,18 @@ public class Entry {
         return frozenAt;
     }
 
+    public @Nullable Timestamp getFreezeStartTimeOrNull() {
+        return frozenAt;
+    }
+
     public Timestamp getFreezeEndTime() {
         if (frozenUntil == null) {
             throw new UnsupportedOperationException("Entry is not frozen");
         }
+        return frozenUntil;
+    }
+
+    public @Nullable Timestamp getFreezeEndTimeOrNull() {
         return frozenUntil;
     }
 
@@ -170,7 +170,7 @@ public class Entry {
         return frozenUntil.getTime() - System.currentTimeMillis();
     }
 
-    public long getExpirationOrNull() {
+    public long getUntilRaw() {
         return until;
     }
 
