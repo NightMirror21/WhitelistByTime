@@ -24,36 +24,81 @@ public class SettingsConfig extends YamlSerializable {
     }
 
     @Comment(value = {
-            @CommentValue("Is whitelist enabled by default on startup")
+            @CommentValue("Enable or disable whitelist by default at server startup")
     }, at = Comment.At.PREPEND)
-    boolean enabled = true;
+    boolean whitelistEnabledOnStartup = true;
 
     @Comment(value = {
-            @CommentValue("When a player join to the server and his time is frozen, the time will unfreeze")
+            @CommentValue("Automatically unfreeze player time when they join the server if their time is frozen")
     }, at = Comment.At.PREPEND)
-    boolean unfreezeOnJoin = false;
-
-    @NewLine
-    @Comment(value = {
-            @CommentValue("The delay through which the thread will check players. In milliseconds")
-    }, at = Comment.At.PREPEND)
-    int checkerDelay = 1000;
+    boolean unfreezeTimeOnPlayerJoin = false;
 
     @NewLine
     @Comment(value = {
-            @CommentValue("Check the case of the nickname")
+            @CommentValue("Enable the expiration monitor, which checks players' expiration status")
     }, at = Comment.At.PREPEND)
-    boolean caseSensitive = true;
+    boolean expireMonitorEnabled = true;
+
+    @Comment(value = {
+            @CommentValue("Interval in milliseconds for the expiration monitor to check players and remove them from the database if expired")
+    }, at = Comment.At.PREPEND)
+    int expireMonitorIntervalMs = 5000;
 
     @NewLine
     @Comment(value = {
-            @CommentValue("Time units")
+            @CommentValue("Enable the last join monitor, which checks players' last join timestamps")
     }, at = Comment.At.PREPEND)
-    Set<String> timeUnitsYear = Set.of("y");
-    Set<String> timeUnitsMonth = Set.of("mo");
-    Set<String> timeUnitsWeek = Set.of("w");
-    Set<String> timeUnitsDay = Set.of("d");
-    Set<String> timeUnitsHour = Set.of("h");
-    Set<String> timeUnitsMinute = Set.of("m");
-    Set<String> timeUnitsSecond = Set.of("s");
+    boolean lastJoinMonitorEnabled = false;
+
+    @Comment(value = {
+            @CommentValue("Threshold in seconds between the player's last join and the current time. If exceeded, the player is removed by the monitor")
+    })
+    int lastJoinExpirationThresholdSeconds = 3600 * 24 * 31;
+
+    @Comment(value = {
+            @CommentValue("Interval in milliseconds for the last join monitor to check players and remove them if their last join exceeds the threshold")
+    }, at = Comment.At.PREPEND)
+    int lastJoinMonitorIntervalMs = 3600000;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("Enable case-sensitive nickname checking")
+    }, at = Comment.At.PREPEND)
+    boolean nicknameCaseSensitive = true;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for years")
+    }, at = Comment.At.PREPEND)
+    Set<String> yearTimeUnits = Set.of("y");
+
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for months")
+    })
+    Set<String> monthTimeUnits = Set.of("mo");
+
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for weeks")
+    })
+    Set<String> weekTimeUnits = Set.of("w");
+
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for days")
+    })
+    Set<String> dayTimeUnits = Set.of("d");
+
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for hours")
+    })
+    Set<String> hourTimeUnits = Set.of("h");
+
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for minutes")
+    })
+    Set<String> minuteTimeUnits = Set.of("m");
+
+    @Comment(value = {
+            @CommentValue("Symbols representing time units for seconds")
+    })
+    Set<String> secondTimeUnits = Set.of("s");
 }
