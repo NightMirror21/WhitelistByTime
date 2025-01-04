@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-class AddCommandTest {
+public class AddCommandTest {
 
     private AddCommand addCommand;
     private MessagesConfig messages;
@@ -29,7 +29,7 @@ class AddCommandTest {
     private CommandIssuer issuer;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
@@ -41,17 +41,17 @@ class AddCommandTest {
     }
 
     @Test
-    void testGetPermission_ShouldReturnCorrectPermission() {
+    public void testGetPermission_ShouldReturnCorrectPermission() {
         assertEquals("wlbytime.add", addCommand.getPermission());
     }
 
     @Test
-    void testGetName_ShouldReturnCorrectName() {
+    public void testGetName_ShouldReturnCorrectName() {
         assertEquals("add", addCommand.getName());
     }
 
     @Test
-    void testExecute_WithNoArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void testExecute_WithNoArguments_ShouldSendIncorrectArgumentsMessage() {
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments!");
 
         addCommand.execute(issuer, new String[]{});
@@ -60,7 +60,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testExecute_WithPlayerAlreadyInWhitelist_ShouldSendAlreadyInWhitelistMessage() {
+    public void testExecute_WithPlayerAlreadyInWhitelist_ShouldSendAlreadyInWhitelistMessage() {
         String nickname = "existingPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(Entry.builder().build()));  // Simulate existing player
         when(messages.getPlayerAlreadyInWhitelist()).thenReturn("%nickname% is already in the whitelist!");
@@ -71,7 +71,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testExecute_WithValidNickname_ShouldAddPlayerWithoutTime() {
+    public void testExecute_WithValidNickname_ShouldAddPlayerWithoutTime() {
         String nickname = "newPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% successfully added!");
@@ -83,7 +83,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testExecute_WithNicknameAndTime_ShouldAddPlayerWithTime() {
+    public void testExecute_WithNicknameAndTime_ShouldAddPlayerWithTime() {
         String nickname = "timedPlayer";
         String timeArgument = "1d2h";  // Sample time input
         when(finder.find(nickname)).thenReturn(Optional.empty());
@@ -102,7 +102,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testExecute_WithMultipleArgumentsForTime_ShouldConcatenateAndConvertTime() {
+    public void testExecute_WithMultipleArgumentsForTime_ShouldConcatenateAndConvertTime() {
         String nickname = "concatPlayer";
         String[] args = {"concatPlayer", "1d", "2h"};
         when(finder.find(nickname)).thenReturn(Optional.empty());
@@ -117,7 +117,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testGetTabulate_WithNoArgs_ShouldReturnIssuerNickname() {
+    public void testGetTabulate_WithNoArgs_ShouldReturnIssuerNickname() {
         when(issuer.getNickname()).thenReturn("issuerNickname");
 
         Set<String> tabulate = addCommand.getTabulate(issuer, new String[]{});
@@ -126,7 +126,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testGetTabulate_WithArgs_ShouldReturnRandomOneTime() {
+    public void testGetTabulate_WithArgs_ShouldReturnRandomOneTime() {
         when(random.getRandomOneTime()).thenReturn("1h");
 
         Set<String> tabulate = addCommand.getTabulate(issuer, new String[]{"someArg"});
@@ -135,7 +135,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testAddPlayerWithoutTime_ShouldSendSuccessMessage() {
+    public void testAddPlayerWithoutTime_ShouldSendSuccessMessage() {
         String nickname = "noTimePlayer";
         when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% successfully added!");
 
@@ -146,7 +146,7 @@ class AddCommandTest {
     }
 
     @Test
-    void testAddPlayerWithTime_ShouldSendFormattedSuccessMessage() {
+    public void testAddPlayerWithTime_ShouldSendFormattedSuccessMessage() {
         String nickname = "timePlayer";
         String timeArgument = "3d";
         when(finder.find(nickname)).thenReturn(Optional.empty());
