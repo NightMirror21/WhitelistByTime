@@ -72,10 +72,10 @@ public final class PlaceholderHook extends PlaceholderExpansion {
         String output;
 
         if (entry.isFreezeActive()) {
-            remainingTime = entry.getRemainingFreezeTime();
+            remainingTime = entry.getLeftFreezeTime();
             output = config.getTimeLeftWithFreeze();
         } else if (entry.isActive()) {
-            remainingTime = entry.getRemainingActiveTime();
+            remainingTime = entry.getLeftActiveTime();
             output = config.getTimeLeft();
         } else {
             return EMPTY;
