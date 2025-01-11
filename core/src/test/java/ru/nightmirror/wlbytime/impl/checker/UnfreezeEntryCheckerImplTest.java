@@ -27,7 +27,7 @@ public class UnfreezeEntryCheckerImplTest {
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
 
-        verify(entry).unfreeze();
+        verify(entry, never()).unfreeze();
         verify(entryService).unfreeze(entry);
     }
 
