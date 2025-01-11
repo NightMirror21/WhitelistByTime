@@ -14,13 +14,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class EntryDaoImplTest {
+public class EntryDaoImplTest {
 
     private EntryDaoImpl entryDao;
     private DatabaseConfig databaseConfig;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         databaseConfig = mock(DatabaseConfig.class);
         when(databaseConfig.getType()).thenReturn("sqlite");
         when(databaseConfig.getName()).thenReturn(":memory:");
@@ -28,23 +28,23 @@ class EntryDaoImplTest {
     }
 
     @AfterEach
-    void tearDown() {
+    public void tearDown() {
         entryDao.close();
     }
 
     @Test
-    void testInitialization_WithValidConfig_ShouldInitializeDao() {
+    public void testInitialization_WithValidConfig_ShouldInitializeDao() {
         assertNotNull(entryDao);
     }
 
     @Test
-    void testInitialization_WithInvalidDatabaseType_ShouldThrowException() {
+    public void testInitialization_WithInvalidDatabaseType_ShouldThrowException() {
         when(databaseConfig.getType()).thenReturn("unsupported_db_type");
         assertThrows(EntryDaoImpl.UnsupportedDatabaseTypeException.class, () -> new EntryDaoImpl(databaseConfig));
     }
 
     @Test
-    void testReopenConnection_WithNewConfig_ShouldCloseOldConnectionAndReinitialize() {
+    public void testReopenConnection_WithNewConfig_ShouldCloseOldConnectionAndReinitialize() {
         DatabaseConfig newConfig = mock(DatabaseConfig.class);
         when(newConfig.getType()).thenReturn("sqlite");
         when(newConfig.getName()).thenReturn(":memory:");
@@ -55,7 +55,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testCreateEntry_WithNickname_ShouldCreateEntryInDatabase() {
+    public void testCreateEntry_WithNickname_ShouldCreateEntryInDatabase() {
         String nickname = "test_nickname";
         Entry entry = entryDao.create(nickname);
 
@@ -68,7 +68,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testCreateEntry_WithExpirationTime_ShouldCreateEntryWithExpiration() {
+    public void testCreateEntry_WithExpirationTime_ShouldCreateEntryWithExpiration() {
         String nickname = "expiring_nickname";
         long expirationTime = System.currentTimeMillis() + 10000;
 
@@ -81,7 +81,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetEntry_ByExistingNickname_ShouldReturnEntry() {
+    public void testGetEntry_ByExistingNickname_ShouldReturnEntry() {
         String nickname = "existing_nickname";
         entryDao.create(nickname);
 
@@ -92,14 +92,14 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetEntry_ByNonExistingNickname_ShouldReturnEmptyOptional() {
+    public void testGetEntry_ByNonExistingNickname_ShouldReturnEmptyOptional() {
         Optional<Entry> result = entryDao.get("non_existing_nickname");
 
         assertFalse(result.isPresent());
     }
 
     @Test
-    void testGetEntryLike_BySimilarNickname_ShouldReturnMatchingEntry() {
+    public void testGetEntryLike_BySimilarNickname_ShouldReturnMatchingEntry() {
         String nickname = "similar_name";
         entryDao.create(nickname);
 
@@ -110,7 +110,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetEntryLike_ByNoMatchingNickname_ShouldReturnEmptyOptional() {
+    public void testGetEntryLike_ByNoMatchingNickname_ShouldReturnEmptyOptional() {
         entryDao.create("some_nickname");
 
         Optional<Entry> result = entryDao.getLike("unmatched");
@@ -119,7 +119,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetAll_ShouldReturnAllEntries() {
+    public void testGetAll_ShouldReturnAllEntries() {
         entryDao.create("first_nickname");
         entryDao.create("second_nickname");
 
@@ -129,7 +129,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testUpdateEntry_ShouldModifyExistingEntry() {
+    public void testUpdateEntry_ShouldModifyExistingEntry() {
         Entry entry = entryDao.create("updatable_nickname");
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
         entryDao.update(entry);
@@ -141,7 +141,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testDeleteExpirationTableEntry_ShouldRemoveExpirationForEntry() {
+    public void testDeleteExpirationTableEntry_ShouldRemoveExpirationForEntry() {
         Entry entry = entryDao.create("entry_with_expiration");
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
         entryDao.update(entry);
@@ -155,29 +155,29 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testClose_WithOpenConnection_ShouldCloseWithoutError() {
+    public void testClose_WithOpenConnection_ShouldCloseWithoutError() {
         assertDoesNotThrow(() -> entryDao.close());
     }
 
     @Test
-    void testInitialization_WithUnsupportedDatabaseType_ShouldThrowUnsupportedDatabaseTypeException() {
+    public void testInitialization_WithUnsupportedDatabaseType_ShouldThrowUnsupportedDatabaseTypeException() {
         when(databaseConfig.getType()).thenReturn("unknown_db");
         assertThrows(EntryDaoImpl.UnsupportedDatabaseTypeException.class, () -> new EntryDaoImpl(databaseConfig));
     }
 
     @Test
-    void testReopenConnection_WithSameConfig_ShouldNotThrowErrors() {
+    public void testReopenConnection_WithSameConfig_ShouldNotThrowErrors() {
         assertDoesNotThrow(() -> entryDao.reopenConnection(databaseConfig));
     }
 
     @Test
-    void testGetAll_WithEmptyDatabase_ShouldReturnEmptySet() {
+    public void testGetAll_WithEmptyDatabase_ShouldReturnEmptySet() {
         Set<Entry> allEntries = entryDao.getAll();
         assertTrue(allEntries.isEmpty());
     }
 
     @Test
-    void testGetEntryLike_MultipleMatches_ShouldReturnFirstMatch() {
+    public void testGetEntryLike_MultipleMatches_ShouldReturnFirstMatch() {
         entryDao.create("similar_entry_one");
         entryDao.create("similar_entry_two");
 
@@ -187,7 +187,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testGetEntry_WithPartialData_ShouldReturnEntry() {
+    public void testGetEntry_WithPartialData_ShouldReturnEntry() {
         String nickname = "partial_data_entry";
         entryDao.create(nickname);
         entryDao.create(nickname);
@@ -198,7 +198,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testInitConnection_ShouldCreateRequiredTables() {
+    public void testInitConnection_ShouldCreateRequiredTables() {
         DatabaseConfig newConfig = mock(DatabaseConfig.class);
         when(newConfig.getType()).thenReturn("sqlite");
         when(newConfig.getName()).thenReturn(":memory:");
@@ -208,7 +208,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testCreateEntry_WithExpiration_ShouldPersistExpiration() {
+    public void testCreateEntry_WithExpiration_ShouldPersistExpiration() {
         String nickname = "expiring_entry";
         long expirationTime = System.currentTimeMillis() + 10000;
 
@@ -224,7 +224,7 @@ class EntryDaoImplTest {
     }
 
     @Test
-    void testClose_MultipleTimes_ShouldNotThrowError() {
+    public void testClose_MultipleTimes_ShouldNotThrowError() {
         assertDoesNotThrow(() -> entryDao.close());
         assertDoesNotThrow(() -> entryDao.close());
     }

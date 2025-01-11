@@ -62,7 +62,7 @@ public class AddCommandTest {
     @Test
     public void testExecute_WithPlayerAlreadyInWhitelist_ShouldSendAlreadyInWhitelistMessage() {
         String nickname = "existingPlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(Entry.builder().build()));  // Simulate existing player
+        when(finder.find(nickname)).thenReturn(Optional.of(Entry.builder().build()));
         when(messages.getPlayerAlreadyInWhitelist()).thenReturn("%nickname% is already in the whitelist!");
 
         addCommand.execute(issuer, new String[]{nickname});
@@ -85,9 +85,9 @@ public class AddCommandTest {
     @Test
     public void testExecute_WithNicknameAndTime_ShouldAddPlayerWithTime() {
         String nickname = "timedPlayer";
-        String timeArgument = "1d2h";  // Sample time input
+        String timeArgument = "1d2h";
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTimeMs(timeArgument)).thenReturn(90000000L);  // Mock time conversion
+        when(convertor.getTimeMs(timeArgument)).thenReturn(90000000L);
         when(convertor.getTimeLine(90000000L)).thenReturn("1 day 2 hours");
         when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% added for %time%!");
 
@@ -97,7 +97,6 @@ public class AddCommandTest {
         verify(service).create(eq(nickname), timeCaptor.capture());
         verify(issuer).sendMessage("Player timedPlayer added for 1 day 2 hours!");
 
-        // Check that timeCaptor captured the correct adjusted timestamp (current time + mock duration)
         assertTrue(timeCaptor.getValue() > System.currentTimeMillis());
     }
 
@@ -106,7 +105,7 @@ public class AddCommandTest {
         String nickname = "concatPlayer";
         String[] args = {"concatPlayer", "1d", "2h"};
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTimeMs("1d2h")).thenReturn(93600000L);  // Mock time conversion
+        when(convertor.getTimeMs("1d2h")).thenReturn(93600000L);
         when(convertor.getTimeLine(93600000L)).thenReturn("1 day 2 hours");
         when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% added for %time%!");
 

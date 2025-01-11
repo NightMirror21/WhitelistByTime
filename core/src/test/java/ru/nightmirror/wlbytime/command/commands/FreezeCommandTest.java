@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-class FreezeCommandTest {
+public class FreezeCommandTest {
 
     private FreezeCommand freezeCommand;
     private MessagesConfig messages;
@@ -29,7 +29,7 @@ class FreezeCommandTest {
     private CommandIssuer issuer;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
@@ -40,21 +40,18 @@ class FreezeCommandTest {
         freezeCommand = new FreezeCommand(messages, finder, convertor, timeRandom, service);
     }
 
-    // Test getPermission method
     @Test
-    void testGetPermission_ShouldReturnCorrectPermission() {
+    public void testGetPermission_ShouldReturnCorrectPermission() {
         assertEquals("wlbytime.freeze", freezeCommand.getPermission());
     }
 
-    // Test getName method
     @Test
-    void testGetName_ShouldReturnCorrectName() {
+    public void testGetName_ShouldReturnCorrectName() {
         assertEquals("freeze", freezeCommand.getName());
     }
 
-    // Test execute method with insufficient arguments
     @Test
-    void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided!");
 
         freezeCommand.execute(issuer, new String[]{});
@@ -64,9 +61,8 @@ class FreezeCommandTest {
         verifyNoInteractions(finder, convertor, service);
     }
 
-    // Test execute method when player is not in whitelist
     @Test
-    void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
         String nickname = "nonExistentPlayer";
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.empty());
@@ -80,9 +76,8 @@ class FreezeCommandTest {
         verifyNoInteractions(convertor, service);
     }
 
-    // Test execute method with invalid time string (timeInMillis <= 0)
     @Test
-    void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
+    public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
         String nickname = "validPlayer";
         String timeString = "invalidTime";
         Entry activeEntry = mock(Entry.class);
@@ -102,9 +97,8 @@ class FreezeCommandTest {
         verifyNoInteractions(service);
     }
 
-    // Test execute method when player is inactive (expired)
     @Test
-    void testExecute_PlayerIsInactive_ShouldSendPlayerExpiredMessage() {
+    public void testExecute_PlayerIsInactive_ShouldSendPlayerExpiredMessage() {
         String nickname = "expiredPlayer";
         Entry expiredEntry = mock(Entry.class);
         when(issuer.getNickname()).thenReturn(nickname);
@@ -120,9 +114,8 @@ class FreezeCommandTest {
         verifyNoInteractions(convertor, service);
     }
 
-    // Test execute method when player is already frozen
     @Test
-    void testExecute_PlayerAlreadyFrozen_ShouldSendPlayerAlreadyFrozenMessage() {
+    public void testExecute_PlayerAlreadyFrozen_ShouldSendPlayerAlreadyFrozenMessage() {
         String nickname = "frozenPlayer";
         Entry frozenEntry = mock(Entry.class);
         when(issuer.getNickname()).thenReturn(nickname);
@@ -141,12 +134,11 @@ class FreezeCommandTest {
         verifyNoInteractions(convertor, service);
     }
 
-    // Test execute method successfully freezing a player
     @Test
-    void testExecute_SuccessfullyFreezePlayer_ShouldSendPlayerFrozenMessage() {
+    public void testExecute_SuccessfullyFreezePlayer_ShouldSendPlayerFrozenMessage() {
         String nickname = "activePlayer";
         String timeString = "3h";
-        long timeInMillis = 10800000L; // 3 hours in milliseconds
+        long timeInMillis = 10800000L;
         Entry activeEntry = mock(Entry.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
@@ -168,13 +160,12 @@ class FreezeCommandTest {
         verifyNoMoreInteractions(issuer);
     }
 
-    // Test execute method with multiple time arguments (e.g., "1d2h")
     @Test
-    void testExecute_WithMultipleTimeArguments_ShouldConcatenateAndFreezePlayer() {
+    public void testExecute_WithMultipleTimeArguments_ShouldConcatenateAndFreezePlayer() {
         String nickname = "multiTimePlayer";
         String[] args = {nickname, "1d", "2h"};
         String concatenatedTime = "1d2h";
-        long timeInMillis = 93600000L; // 1 day 2 hours in milliseconds
+        long timeInMillis = 93600000L;
         Entry activeEntry = mock(Entry.class);
         String formattedTime = "1 day 2 hours";
 
@@ -198,9 +189,8 @@ class FreezeCommandTest {
         verifyNoMoreInteractions(issuer);
     }
 
-    // Test getTabulate method with no arguments
     @Test
-    void testGetTabulate_WithNoArguments_ShouldReturnIssuerNickname() {
+    public void testGetTabulate_WithNoArguments_ShouldReturnIssuerNickname() {
         String nickname = "issuerUser";
         when(issuer.getNickname()).thenReturn(nickname);
 
@@ -209,9 +199,8 @@ class FreezeCommandTest {
         assertEquals(Set.of(nickname), tabulate);
     }
 
-    // Test getTabulate method with arguments (should return random time)
     @Test
-    void testGetTabulate_WithArguments_ShouldReturnRandomTime() {
+    public void testGetTabulate_WithArguments_ShouldReturnRandomTime() {
         String randomTime = "45m";
         when(timeRandom.getRandomOneTime()).thenReturn(randomTime);
 
@@ -220,12 +209,11 @@ class FreezeCommandTest {
         assertEquals(Set.of(randomTime), tabulate);
     }
 
-    // Additional Test: Ensure that freezePlayer constructs the correct message
     @Test
-    void testExecute_FreezePlayer_ConstructsCorrectMessage() {
+    public void testExecute_FreezePlayer_ConstructsCorrectMessage() {
         String nickname = "testFreezePlayer";
         String timeString = "30m";
-        long timeInMillis = 1800000L; // 30 minutes in milliseconds
+        long timeInMillis = 1800000L;
         Entry activeEntry = mock(Entry.class);
         String formattedTime = "30 minutes";
 
@@ -248,12 +236,10 @@ class FreezeCommandTest {
         verify(issuer).sendMessage("Player testFreezePlayer has been frozen for 30 minutes!");
     }
 
-    // Additional Test: Ensure concatenateArgs works correctly
     @Test
-    void testExecute_WithEmptyTimeArguments_ShouldConcatenateToEmptyString() {
+    public void testExecute_WithEmptyTimeArguments_ShouldConcatenateToEmptyString() {
         String nickname = "emptyTimePlayer";
         String[] args = {nickname};
-        // Since args.length < 2, it should send incorrect arguments message
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided!");
 
         freezeCommand.execute(issuer, args);
@@ -262,12 +248,11 @@ class FreezeCommandTest {
         verifyNoMoreInteractions(issuer);
     }
 
-    // Additional Test: Time conversion returns negative value
     @Test
-    void testExecute_WithNegativeTime_ShouldSendTimeIsIncorrectMessage() {
+    public void testExecute_WithNegativeTime_ShouldSendTimeIsIncorrectMessage() {
         String nickname = "negativeTimePlayer";
         String timeString = "-1h";
-        long timeInMillis = -3600000L; // -1 hour in milliseconds
+        long timeInMillis = -3600000L;
 
         Entry activeEntry = mock(Entry.class);
         when(issuer.getNickname()).thenReturn(nickname);
@@ -286,9 +271,8 @@ class FreezeCommandTest {
         verifyNoInteractions(service);
     }
 
-    // Additional Test: Time conversion returns zero
     @Test
-    void testExecute_WithZeroTime_ShouldSendTimeIsIncorrectMessage() {
+    public void testExecute_WithZeroTime_ShouldSendTimeIsIncorrectMessage() {
         String nickname = "zeroTimePlayer";
         String timeString = "0h";
         long timeInMillis = 0L;
@@ -310,12 +294,11 @@ class FreezeCommandTest {
         verifyNoInteractions(service);
     }
 
-    // Additional Test: Ensure that no exception is thrown when service.freeze is called successfully
     @Test
-    void testExecute_SuccessfulFreeze_ShouldNotThrowException() {
+    public void testExecute_SuccessfulFreeze_ShouldNotThrowException() {
         String nickname = "safeFreezePlayer";
         String timeString = "15m";
-        long timeInMillis = 900000L; // 15 minutes in milliseconds
+        long timeInMillis = 900000L;
         Entry activeEntry = mock(Entry.class);
         String formattedTime = "15 minutes";
 

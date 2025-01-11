@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-class TimeCommandTest {
+public class TimeCommandTest {
 
     private TimeCommand timeCommand;
     private MessagesConfig messages;
@@ -28,7 +28,7 @@ class TimeCommandTest {
     private Entry entry;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
@@ -39,7 +39,6 @@ class TimeCommandTest {
 
         timeCommand = new TimeCommand(messages, finder, convertor, timeRandom, timeService);
 
-        // Mocking common message responses
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments.");
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
         when(messages.getTimeIsIncorrect()).thenReturn("Time provided is incorrect.");
@@ -51,14 +50,14 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
         timeCommand.execute(issuer, new String[]{});
 
         verify(issuer).sendMessage("Incorrect arguments.");
     }
 
     @Test
-    void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
         String nickname = "nonexistentPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
@@ -69,7 +68,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_WithInvalidOperation_ShouldSendIncorrectArgumentsMessage() {
+    public void testExecute_WithInvalidOperation_ShouldSendIncorrectArgumentsMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
 
@@ -79,7 +78,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
+    public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("1x")).thenReturn(-1L);
@@ -90,10 +89,10 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_AddOperation_CanAdd_ShouldSendAddTimeMessage() {
+    public void testExecute_AddOperation_CanAdd_ShouldSendAddTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L); // 1 hour in milliseconds
+        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
         when(timeService.canAdd(entry, 3600000L)).thenReturn(true);
 
@@ -104,7 +103,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_AddOperation_CannotAdd_ShouldSendCantAddTimeMessage() {
+    public void testExecute_AddOperation_CannotAdd_ShouldSendCantAddTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
@@ -116,7 +115,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_RemoveOperation_CanRemove_ShouldSendRemoveTimeMessage() {
+    public void testExecute_RemoveOperation_CanRemove_ShouldSendRemoveTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
@@ -130,7 +129,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_RemoveOperation_CannotRemove_ShouldSendCantRemoveTimeMessage() {
+    public void testExecute_RemoveOperation_CannotRemove_ShouldSendCantRemoveTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
@@ -142,7 +141,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testExecute_SetOperation_ShouldSendSetTimeMessage() {
+    public void testExecute_SetOperation_ShouldSendSetTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
@@ -155,7 +154,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testGetTabulate_WithoutArguments_ShouldReturnOperations() {
+    public void testGetTabulate_WithoutArguments_ShouldReturnOperations() {
         Set<String> expected = Set.of("add", "remove", "set");
 
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{});
@@ -164,14 +163,14 @@ class TimeCommandTest {
     }
 
     @Test
-    void testGetTabulate_WithInvalidOperation_ShouldReturnEmptySet() {
+    public void testGetTabulate_WithInvalidOperation_ShouldReturnEmptySet() {
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{"invalid"});
 
         assertEquals(Set.of(), result);
     }
 
     @Test
-    void testGetTabulate_WithValidOperation_ShouldReturnIssuerNickname() {
+    public void testGetTabulate_WithValidOperation_ShouldReturnIssuerNickname() {
         when(issuer.getNickname()).thenReturn("nickname");
 
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{"add"});
@@ -180,7 +179,7 @@ class TimeCommandTest {
     }
 
     @Test
-    void testGetTabulate_WithOperationAndNickname_ShouldReturnRandomTime() {
+    public void testGetTabulate_WithOperationAndNickname_ShouldReturnRandomTime() {
         when(timeRandom.getRandomOneTime()).thenReturn("1h");
 
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{"add", "nickname"});

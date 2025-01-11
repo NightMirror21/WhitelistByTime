@@ -14,7 +14,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-class GetAllCommandTest {
+public class GetAllCommandTest {
 
     private GetAllCommand getAllCommand;
     private MessagesConfig messages;
@@ -23,14 +23,13 @@ class GetAllCommandTest {
     private CommandIssuer issuer;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         messages = mock(MessagesConfig.class);
         service = mock(EntryService.class);
         convertor = mock(TimeConvertor.class);
         issuer = mock(CommandIssuer.class);
         getAllCommand = new GetAllCommand(messages, service, convertor);
 
-        // Mock common message responses
         when(messages.getListEmpty()).thenReturn("The list is empty.");
         when(messages.getListHeader()).thenReturn("List of entries:");
         when(messages.getListFooter()).thenReturn("Page %page% of %max-page%");
@@ -45,7 +44,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testExecute_WithNoEntries_ShouldSendEmptyListMessage() {
+    public void testExecute_WithNoEntries_ShouldSendEmptyListMessage() {
         when(service.getEntries()).thenReturn(Set.of());
 
         getAllCommand.execute(issuer, new String[]{});
@@ -55,7 +54,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testExecute_WithEntriesOnFirstPage_ShouldSendEntriesWithHeaderAndFooter() {
+    public void testExecute_WithEntriesOnFirstPage_ShouldSendEntriesWithHeaderAndFooter() {
         Entry entry1 = mockEntry("player1", true, false, false, 5000);
         Entry entry2 = mockEntry("player2", true, true, false, 3000);
         Entry entry3 = mockEntry("player3", false, false, false, 0);
@@ -74,7 +73,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testExecute_WithPageArgument_ShouldDisplayCorrectPageEntries() {
+    public void testExecute_WithPageArgument_ShouldDisplayCorrectPageEntries() {
         List<Entry> entries = List.of(
                 mockEntry("player1", true, false, false, 5000),
                 mockEntry("player2", true, false, true, 0),
@@ -101,7 +100,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testExecute_WithInvalidPageNumber_ShouldSendPageNotExistsMessage() {
+    public void testExecute_WithInvalidPageNumber_ShouldSendPageNotExistsMessage() {
         List<Entry> entries = List.of(
                 mockEntry("player1", true, false, false, 5000),
                 mockEntry("player2", true, false, true, 0)
@@ -117,7 +116,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testExecute_WithInvalidPageArgument_ShouldSendIncorrectArgumentsMessage() {
+    public void testExecute_WithInvalidPageArgument_ShouldSendIncorrectArgumentsMessage() {
         getAllCommand.execute(issuer, new String[]{"abc"});
 
         verify(issuer).sendMessage("Incorrect arguments provided.");
@@ -125,7 +124,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testTabulate_WithNoArgs_ShouldReturnPagesUpTo20() {
+    public void testTabulate_WithNoArgs_ShouldReturnPagesUpTo20() {
         Set<String> tabulationResult = getAllCommand.getTabulate(issuer, new String[]{});
 
         assertEquals(20, tabulationResult.size());
@@ -135,7 +134,7 @@ class GetAllCommandTest {
     }
 
     @Test
-    void testTabulate_WithArgs_ShouldReturnEmptySet() {
+    public void testTabulate_WithArgs_ShouldReturnEmptySet() {
         Set<String> tabulationResult = getAllCommand.getTabulate(issuer, new String[]{"1"});
 
         assertEquals(Set.of(), tabulationResult);
