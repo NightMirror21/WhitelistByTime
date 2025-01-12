@@ -79,6 +79,10 @@ public class Entry {
             throw new IllegalStateException("Entry is already frozen.");
         }
 
+        if (isForever()) {
+            throw new IllegalStateException("Can't freeze forever entry.");
+        }
+
         freezing = new Freezing(id, time);
     }
 

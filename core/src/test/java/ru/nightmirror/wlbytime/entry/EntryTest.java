@@ -104,12 +104,14 @@ public class EntryTest {
 
     @Test
     public void testIsFrozen_WhenFreezingIsNotNull_ShouldReturnTrue() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(1000);
         assertTrue(entry.isFrozen());
     }
 
     @Test
     public void testIsFreezeActive() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         when(freezingMock.isFrozen()).thenReturn(true);
         entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
@@ -118,6 +120,7 @@ public class EntryTest {
 
     @Test
     public void testIsFreezeInactive() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         when(freezingMock.isFrozen()).thenReturn(false);
         entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
@@ -126,12 +129,14 @@ public class EntryTest {
 
     @Test
     public void testFreeze_WhenNotFrozen_ShouldSetFreezing() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(1000L);
         assertNotNull(entry.getFreezing());
     }
 
     @Test
     public void testFreeze_WhenAlreadyFrozen_ShouldThrowException() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(1000L);
         assertThrows(IllegalStateException.class, () -> entry.freeze(1000L));
     }
@@ -142,10 +147,26 @@ public class EntryTest {
     }
 
     @Test
-    public void testUnfreeze_WhenFrozen_ShouldUnsetFreezing() {
-        entry.freeze(1000L);
+    public void testUnfreeze_WhenFrozen_ShouldAddFreezeDurationToExpiration() {
+        long initialExpirationTime = System.currentTimeMillis() + 20000L;
+        entry.setExpiration(new Timestamp(initialExpirationTime));
+
+        entry.freeze(10000L);
+
+        assertTrue(entry.isFrozen());
+
         entry.unfreeze();
-        assertNull(entry.getFreezing());
+
+        assertNotNull(entry.getExpiration());
+        assertEquals(initialExpirationTime + 10000L, entry.getExpiration().getExpirationTime().getTime());
+
+        assertFalse(entry.isFrozen());
+    }
+
+    @Test
+    public void testFreeze_WhenForever_ShouldThrowException() {
+        entry.setForever();
+        assertThrows(IllegalStateException.class, () -> entry.freeze(1000L));
     }
 
     @Test
@@ -175,6 +196,7 @@ public class EntryTest {
 
     @Test
     public void testGetLeftFreezeTime_WhenFreezeInactive_ShouldThrowException() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(1000L);
         when(freezingMock.isFrozen()).thenReturn(false);
         entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
@@ -211,12 +233,14 @@ public class EntryTest {
 
     @Test
     public void testIsFrozen_WhenFreezingIsNotNullAndFrozen_ShouldReturnTrue() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(1000L);
         assertTrue(entry.isFrozen());
     }
 
     @Test
     public void testIsFreezeInactive_WhenFreezingIsPresentButNotActive_ShouldReturnTrue() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         when(freezingMock.isFrozen()).thenReturn(false);
         entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
@@ -226,15 +250,6 @@ public class EntryTest {
     @Test
     public void testFreeze_WithNegativeDuration_ShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () -> entry.freeze(-1000L));
-    }
-
-    @Test
-    public void testUnfreeze_WhenFrozen_ShouldSetExpirationBasedOnFreezeDuration() {
-        entry.freeze(10000L);
-        long currentTime = System.currentTimeMillis();
-        entry.unfreeze();
-        assertNotNull(entry.getExpiration());
-        assertTrue(entry.getExpiration().getExpirationTime().getTime() > currentTime);
     }
 
     @Test
@@ -267,6 +282,7 @@ public class EntryTest {
 
     @Test
     public void testGetLeftFreezeTime_WhenFreezeActive_ShouldReturnRemainingFreezeTime() {
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         assertTrue(entry.getLeftFreezeTime() > 0);
     }
