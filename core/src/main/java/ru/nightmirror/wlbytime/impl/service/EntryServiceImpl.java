@@ -44,11 +44,13 @@ public class EntryServiceImpl implements EntryService {
         }
 
         entry.freeze(durationMs);
+        entryDao.update(entry);
     }
 
     @Override
     public void unfreeze(Entry entry) {
         entry.unfreeze();
+        entryDao.update(entry);
     }
 
     @Override

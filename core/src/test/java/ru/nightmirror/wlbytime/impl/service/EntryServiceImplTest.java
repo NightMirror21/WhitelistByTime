@@ -79,10 +79,11 @@ public class EntryServiceImplTest {
         entryService.freeze(entry, duration);
 
         verify(entry, times(1)).freeze(duration);
+        verify(entryDao, times(1)).update(entry);
     }
 
     @Test
-    public void testFreeze_WithInvalidDuration_ShouldThrowException() {
+    public void testFreeze_WithInvalidDuration_ShouldThrowException_AndShouldNotUpdateEntry() {
         Entry entry = mock(Entry.class);
         long invalidDuration = -5000;
 
@@ -92,6 +93,7 @@ public class EntryServiceImplTest {
 
         assertEquals("Duration must be positive", exception.getMessage());
         verify(entry, never()).freeze(anyLong());
+        verify(entryDao, never()).update(entry);
     }
 
     @Test
@@ -101,6 +103,7 @@ public class EntryServiceImplTest {
         entryService.unfreeze(entry);
 
         verify(entry, times(1)).unfreeze();
+        verify(entryDao, times(1)).update(entry);
     }
 
     @Test
