@@ -16,6 +16,8 @@ public interface EntryDao {
 
     Entry create(String nickname);
 
+    void remove(Entry entry);
+
     default void create(Set<String> nicknames) {
         nicknames.forEach(this::create);
     }

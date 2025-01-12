@@ -79,6 +79,8 @@ public class EntryDaoImplTest {
         assertNotNull(entry.getExpiration());
         assertEquals(new Timestamp(expirationTime), entry.getExpiration().getExpirationTime());
     }
+    
+    
 
     @Test
     public void testGetEntry_ByExistingNickname_ShouldReturnEntry() {
@@ -227,5 +229,38 @@ public class EntryDaoImplTest {
     public void testClose_MultipleTimes_ShouldNotThrowError() {
         assertDoesNotThrow(() -> entryDao.close());
         assertDoesNotThrow(() -> entryDao.close());
+    }
+
+    @Test
+    public void testRemoveEntry_ShouldDeleteEntryFromDatabase() {
+        String nickname = "removable_nickname";
+        Entry entry = entryDao.create(nickname);
+
+        entryDao.remove(entry);
+
+        Optional<Entry> result = entryDao.get(nickname);
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testRemoveEntry_ShouldDeleteRelatedTables() {
+        String nickname = "removable_with_related_data";
+        long expirationTime = System.currentTimeMillis() + 10000;
+        Entry entry = entryDao.create(nickname, expirationTime);
+
+        entryDao.remove(entry);
+
+        Optional<Entry> result = entryDao.get(nickname);
+        assertFalse(result.isPresent());
+
+        Set<Entry> allEntries = entryDao.getAll();
+        assertEquals(0, allEntries.size());
+    }
+
+    @Test
+    public void testRemoveEntry_WhenEntryDoesNotExist_ShouldDoNothing() {
+        Entry nonExistingEntry = Entry.builder().id(999L).nickname("non_existing").build();
+
+        assertDoesNotThrow(() -> entryDao.remove(nonExistingEntry));
     }
 }

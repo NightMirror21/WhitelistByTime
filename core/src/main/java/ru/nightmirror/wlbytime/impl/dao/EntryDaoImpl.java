@@ -220,16 +220,40 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
     }
 
     @Override
-    public Entry create(String nickname, long milliseconds) {
+    public Entry create(String nickname, long until) {
         try {
             EntryTable entryTable = new EntryTable(null, nickname);
             entryDao.create(entryTable);
-            ExpirationTable expirationTable = new ExpirationTable(null, entryTable, new Timestamp(milliseconds));
+            ExpirationTable expirationTable = new ExpirationTable(null, entryTable, new Timestamp(until));
             expirationDao.create(expirationTable);
             return get(nickname).orElseThrow();
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error creating entry", e);
             throw new DataAccessException("Failed to create entry", e);
+        }
+    }
+
+    @Override
+    public void remove(Entry entry) {
+        try {
+            DeleteBuilder<LastJoinTable, Long> lastJoinBuilder = lastJoinDao.deleteBuilder();
+            lastJoinBuilder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
+            lastJoinDao.delete(lastJoinBuilder.prepare());
+
+            DeleteBuilder<FreezingTable, Long> freezingBuilder = freezingDao.deleteBuilder();
+            freezingBuilder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
+            freezingDao.delete(freezingBuilder.prepare());
+
+            DeleteBuilder<ExpirationTable, Long> expirationBuilder = expirationDao.deleteBuilder();
+            expirationBuilder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
+            expirationDao.delete(expirationBuilder.prepare());
+
+            DeleteBuilder<EntryTable, Long> entryBuilder = entryDao.deleteBuilder();
+            entryBuilder.where().eq(EntryTable.ID_COLUMN, entry.getId());
+            entryDao.delete(entryBuilder.prepare());
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error removing entry entity", e);
+            throw new DataAccessException("Failed to remove entry entity", e);
         }
     }
 
