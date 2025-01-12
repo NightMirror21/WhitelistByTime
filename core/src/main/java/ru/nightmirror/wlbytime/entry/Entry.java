@@ -87,7 +87,9 @@ public class Entry {
             throw new IllegalStateException("Entry is not frozen.");
         }
 
-        expiration = new Expiration(id, new Timestamp(System.currentTimeMillis() + freezing.getDurationOfFreeze()));
+        long previousExpirationTime = expiration.getExpirationTime().getTime();
+        long durationOfFreeze = freezing.getDurationOfFreeze();
+        expiration = new Expiration(id, new Timestamp(previousExpirationTime + durationOfFreeze));
 
         freezing = null;
     }
