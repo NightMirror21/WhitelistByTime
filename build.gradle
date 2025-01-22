@@ -26,6 +26,11 @@ tasks.register('cleanAll') {
             .toArray())
 }
 
+tasks.register('buildAll') {
+    dependsOn 'cleanAll'
+    finalizedBy 'shadowJarAll'
+}
+
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }

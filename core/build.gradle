@@ -63,4 +63,8 @@ tasks {
             }
         }
     }
+
+    shadowJar {
+        dependsOn test
+    }
 }
