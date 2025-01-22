@@ -19,6 +19,7 @@ public class CommandDispatcherTest {
     private CommandIssuer issuer;
     private Command command;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     public void setUp() {
         noPermissionSender = mock(Consumer.class);
