@@ -10,11 +10,13 @@ import java.util.Random;
 @RequiredArgsConstructor
 public final class TimeRandom {
 
+    static long MINIMUM_TIME = 1000L;
+
     TimeConvertor convertor;
     Random random = new Random();
 
     public String getRandomOneTime() {
-        long ms = random.nextLong() + 1000L;
+        long ms = random.nextLong() + MINIMUM_TIME;
         return convertor.getTimeLine(ms).split(" ")[0];
     }
 }
