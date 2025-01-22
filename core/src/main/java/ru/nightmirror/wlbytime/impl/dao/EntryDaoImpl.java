@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class EntryDaoImpl implements EntryDao, AutoCloseable {
+public class EntryDaoImpl implements EntryDao {
 
     private static final Logger LOGGER = Logger.getLogger(EntryDaoImpl.class.getSimpleName());
     private static final String SQLITE = "sqlite";
@@ -94,7 +94,7 @@ public class EntryDaoImpl implements EntryDao, AutoCloseable {
         }
     }
 
-    @Override
+    // FIXME move synchronized over connectionSource
     public synchronized void close() {
         try {
             connectionSource.close();
