@@ -6,6 +6,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 
+/*
+TODO Separate to:
+ EntryView (interface) - only view,
+ Entry extends EntryView (interface) - editable,
+ EntryImpl implements Entry (class) - implementation
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
