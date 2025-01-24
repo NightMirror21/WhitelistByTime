@@ -8,6 +8,7 @@ import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
+import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
 
 import java.io.File;
 
@@ -36,5 +37,18 @@ public class ConfigsContainer {
 
         settings = new SettingsConfig();
         settings.reload(new File(folder, "settings.yml").toPath());
+    }
+
+    public TimeUnitsConvertorSettings getTimeUnitsConvertorSettings() {
+        return TimeUnitsConvertorSettings.builder()
+                .forever(messages.getForever())
+                .year(settings.getYearTimeUnits())
+                .month(settings.getMonthTimeUnits())
+                .week(settings.getWeekTimeUnits())
+                .day(settings.getDayTimeUnits())
+                .hour(settings.getHourTimeUnits())
+                .minute(settings.getMinuteTimeUnits())
+                .second(settings.getSecondTimeUnits())
+                .build();
     }
 }
