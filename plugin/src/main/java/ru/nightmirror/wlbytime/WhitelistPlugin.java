@@ -5,13 +5,20 @@ import lombok.experimental.FieldDefaults;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.nightmirror.wlbytime.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.impl.dao.EntryDaoImpl;
+import ru.nightmirror.wlbytime.impl.finder.EntryFinderImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryServiceImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryTimeServiceImpl;
+import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.monitor.Monitor;
 import ru.nightmirror.wlbytime.monitor.monitors.ExpireMonitor;
 import ru.nightmirror.wlbytime.monitor.monitors.LastJoinMonitor;
+import ru.nightmirror.wlbytime.placeholder.PlaceholderHook;
+import ru.nightmirror.wlbytime.time.TimeConvertor;
+import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
+import ru.nightmirror.wlbytime.utils.MetricsUtils;
+import ru.nightmirror.wlbytime.utils.VersionUtils;
 
 import java.util.logging.Level;
 
@@ -21,6 +28,11 @@ public class WhitelistPlugin extends JavaPlugin {
     EntryDaoImpl entryDao;
     Monitor expireMonitor;
     Monitor lastJoinMonitor;
+
+    String version;
+    ConfigsContainer configsContainer;
+    TimeConvertor timeConvertor;
+    EntryFinder entryFinder;
 
     @Override
     public void onEnable() {
@@ -33,13 +45,17 @@ public class WhitelistPlugin extends JavaPlugin {
     }
 
     private void tryToEnable() {
+        version = VersionUtils.getVersion(this);
+        getLogger().info("Version " + version);
+
         getLogger().info("Loading configs...");
-        ConfigsContainer configsContainer = new ConfigsContainer(getDataFolder());
+        configsContainer = new ConfigsContainer(getDataFolder());
         configsContainer.load();
         getLogger().info("Configs loaded");
 
         getLogger().info("Loading database...");
         entryDao = new EntryDaoImpl(configsContainer.getDatabase());
+        entryFinder = new EntryFinderImpl(configsContainer.getSettings().isNicknameCaseSensitive(), entryDao);
         getLogger().info("Database loaded");
 
         getLogger().info("Initializing services...");
@@ -52,9 +68,35 @@ public class WhitelistPlugin extends JavaPlugin {
         lastJoinMonitor = new LastJoinMonitor(entryDao, configsContainer.getSettings());
         getLogger().info("Monitors started");
 
+        getLogger().info("Loading time convertor");
+        TimeUnitsConvertorSettings timeUnitsConvertorSettings = configsContainer.getTimeUnitsConvertorSettings();
+        timeConvertor = new TimeConvertor(timeUnitsConvertorSettings);
+        getLogger().info("Time convertor loaded");
+
         // TODO load commands
 
+        tryToLoadMetrics();
+        tryToLoadPapi();
+
         getLogger().info("Plugin enabled");
+    }
+
+    private void tryToLoadPapi() {
+        try {
+            new PlaceholderHook(entryFinder, timeConvertor, configsContainer.getPlaceholders(), version);
+            getLogger().info("PAPI hooked");
+        } catch (Exception exception) {
+            getLogger().log(Level.WARNING, "Failed to load PAPI", exception);
+        }
+    }
+
+    private void tryToLoadMetrics() {
+        try {
+            MetricsUtils.tryToLoad(this);
+            getLogger().info("Metrics loaded");
+        } catch (Exception exception) {
+            getLogger().log(Level.WARNING, "Failed to load metrics", exception);
+        }
     }
 
     @Override
