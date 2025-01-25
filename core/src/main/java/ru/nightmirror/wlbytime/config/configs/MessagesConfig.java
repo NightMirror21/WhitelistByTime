@@ -19,18 +19,11 @@ public class MessagesConfig extends YamlSerializable {
     private static final SerializerConfig CONFIG = new SerializerConfig.Builder()
             .build();
 
-    String pluginReloaded = "Plugin reloaded!";
-    String notPermission = "You do not have permission!";
+    String notPermission = "You do not have permission!"; // fixme unused
     String incorrectArguments = "Incorrect argument(s)";
 
     @NewLine
-    String whitelistEnabled = "WhitelistByTime enabled";
-    String whitelistAlreadyEnabled = "WhitelistByTime already enabled";
-    String whitelistDisabled = "WhitelistByTime disabled";
-    String whitelistAlreadyDisabled = "WhitelistByTime already disabled";
-
-    @NewLine
-    List<String> youNotInWhitelistKick = List.of(
+    List<String> youNotInWhitelistKick = List.of(  // fixme unused
             "Sorry, but you are not in whitelist",
             "Bye!"
     );
@@ -46,8 +39,8 @@ public class MessagesConfig extends YamlSerializable {
     @Comment(value = {
             @CommentValue("For command with time")
     }, at = Comment.At.PREPEND)
-    String successfullyAddedForTime = "%nickname% added to whitelist for %time%";
-    String stillInWhitelistForTime = "%nickname% will be in whitelist still %time%";
+    String successfullyAddedForTime = "%nickname% added to whitelist for %time%";  // fixme unused
+    String stillInWhitelistForTime = "%nickname% will be in whitelist still %time%";  // fixme unused
     String checkMeStillInWhitelistForTime = "You will remain on the whitelist for %time%";
 
     @NewLine
@@ -55,7 +48,7 @@ public class MessagesConfig extends YamlSerializable {
             @CommentValue("For command without time")
     }, at = Comment.At.PREPEND)
     String successfullyAdded = "%nickname% added to whitelist forever";
-    String stillInWhitelist = "%nickname% will be in whitelist forever";
+    String stillInWhitelist = "%nickname% will be in whitelist forever";  // fixme unused
     String checkMeStillInWhitelistForever = "You are permanently whitelisted";
 
     @NewLine
@@ -84,21 +77,21 @@ public class MessagesConfig extends YamlSerializable {
     String setTime = "Now %nickname% will be in whitelist for %time%";
     String addTime = "Added %time% to %nickname%";
     String removeTime = "Removed %time% from %nickname%";
-    String cantAddTimeCausePlayerIsForever = "Can't add time cause %nickname% is forever";
-    String cantRemoveTimeCausePlayerIsForever = "Can't add time cause %nickname% is forever";
+    String cantAddTimeCausePlayerIsForever = "Can't add time cause %nickname% is forever";  // fixme unused
+    String cantRemoveTimeCausePlayerIsForever = "Can't add time cause %nickname% is forever";  // fixme unused
     String timeIsIncorrect = "Time is incorrect";
     String cantAddTime = "Can't add time";
     String cantRemoveTime = "Can't remove time";
 
     @NewLine
-    String playerUnfrozen = "Player %nickname% unfrozen";
+    String playerUnfrozen = "Player %nickname% unfrozen";  // fixme unused
     String playerFrozen = "Player %nickname% frozen for %time%";
     String playerAlreadyFrozen = "Player %nickname% already frozen";
-    String playerNotFrozen = "Player %nickname% not frozen";
+    String playerNotFrozen = "Player %nickname% not frozen";  // fixme unused
     String playerExpired = "Player %nickname% expired";
 
     @NewLine
-    List<String> help = List.of(
+    List<String> help = List.of(  // fixme unused
             "> WhitelistByTime - Help",
             "| /whitelist on/off",
             "| /whitelist add [nickname] (time)",
