@@ -19,7 +19,7 @@ public class MessagesConfig extends YamlSerializable {
     private static final SerializerConfig CONFIG = new SerializerConfig.Builder()
             .build();
 
-    String notPermission = "You do not have permission!"; // fixme unused
+    String notPermission = "You do not have permission!";
     String incorrectArguments = "Incorrect argument(s)";
 
     @NewLine
