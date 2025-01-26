@@ -84,7 +84,9 @@ public class TimeCommand implements Command {
     private void processOperation(CommandIssuer issuer, Entry entry, String operation, String nickname, long timeInMillis, String timeAsString) {
         switch (operation) {
             case "add" -> {
-                if (timeService.canAdd(entry, timeInMillis)) {
+                if (entry.isForever()) {
+                    issuer.sendMessage(messages.getCantAddTimeCausePlayerIsForever());
+                } else if (timeService.canAdd(entry, timeInMillis)) {
                     timeService.add(entry, timeInMillis);
                     issuer.sendMessage(messages.getAddTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
                 } else {
@@ -92,7 +94,9 @@ public class TimeCommand implements Command {
                 }
             }
             case "remove" -> {
-                if (timeService.canRemove(entry, timeInMillis)) {
+                if (entry.isForever()) {
+                    issuer.sendMessage(messages.getCantRemoveTimeCausePlayerIsForever());
+                } else if (timeService.canRemove(entry, timeInMillis)) {
                     timeService.remove(entry, timeInMillis);
                     issuer.sendMessage(messages.getRemoveTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
                 } else {

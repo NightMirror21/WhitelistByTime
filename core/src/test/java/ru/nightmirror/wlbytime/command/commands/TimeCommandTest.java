@@ -47,6 +47,8 @@ public class TimeCommandTest {
         when(messages.getRemoveTime()).thenReturn("Removed %time% from %nickname%'s time.");
         when(messages.getCantRemoveTime()).thenReturn("Cannot remove time.");
         when(messages.getSetTime()).thenReturn("Set %nickname%'s time to %time%.");
+        when(messages.getCantAddTimeCausePlayerIsForever()).thenReturn("Cannot add time because player is forever.");
+        when(messages.getCantRemoveTimeCausePlayerIsForever()).thenReturn("Cannot remove time because player is forever.");
     }
 
     @Test
@@ -60,7 +62,6 @@ public class TimeCommandTest {
     public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
         String nickname = "nonexistentPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
 
         timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
 
@@ -89,9 +90,40 @@ public class TimeCommandTest {
     }
 
     @Test
+    public void testExecute_AddOperation_EntryIsForever_ShouldSendCantAddTimeForeverMessage() {
+        String nickname = "somePlayer";
+        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(true);
+        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
+
+        timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
+
+        verify(issuer).sendMessage("Cannot add time because player is forever.");
+
+        verify(timeService, never()).canAdd(any(), anyLong());
+        verify(timeService, never()).add(any(), anyLong());
+    }
+
+    @Test
+    public void testExecute_RemoveOperation_EntryIsForever_ShouldSendCantRemoveTimeForeverMessage() {
+        String nickname = "somePlayer";
+        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(true);
+        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
+
+        timeCommand.execute(issuer, new String[]{"remove", nickname, "1h"});
+
+        verify(issuer).sendMessage("Cannot remove time because player is forever.");
+
+        verify(timeService, never()).canRemove(any(), anyLong());
+        verify(timeService, never()).remove(any(), anyLong());
+    }
+
+    @Test
     public void testExecute_AddOperation_CanAdd_ShouldSendAddTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(false);
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
         when(timeService.canAdd(entry, 3600000L)).thenReturn(true);
@@ -106,6 +138,7 @@ public class TimeCommandTest {
     public void testExecute_AddOperation_CannotAdd_ShouldSendCantAddTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(false);
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(timeService.canAdd(entry, 3600000L)).thenReturn(false);
 
@@ -118,6 +151,7 @@ public class TimeCommandTest {
     public void testExecute_RemoveOperation_CanRemove_ShouldSendRemoveTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(false);
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
         when(timeService.canRemove(entry, 3600000L)).thenReturn(true);
@@ -132,6 +166,7 @@ public class TimeCommandTest {
     public void testExecute_RemoveOperation_CannotRemove_ShouldSendCantRemoveTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(false);
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(timeService.canRemove(entry, 3600000L)).thenReturn(false);
 
@@ -144,6 +179,7 @@ public class TimeCommandTest {
     public void testExecute_SetOperation_ShouldSendSetTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(entry.isForever()).thenReturn(false);
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
 
