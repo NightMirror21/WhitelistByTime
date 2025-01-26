@@ -38,7 +38,7 @@ public class FreezeCommand implements Command {
     @Override
     public void execute(CommandIssuer issuer, String[] args) {
         if (args.length < 2) {
-            sendIncorrectArgumentsMessage(issuer);
+            issuer.sendMessage(messages.getIncorrectArguments());
             return;
         }
 
@@ -47,46 +47,26 @@ public class FreezeCommand implements Command {
 
         Optional<Entry> entry = finder.find(nickname);
         if (entry.isEmpty()) {
-            sendPlayerNotInWhitelistMessage(issuer, nickname);
+            issuer.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%nickname%", nickname));
             return;
         }
 
         Entry userEntry = entry.get();
         if (!userEntry.isActive()) {
-            sendPlayerExpiredMessage(issuer, nickname);
+            issuer.sendMessage(messages.getPlayerExpired().replaceAll("%nickname%", nickname));
             return;
         }
 
         if (userEntry.isFreezeActive()) {
-            sendPlayerAlreadyFrozenMessage(issuer, nickname);
+            issuer.sendMessage(messages.getPlayerAlreadyFrozen().replaceAll("%nickname%", nickname));
         } else {
             long timeInMillis = convertor.getTimeMs(timeString);
             if (timeInMillis <= 0) {
-                sendTimeIsIncorrectMessage(issuer);
+                issuer.sendMessage(messages.getTimeIsIncorrect());
                 return;
             }
             freezePlayer(issuer, userEntry, timeInMillis, nickname);
         }
-    }
-
-    private void sendIncorrectArgumentsMessage(CommandIssuer issuer) {
-        issuer.sendMessage(messages.getIncorrectArguments());
-    }
-
-    private void sendPlayerNotInWhitelistMessage(CommandIssuer issuer, String nickname) {
-        issuer.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%nickname%", nickname));
-    }
-
-    private void sendTimeIsIncorrectMessage(CommandIssuer issuer) {
-        issuer.sendMessage(messages.getTimeIsIncorrect());
-    }
-
-    private void sendPlayerExpiredMessage(CommandIssuer issuer, String nickname) {
-        issuer.sendMessage(messages.getPlayerExpired().replaceAll("%nickname%", nickname));
-    }
-
-    private void sendPlayerAlreadyFrozenMessage(CommandIssuer issuer, String nickname) {
-        issuer.sendMessage(messages.getPlayerAlreadyFrozen().replaceAll("%nickname%", nickname));
     }
 
     private void freezePlayer(CommandIssuer issuer, Entry userEntry, long timeInMillis, String nickname) {

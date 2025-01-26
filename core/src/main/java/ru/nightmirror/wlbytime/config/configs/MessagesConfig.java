@@ -84,10 +84,8 @@ public class MessagesConfig extends YamlSerializable {
     String cantRemoveTime = "Can't remove time";
 
     @NewLine
-    String playerUnfrozen = "Player %nickname% unfrozen";  // fixme unused
     String playerFrozen = "Player %nickname% frozen for %time%";
     String playerAlreadyFrozen = "Player %nickname% already frozen";
-    String playerNotFrozen = "Player %nickname% not frozen";  // fixme unused
     String playerExpired = "Player %nickname% expired";
 
     @NewLine
