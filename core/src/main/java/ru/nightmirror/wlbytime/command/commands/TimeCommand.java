@@ -47,7 +47,7 @@ public class TimeCommand implements Command {
 
         Optional<Entry> entry = finder.find(nickname);
         if (entry.isEmpty()) {
-            issuer.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%nickname%", nickname));
+            issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
             return;
         }
         if (!OPERATIONS.contains(operation)) {
@@ -88,7 +88,7 @@ public class TimeCommand implements Command {
                     issuer.sendMessage(messages.getCantAddTimeCausePlayerIsForever());
                 } else if (timeService.canAdd(entry, timeInMillis)) {
                     timeService.add(entry, timeInMillis);
-                    issuer.sendMessage(messages.getAddTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
+                    issuer.sendMessage(messages.getAddTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
                 } else {
                     issuer.sendMessage(messages.getCantAddTime());
                 }
@@ -98,14 +98,14 @@ public class TimeCommand implements Command {
                     issuer.sendMessage(messages.getCantRemoveTimeCausePlayerIsForever());
                 } else if (timeService.canRemove(entry, timeInMillis)) {
                     timeService.remove(entry, timeInMillis);
-                    issuer.sendMessage(messages.getRemoveTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
+                    issuer.sendMessage(messages.getRemoveTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
                 } else {
                     issuer.sendMessage(messages.getCantRemoveTime());
                 }
             }
             case "set" -> {
                 timeService.set(entry, timeInMillis);
-                issuer.sendMessage(messages.getSetTime().replaceAll("%nickname%", nickname).replaceAll("%time%", timeAsString));
+                issuer.sendMessage(messages.getSetTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
             }
             default -> issuer.sendMessage(messages.getIncorrectArguments());
         }

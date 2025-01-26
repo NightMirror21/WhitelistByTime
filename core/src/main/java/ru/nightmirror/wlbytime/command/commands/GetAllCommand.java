@@ -106,8 +106,8 @@ public class GetAllCommand implements Command {
     private String formatEntryMessage(Entry entry) {
         String timeOrStatus = getTimeOrStatus(entry);
         return messages.getListElement()
-                .replaceAll("%nickname%", entry.getNickname())
-                .replaceAll("%time-or-status%", timeOrStatus);
+                .replace("%nickname%", entry.getNickname())
+                .replace("%time-or-status%", timeOrStatus);
     }
 
     private String getTimeOrStatus(Entry entry) {

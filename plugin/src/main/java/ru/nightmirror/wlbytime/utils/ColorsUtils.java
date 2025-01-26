@@ -37,7 +37,7 @@ public final class ColorsUtils {
     }
 
     private static String checkAndReplaceLegacyColors(String message) {
-        message = message.replaceAll("&", "§");
+        message = message.replace("&", "§");
         if (message.contains("&") || message.contains("§")) {
             return replaceLegacyColors(message);
         }
@@ -46,7 +46,7 @@ public final class ColorsUtils {
 
     private static String replaceLegacyColors(String text) {
         for (Map.Entry<String, String> entry : COLOR_MAPPINGS.entrySet()) {
-            text = text.replaceAll(entry.getKey(), entry.getValue());
+            text = text.replace(entry.getKey(), entry.getValue());
         }
         return text;
     }

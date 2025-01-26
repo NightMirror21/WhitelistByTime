@@ -47,18 +47,18 @@ public class FreezeCommand implements Command {
 
         Optional<Entry> entry = finder.find(nickname);
         if (entry.isEmpty()) {
-            issuer.sendMessage(messages.getPlayerNotInWhitelist().replaceAll("%nickname%", nickname));
+            issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
             return;
         }
 
         Entry userEntry = entry.get();
         if (!userEntry.isActive()) {
-            issuer.sendMessage(messages.getPlayerExpired().replaceAll("%nickname%", nickname));
+            issuer.sendMessage(messages.getPlayerExpired().replace("%nickname%", nickname));
             return;
         }
 
         if (userEntry.isFreezeActive()) {
-            issuer.sendMessage(messages.getPlayerAlreadyFrozen().replaceAll("%nickname%", nickname));
+            issuer.sendMessage(messages.getPlayerAlreadyFrozen().replace("%nickname%", nickname));
         } else {
             long timeInMillis = convertor.getTimeMs(timeString);
             if (timeInMillis <= 0) {
@@ -73,8 +73,8 @@ public class FreezeCommand implements Command {
         service.freeze(userEntry, timeInMillis);
         String timeAsString = convertor.getTimeLine(timeInMillis);
         issuer.sendMessage(messages.getPlayerFrozen()
-                .replaceAll("%nickname%", nickname)
-                .replaceAll("%time%", timeAsString));
+                .replace("%nickname%", nickname)
+                .replace("%time%", timeAsString));
     }
 
     private String concatenateArgs(String[] args) {

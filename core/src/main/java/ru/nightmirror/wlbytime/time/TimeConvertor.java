@@ -25,7 +25,7 @@ public final class TimeConvertor {
 
     private static String clear(String string, Set<String> patterns) {
         for (String pattern : patterns) {
-            string = string.replaceAll(pattern, "");
+            string = string.replace(pattern, "");
         }
         return string;
     }

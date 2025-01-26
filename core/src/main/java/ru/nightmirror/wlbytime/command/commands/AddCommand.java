@@ -55,7 +55,7 @@ public class AddCommand implements Command {
     private boolean isPlayerInWhitelist(String nickname, CommandIssuer issuer) {
         if (finder.find(nickname).isPresent()) {
             String message = messages.getPlayerAlreadyInWhitelist()
-                    .replaceAll("%nickname%", nickname);
+                    .replace("%nickname%", nickname);
             issuer.sendMessage(message);
             return true;
         }
@@ -65,7 +65,7 @@ public class AddCommand implements Command {
     private void addPlayerWithoutTime(String nickname, CommandIssuer issuer) {
         service.create(nickname);
         String message = messages.getSuccessfullyAdded()
-                .replaceAll("%nickname%", nickname);
+                .replace("%nickname%", nickname);
         issuer.sendMessage(message);
     }
 
@@ -80,8 +80,8 @@ public class AddCommand implements Command {
 
         String timeAsString = convertor.getTimeLine(timeInMillis);
         String message = messages.getSuccessfullyAddedForTime()
-                .replaceAll("%nickname%", nickname)
-                .replaceAll("%time%", timeAsString);
+                .replace("%nickname%", nickname)
+                .replace("%time%", timeAsString);
         issuer.sendMessage(message);
     }
 

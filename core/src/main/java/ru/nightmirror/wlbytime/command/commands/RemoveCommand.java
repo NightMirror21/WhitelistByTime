@@ -43,10 +43,10 @@ public class RemoveCommand implements Command {
         if (entry.isPresent()) {
             service.remove(entry.get());
             issuer.sendMessage(messages.getPlayerRemovedFromWhitelist()
-                    .replaceAll("%nickname%", nickname));
+                    .replace("%nickname%", nickname));
         } else {
             issuer.sendMessage(messages.getPlayerNotInWhitelist()
-                    .replaceAll("%nickname%", nickname));
+                    .replace("%nickname%", nickname));
         }
     }
 
