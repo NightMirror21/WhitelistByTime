@@ -40,7 +40,7 @@ public class MessagesConfig extends YamlSerializable {
             @CommentValue("For command with time")
     }, at = Comment.At.PREPEND)
     String successfullyAddedForTime = "%nickname% added to whitelist for %time%";
-    String stillInWhitelistForTime = "%nickname% will be in whitelist still %time%";  // fixme unused
+    String checkStillInWhitelistForTime = "%nickname% will be in whitelist still %time%";
     String checkMeStillInWhitelistForTime = "You will remain on the whitelist for %time%";
 
     @NewLine
@@ -48,7 +48,7 @@ public class MessagesConfig extends YamlSerializable {
             @CommentValue("For command without time")
     }, at = Comment.At.PREPEND)
     String successfullyAdded = "%nickname% added to whitelist forever";
-    String stillInWhitelist = "%nickname% will be in whitelist forever";  // fixme unused
+    String checkStillInWhitelist = "%nickname% will be in whitelist forever";
     String checkMeStillInWhitelistForever = "You are permanently whitelisted";
 
     @NewLine
@@ -87,23 +87,6 @@ public class MessagesConfig extends YamlSerializable {
     String playerFrozen = "Player %nickname% frozen for %time%";
     String playerAlreadyFrozen = "Player %nickname% already frozen";
     String playerExpired = "Player %nickname% expired";
-
-    @NewLine
-    List<String> help = List.of(  // fixme unused
-            "> WhitelistByTime - Help",
-            "| /whitelist on/off",
-            "| /whitelist add [nickname] (time)",
-            "| /whitelist remove [nickname]",
-            "| /whitelist check [nickname]",
-            "| /whitelist checkme",
-            "| /whitelist reload",
-            "| /whitelist getall",
-            "| /whitelist switchfreeze [nickname]",
-            "| /whitelist time set/add/remove [nickname] [time]",
-            "| (time) - time for which the player will be added to the whitelist",
-            "| Example: 2d 3h 10m",
-            "| Leave this value empty if you want to add player forever"
-    );
 
     public MessagesConfig() {
         super(MessagesConfig.CONFIG);
