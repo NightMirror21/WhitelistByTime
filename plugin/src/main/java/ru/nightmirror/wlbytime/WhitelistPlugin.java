@@ -2,7 +2,11 @@ package ru.nightmirror.wlbytime;
 
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.nightmirror.wlbytime.command.CommandDispatcher;
+import ru.nightmirror.wlbytime.command.CommandProxy;
+import ru.nightmirror.wlbytime.command.CommandsLoader;
 import ru.nightmirror.wlbytime.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.impl.dao.EntryDaoImpl;
 import ru.nightmirror.wlbytime.impl.finder.EntryFinderImpl;
@@ -16,14 +20,18 @@ import ru.nightmirror.wlbytime.monitor.monitors.ExpireMonitor;
 import ru.nightmirror.wlbytime.monitor.monitors.LastJoinMonitor;
 import ru.nightmirror.wlbytime.placeholder.PlaceholderHook;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
+import ru.nightmirror.wlbytime.time.TimeRandom;
 import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
 import ru.nightmirror.wlbytime.utils.MetricsUtils;
 import ru.nightmirror.wlbytime.utils.VersionUtils;
 
+import java.util.Set;
 import java.util.logging.Level;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WhitelistPlugin extends JavaPlugin {
+
+    static final Set<String> WHITELIST_COMMANDS = Set.of("wlbytime", "whitelist", "wl");
 
     EntryDaoImpl entryDao;
     Monitor expireMonitor;
@@ -71,14 +79,34 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Loading time convertor");
         TimeUnitsConvertorSettings timeUnitsConvertorSettings = configsContainer.getTimeUnitsConvertorSettings();
         timeConvertor = new TimeConvertor(timeUnitsConvertorSettings);
+        TimeRandom timeRandom = new TimeRandom(timeConvertor);
         getLogger().info("Time convertor loaded");
 
-        // TODO load commands
+        CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getMessages(), entryFinder, timeConvertor,
+                entryService, timeRandom, entryTimeService);
+        CommandDispatcher commandDispatcher = new CommandDispatcher(configsContainer.getMessages(), commandsLoader.load());
+        CommandProxy commandProxy = new CommandProxy(configsContainer.getMessages(), commandDispatcher);
+
+        WHITELIST_COMMANDS.forEach(commandName -> tryToBindCommandHandler(commandName, commandProxy));
 
         tryToLoadMetrics();
         tryToLoadPapi();
 
         getLogger().info("Plugin enabled");
+    }
+
+    private void tryToBindCommandHandler(String commandName, CommandProxy commandProxy) {
+        try {
+            PluginCommand command = getCommand(commandName);
+            if (command == null) {
+                getLogger().log(Level.WARNING, "Plugin command by name " + commandName + " not found (null)");
+                return;
+            }
+            command.setTabCompleter(commandProxy);
+            command.setExecutor(commandProxy);
+        } catch (Exception exception) {
+            getLogger().log(Level.SEVERE, "Failed to register command handler " + commandName, exception);
+        }
     }
 
     private void tryToLoadPapi() {
