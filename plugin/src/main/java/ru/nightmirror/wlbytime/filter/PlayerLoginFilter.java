@@ -30,7 +30,7 @@ public class PlayerLoginFilter implements Listener {
     private void filter(AsyncPlayerPreLoginEvent event) {
         Optional<Entry> entry = entryFinder.find(event.getName());
         entry.ifPresent(unfreezeEntryChecker::unfreezeIfRequired);
-        boolean allowedLogin = entry.isEmpty() || accessEntryChecker.isAllowed(entry.get());
+        boolean allowedLogin = entry.isPresent() && accessEntryChecker.isAllowed(entry.get());
         if (!allowedLogin) {
             Component component = ColorsUtils.convertMessage(messagesConfig.getYouNotInWhitelistOrFrozenKick());
             event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST, component);
