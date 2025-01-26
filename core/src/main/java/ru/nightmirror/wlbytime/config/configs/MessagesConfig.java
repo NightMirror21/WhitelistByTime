@@ -88,6 +88,21 @@ public class MessagesConfig extends YamlSerializable {
     String playerAlreadyFrozen = "Player %nickname% already frozen";
     String playerExpired = "Player %nickname% expired";
 
+    @NewLine
+    List<String> help = List.of(
+            "> WhitelistByTime - Help",
+            "| /whitelist add [nickname] (time)",
+            "| /whitelist remove [nickname]",
+            "| /whitelist check [nickname]",
+            "| /whitelist checkme",
+            "| /whitelist getall",
+            "| /whitelist freeze [nickname] [time]",
+            "| /whitelist time set/add/remove [nickname] [time]",
+            "| (time) - time for which the player will be added to the whitelist",
+            "| Example: 2d 3h 10m",
+            "| Leave this value empty if you want to add player forever"
+    );
+
     public MessagesConfig() {
         super(MessagesConfig.CONFIG);
     }
