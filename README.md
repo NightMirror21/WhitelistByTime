@@ -35,10 +35,14 @@ All output can be configured in the config.
 *%wlbytime_in_whitelist%* - In whitelistByTime or not.\
 *%wlbytime_time_left%* - How much is left in whitelistByTime.
 
+## TODO
+1. **Cleanup command**\
+   command to clear the white list if a player has not logged in for a long time or has not logged in at all
+
 ## FAQ
 1. *Why does the plugin weigh so much?*\
    Because it contains libraries such as omrlite (database), caffein (cache), bstats (metrics), elytrium-serializer (configs).
 2. *I have a problem/idea where should I write?*\
    Create an issue in this repository and describe it in detail. I would be happy to get any feedback!
 3. *Will there be bungee\velocity support?*\
-   No, I plan to develop the plugin for paper only.
+   No, I plan to develop the plugin for paper and folia only.
