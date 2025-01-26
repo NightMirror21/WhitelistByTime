@@ -128,8 +128,11 @@ public class WhitelistPlugin extends JavaPlugin {
 
     private void tryToLoadPapi() {
         try {
-            new PlaceholderHook(entryFinder, timeConvertor, configsContainer.getPlaceholders(), version);
-            getLogger().info("PAPI hooked");
+            if (configsContainer.getPlaceholders().isPlaceholdersEnabled()) {
+                PlaceholderHook hook = new PlaceholderHook(entryFinder, timeConvertor, configsContainer.getPlaceholders(), version);
+                hook.register();
+                getLogger().info("PAPI hooked");
+            }
         } catch (Exception exception) {
             getLogger().log(Level.WARNING, "Failed to load PAPI", exception);
         }
