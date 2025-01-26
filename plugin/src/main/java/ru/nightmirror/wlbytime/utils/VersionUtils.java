@@ -1,10 +1,12 @@
 package ru.nightmirror.wlbytime.utils;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Optional;
 
-public class VersionUtils {
+@UtilityClass
+public final class VersionUtils {
 
     private static final String VERSION_DEFAULT = "null";
 
