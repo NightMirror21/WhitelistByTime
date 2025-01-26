@@ -7,17 +7,15 @@
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
 
 ## Commands and Permissions
-| Command                                                | Permission                   |
-|--------------------------------------------------------|------------------------------|
-| /whitelistByTime on/off                                | whitelistbytime.turn         |
-| /whitelistByTime add  [nickname] (time)                | whitelistbytime.turn         |
-| /whitelistByTime remove [nickname]                     | whitelistbytime.remove       |
-| /whitelistByTime check [nickname]                      | whitelistbytime.check        |
-| /whitelistByTime checkme                               | whitelistbytime.checkme      |
-| /whitelistByTime time set/add/remove [nickname] [time] | whitelistbytime.time         |
-| /whitelistByTime reload                                | whitelistbytime.reload       |
-| /whitelistByTime getall (page)                         | whitelistbytime.getall       |
-| /whitelistByTime switchfreeze [nickname]               | whitelistbytime.switchfreeze |
+| Command                                                | Permission              |
+|--------------------------------------------------------|-------------------------|
+| /whitelistByTime add [nickname] (time)                 | whitelistbytime.add     |
+| /whitelistByTime remove [nickname]                     | whitelistbytime.remove  |
+| /whitelistByTime check [nickname]                      | whitelistbytime.check   |
+| /whitelistByTime checkme                               | whitelistbytime.checkme |
+| /whitelistByTime time set/add/remove [nickname] [time] | whitelistbytime.time    |
+| /whitelistByTime getall (page)                         | whitelistbytime.getall  |
+| /whitelistByTime freeze [nickname] [time]              | whitelistbytime.freeze  |
 
 Note:
 - [nickname] - this argument is required.
@@ -38,6 +36,4 @@ All output can be configured in the config.
 2. *I have a problem/idea where should I write?*\
    Create an issue in this repository and describe it in detail. I would be happy to get any feedback!
 3. *Will there be bungee\velocity support?*\
-   Yes, it will, as soon as I learn how to use their api.
-4. *What is the difference in the whitelistbytime between paper and spigot?*\
-   The difference lies in the formatting of the messages. In Spigot, strings are used, whereas in Paper, components are utilized. To create colored messages in Spigot, you can use the '&' sign or hex codes (e.g., #ffffffff). However, in Paper, only MiniMessage formatting is supported.
+   No, I plan to develop the plugin for paper only.
