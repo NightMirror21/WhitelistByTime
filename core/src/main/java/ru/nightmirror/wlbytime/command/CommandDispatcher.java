@@ -3,18 +3,18 @@ package ru.nightmirror.wlbytime.command;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CommandDispatcher {
 
-    Consumer<CommandIssuer> noPermissionSender;
+    MessagesConfig messagesConfig;
     Set<Command> commands;
 
     public void dispatchExecute(CommandIssuer issuer, String commandName, String[] args) {
@@ -24,7 +24,7 @@ public class CommandDispatcher {
             }
 
             if (!issuer.hasPermission(command.getPermission())) {
-                noPermissionSender.accept(issuer);
+                issuer.sendMessage(messagesConfig.getNotPermission());
             } else {
                 command.execute(issuer, args);
             }

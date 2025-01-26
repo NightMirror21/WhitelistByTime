@@ -2,11 +2,11 @@ package ru.nightmirror.wlbytime.command;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,18 +15,20 @@ import static org.mockito.Mockito.*;
 public class CommandDispatcherTest {
 
     private CommandDispatcher commandDispatcher;
-    private Consumer<CommandIssuer> noPermissionSender;
+    private MessagesConfig messagesConfig;
     private CommandIssuer issuer;
     private Command command;
 
-    @SuppressWarnings("unchecked")
     @BeforeEach
     public void setUp() {
-        noPermissionSender = mock(Consumer.class);
-        command = mock(Command.class);
+        messagesConfig = mock(MessagesConfig.class);
         issuer = mock(CommandIssuer.class);
+        command = mock(Command.class);
+
+        when(messagesConfig.getNotPermission()).thenReturn("You do not have permission!");
+
         Set<Command> commands = Set.of(command);
-        commandDispatcher = new CommandDispatcher(noPermissionSender, commands);
+        commandDispatcher = new CommandDispatcher(messagesConfig, commands);
     }
 
     @Test
@@ -40,7 +42,7 @@ public class CommandDispatcherTest {
         commandDispatcher.dispatchExecute(issuer, commandName, args);
 
         verify(command).execute(issuer, args);
-        verify(noPermissionSender, never()).accept(issuer);
+        verify(issuer, never()).sendMessage("You do not have permission!");
     }
 
     @Test
@@ -53,7 +55,7 @@ public class CommandDispatcherTest {
 
         commandDispatcher.dispatchExecute(issuer, commandName, args);
 
-        verify(noPermissionSender).accept(issuer);
+        verify(issuer).sendMessage("You do not have permission!");
         verify(command, never()).execute(issuer, args);
     }
 
@@ -66,7 +68,7 @@ public class CommandDispatcherTest {
         commandDispatcher.dispatchExecute(issuer, commandName, args);
 
         verify(command, never()).execute(issuer, args);
-        verify(noPermissionSender, never()).accept(issuer);
+        verify(issuer, never()).sendMessage("You do not have permission!");
     }
 
     @Test
@@ -122,7 +124,7 @@ public class CommandDispatcherTest {
 
     @Test
     public void testGetCommands_WhenNoCommands_ShouldReturnEmptySet() {
-        commandDispatcher = new CommandDispatcher(noPermissionSender, Set.of());
+        commandDispatcher = new CommandDispatcher(messagesConfig, Set.of());
 
         Set<String> result = commandDispatcher.getCommands();
 
