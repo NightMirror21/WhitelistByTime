@@ -42,7 +42,7 @@ public class Entry {
         }
 
         if (isFreezeActive()) {
-            return expiration.isNotExpired(freezing.getDurationOfFreeze());
+            return expiration.isNotExpired(freezing.getLeftTime());
         } else {
             return false;
         }
@@ -116,7 +116,7 @@ public class Entry {
         long offset = 0L;
         
         if (isFreezeActive()) {
-            offset = freezing.getDurationOfFreeze();
+            offset = freezing.getLeftTime();
         }
         
         if (isForever()) {
@@ -130,6 +130,6 @@ public class Entry {
         if (isFreezeInactive()) {
             throw new IllegalStateException("Can't get left freeze time cause entry is not frozen");
         }
-        return freezing.getDurationOfFreeze();
+        return freezing.getLeftTime();
     }
 }

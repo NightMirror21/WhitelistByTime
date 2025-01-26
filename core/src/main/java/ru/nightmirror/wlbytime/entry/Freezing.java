@@ -25,6 +25,10 @@ public class Freezing {
         return endTime.after(new Timestamp(System.currentTimeMillis()));
     }
 
+    public long getLeftTime() {
+        return endTime.getTime() - System.currentTimeMillis();
+    }
+
     public long getDurationOfFreeze() {
         return endTime.getTime() - startTime.getTime();
     }
