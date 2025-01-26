@@ -30,7 +30,7 @@ public class DatabaseConfig extends YamlSerializable {
             @CommentValue("If not sqlite or h2")
     }, at = Comment.At.PREPEND)
     String address = "localhost:3030";
-    String name = "minecraft";
+    String name = "wlbytime";
 
     @NewLine
     @Comment(value = {

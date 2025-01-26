@@ -69,7 +69,7 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Configs loaded");
 
         getLogger().info("Loading database...");
-        entryDao = new EntryDaoImpl(configsContainer.getDatabase());
+        entryDao = new EntryDaoImpl(getDataFolder(), configsContainer.getDatabase());
         entryFinder = new EntryFinderImpl(configsContainer.getSettings().isNicknameCaseSensitive(), entryDao);
         getLogger().info("Database loaded");
 

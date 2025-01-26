@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.entry.Entry;
 import ru.nightmirror.wlbytime.entry.Expiration;
@@ -20,6 +21,7 @@ import ru.nightmirror.wlbytime.entry.Freezing;
 import ru.nightmirror.wlbytime.entry.LastJoin;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -39,9 +41,22 @@ public class EntryDaoImpl implements EntryDao {
     private Dao<LastJoinTable, Long> lastJoinDao;
     private Dao<FreezingTable, Long> freezingDao;
     private Dao<ExpirationTable, Long> expirationDao;
+    private final @Nullable File dataFolder;
 
     public EntryDaoImpl(DatabaseConfig config) {
         try {
+            dataFolder = null;
+            com.j256.ormlite.logger.Logger.setGlobalLogLevel(com.j256.ormlite.logger.Level.OFF);
+            initConnection(config);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error initializing database connection", e);
+            throw new DatabaseInitializationException("Failed to initialize database connection", e);
+        }
+    }
+
+    public EntryDaoImpl(@Nullable File dataFolder, DatabaseConfig config) {
+        try {
+            this.dataFolder = dataFolder;
             com.j256.ormlite.logger.Logger.setGlobalLogLevel(com.j256.ormlite.logger.Level.OFF);
             initConnection(config);
         } catch (SQLException e) {
@@ -66,9 +81,15 @@ public class EntryDaoImpl implements EntryDao {
 
     private String getDatabaseUrl(DatabaseConfig config) throws SQLException {
         if (SQLITE.equalsIgnoreCase(config.getType())) {
+            String absolutePath;
+            if (dataFolder != null) {
+                absolutePath = new File(dataFolder, config.getName() + ".db").getAbsolutePath();
+            } else {
+                absolutePath = config.getName() + ".db";
+            }
             return config.getName().equals(":memory:")
                     ? "jdbc:sqlite::memory:"
-                    : "jdbc:sqlite:" + config.getName() + ".db";
+                    : "jdbc:sqlite:" + absolutePath;
         } else if (MYSQL.equalsIgnoreCase(config.getType())) {
             String params = String.join("&", config.getParams());
             return String.format("jdbc:mysql://%s/%s?%s", config.getAddress(), config.getName(), params);
