@@ -183,9 +183,12 @@ public class TimeCommandTest {
         when(convertor.getTimeMs("1h")).thenReturn(3600000L);
         when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
 
+        long now = System.currentTimeMillis();
         timeCommand.execute(issuer, new String[]{"set", nickname, "1h"});
 
-        verify(timeService).set(entry, 3600000L);
+        verify(timeService).set(eq(entry), longThat(time ->
+                time >= 3600000L + now && time <= 3600000L + now + 1000
+        ));
         verify(issuer).sendMessage("Set somePlayer's time to 1 hour.");
     }
 

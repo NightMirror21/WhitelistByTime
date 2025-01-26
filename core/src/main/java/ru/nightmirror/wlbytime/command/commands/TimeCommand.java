@@ -104,7 +104,7 @@ public class TimeCommand implements Command {
                 }
             }
             case "set" -> {
-                timeService.set(entry, timeInMillis);
+                timeService.set(entry, System.currentTimeMillis() + timeInMillis);
                 issuer.sendMessage(messages.getSetTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
             }
             default -> issuer.sendMessage(messages.getIncorrectArguments());
