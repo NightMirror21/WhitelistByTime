@@ -23,10 +23,7 @@ public class MessagesConfig extends YamlSerializable {
     String incorrectArguments = "Incorrect argument(s)";
 
     @NewLine
-    List<String> youNotInWhitelistKick = List.of(  // fixme unused
-            "Sorry, but you are not in whitelist",
-            "Bye!"
-    );
+    String youNotInWhitelistOrFrozenKick = "Sorry, but you are not in whitelist or frozen";
 
     @NewLine
     String playerRemovedFromWhitelist = "%nickname% successfully removed from whitelist";

@@ -8,10 +8,15 @@ import ru.nightmirror.wlbytime.command.CommandDispatcher;
 import ru.nightmirror.wlbytime.command.CommandProxy;
 import ru.nightmirror.wlbytime.command.CommandsLoader;
 import ru.nightmirror.wlbytime.config.ConfigsContainer;
+import ru.nightmirror.wlbytime.filter.PlayerLoginFilter;
+import ru.nightmirror.wlbytime.impl.checker.AccessEntryCheckerImpl;
+import ru.nightmirror.wlbytime.impl.checker.UnfreezeEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.dao.EntryDaoImpl;
 import ru.nightmirror.wlbytime.impl.finder.EntryFinderImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryServiceImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryTimeServiceImpl;
+import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
+import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
@@ -41,6 +46,8 @@ public class WhitelistPlugin extends JavaPlugin {
     ConfigsContainer configsContainer;
     TimeConvertor timeConvertor;
     EntryFinder entryFinder;
+
+    PlayerLoginFilter playerLoginFilter;
 
     @Override
     public void onEnable() {
@@ -82,12 +89,21 @@ public class WhitelistPlugin extends JavaPlugin {
         TimeRandom timeRandom = new TimeRandom(timeConvertor);
         getLogger().info("Time convertor loaded");
 
+        getLogger().info("Loading player login filter...");
+        UnfreezeEntryChecker unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(configsContainer.getSettings().isUnfreezeTimeOnPlayerJoin(), entryService);
+        AccessEntryChecker accessEntryChecker = new AccessEntryCheckerImpl();
+        playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), entryFinder,
+                unfreezeEntryChecker, accessEntryChecker);
+        getLogger().info("Player login filter loaded");
+
+        getLogger().info("Loading commands...");
         CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getMessages(), entryFinder, timeConvertor,
                 entryService, timeRandom, entryTimeService);
         CommandDispatcher commandDispatcher = new CommandDispatcher(configsContainer.getMessages(), commandsLoader.load());
         CommandProxy commandProxy = new CommandProxy(configsContainer.getMessages(), commandDispatcher);
 
         WHITELIST_COMMANDS.forEach(commandName -> tryToBindCommandHandler(commandName, commandProxy));
+        getLogger().info("Commands loaded");
 
         tryToLoadMetrics();
         tryToLoadPapi();
@@ -137,6 +153,10 @@ public class WhitelistPlugin extends JavaPlugin {
     }
 
     private void tryToDisable() {
+        getLogger().info("Disabling plugin...");
+        if (playerLoginFilter != null) {
+            playerLoginFilter.unregister();
+        }
         if (entryDao != null) {
             entryDao.close();
         }
