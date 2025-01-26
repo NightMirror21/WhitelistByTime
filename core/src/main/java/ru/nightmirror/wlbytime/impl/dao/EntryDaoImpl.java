@@ -140,11 +140,23 @@ public class EntryDaoImpl implements EntryDao {
 
     private void updateExpirationTable(Entry entry, EntryTable entryTable) throws SQLException {
         if (entry.getExpiration() != null) {
-            expirationDao.createOrUpdate(getExpirationTable(entry, entryTable));
+            ExpirationTable existing = expirationDao.queryBuilder()
+                    .where()
+                    .eq(ExpirationTable.ENTRY_ID_COLUMN, entryTable.getId())
+                    .queryForFirst();
+
+            ExpirationTable newExpirationTable = getExpirationTable(entry, entryTable);
+
+            if (existing != null) {
+                newExpirationTable.setId(existing.getId());
+            }
+
+            expirationDao.createOrUpdate(newExpirationTable);
         } else {
             deleteExpiredTableEntry(entry);
         }
     }
+
 
     private void deleteExpiredTableEntry(Entry entry) throws SQLException {
         DeleteBuilder<ExpirationTable, Long> builder = expirationDao.deleteBuilder();
