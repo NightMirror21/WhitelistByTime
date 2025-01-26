@@ -39,7 +39,7 @@ public class MessagesConfig extends YamlSerializable {
     @Comment(value = {
             @CommentValue("For command with time")
     }, at = Comment.At.PREPEND)
-    String successfullyAddedForTime = "%nickname% added to whitelist for %time%";  // fixme unused
+    String successfullyAddedForTime = "%nickname% added to whitelist for %time%";
     String stillInWhitelistForTime = "%nickname% will be in whitelist still %time%";  // fixme unused
     String checkMeStillInWhitelistForTime = "You will remain on the whitelist for %time%";
 

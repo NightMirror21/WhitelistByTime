@@ -79,7 +79,7 @@ public class AddCommand implements Command {
         service.create(nickname, timeInMillis + System.currentTimeMillis());
 
         String timeAsString = convertor.getTimeLine(timeInMillis);
-        String message = messages.getSuccessfullyAdded()
+        String message = messages.getSuccessfullyAddedForTime()
                 .replaceAll("%nickname%", nickname)
                 .replaceAll("%time%", timeAsString);
         issuer.sendMessage(message);

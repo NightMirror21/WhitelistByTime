@@ -89,7 +89,7 @@ public class AddCommandTest {
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(convertor.getTimeMs(timeArgument)).thenReturn(90000000L);
         when(convertor.getTimeLine(90000000L)).thenReturn("1 day 2 hours");
-        when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% added for %time%!");
+        when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, new String[]{nickname, timeArgument});
 
@@ -107,7 +107,7 @@ public class AddCommandTest {
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(convertor.getTimeMs("1d2h")).thenReturn(93600000L);
         when(convertor.getTimeLine(93600000L)).thenReturn("1 day 2 hours");
-        when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% added for %time%!");
+        when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, args);
 
@@ -151,7 +151,7 @@ public class AddCommandTest {
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(convertor.getTimeMs(timeArgument)).thenReturn(259200000L);
         when(convertor.getTimeLine(259200000L)).thenReturn("3 days");
-        when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% added for %time%!");
+        when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, new String[]{nickname, timeArgument});
 
