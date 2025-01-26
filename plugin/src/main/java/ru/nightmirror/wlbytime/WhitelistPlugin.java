@@ -94,6 +94,7 @@ public class WhitelistPlugin extends JavaPlugin {
         AccessEntryChecker accessEntryChecker = new AccessEntryCheckerImpl();
         playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), entryFinder,
                 unfreezeEntryChecker, accessEntryChecker);
+        getServer().getPluginManager().registerEvents(playerLoginFilter, this);
         getLogger().info("Player login filter loaded");
 
         getLogger().info("Loading commands...");
