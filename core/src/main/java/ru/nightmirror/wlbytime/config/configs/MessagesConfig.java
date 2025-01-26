@@ -52,7 +52,7 @@ public class MessagesConfig extends YamlSerializable {
     String listHeader = "> Whitelist:";
     String listElement = "| %nickname% [%time-or-status%]";
     String listEmpty = "Whitelist is empty";
-    String listFooter = "Page %current-page% / %max-page% (To show another page run /whitelist getall <page>)";
+    String listFooter = "Page %page% / %max-page% (To show another page run /whitelist getall <page>)";
     String pageNotExists = "Page %page% not exists, max page is %max-page%";
 
     @NewLine
