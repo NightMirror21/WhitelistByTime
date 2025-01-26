@@ -12,6 +12,7 @@ commands:
     usage: /wl
     aliases:
       - wl
+      - wlbytime
       - whitelistbytime
 permissions:
   whitelistbytime.add:

@@ -36,7 +36,7 @@ import java.util.logging.Level;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class WhitelistPlugin extends JavaPlugin {
 
-    static final Set<String> WHITELIST_COMMANDS = Set.of("wlbytime", "whitelist", "wl");
+    static final Set<String> WHITELIST_COMMANDS = Set.of("whitelist", "wl", "wlbytime", "whitelistbytime");
 
     EntryDaoImpl entryDao;
     Monitor expireMonitor;
