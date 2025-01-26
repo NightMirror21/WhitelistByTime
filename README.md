@@ -3,8 +3,13 @@
 ![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
 *Statistics are obtained through bstats metrics.*
 
+## Links
+[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-12-2-1-20-4.98946/) - over 4500 downloads (26/01/2025).
+
 ## About
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
+
+**The plugin is made and tested for paper 1.21.4, also supports folia.**
 
 ## Commands and Permissions
 | Command                                                | Permission              |
