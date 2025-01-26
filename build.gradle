@@ -2,14 +2,35 @@ plugins {
     id 'java'
 }
 
-def javaVersion = JavaVersion.VERSION_16;
+def javaVersion = JavaVersion.VERSION_21;
 sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '1.0.1'
+version = '2.0.0'
 description = 'WhitelistByTime'
 
 repositories {
     mavenLocal()
+}
+
+tasks.register('shadowJarAll') {
+    dependsOn([":core", ":plugin"].stream()
+            .map { project(it).tasks.getByName('shadowJar') }
+            .toArray())
+}
+
+tasks.register('cleanAll') {
+    dependsOn([":core", ":plugin"].stream()
+            .map { project(it).tasks.getByName('clean') }
+            .toArray())
+}
+
+tasks.register('buildAll') {
+    dependsOn 'cleanAll'
+    finalizedBy 'shadowJarAll'
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }

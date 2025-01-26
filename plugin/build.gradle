@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'com.gradleup.shadow' version '8.3.2'
+}
+
+def javaVersion = JavaVersion.VERSION_21;
+sourceCompatibility = javaVersion;
+targetCompatibility = javaVersion;
+
+group = 'ru.nightmirror'
+version = rootProject.version
+description = 'WhitelistByTime'
+
+compileJava.options.encoding = "UTF-8"
+compileTestJava.options.encoding = "UTF-8"
+
+repositories {
+    mavenCentral()
+
+    maven {
+        name 'papermc-repo'
+        url 'https://repo.papermc.io/repository/maven-public/'
+    }
+
+    maven {
+        url = 'https://repo.extendedclip.com/releases/'
+    }
+
+    maven {
+        url = uri('https://repo.maven.apache.org/maven2/')
+    }
+}
+
+dependencies {
+    shadow project(path: ':core', configuration: 'default')
+
+    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
+
+    implementation 'org.bstats:bstats-bukkit:3.0.1'
+
+    compileOnly 'me.clip:placeholderapi:2.11.6'
+
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+shadowJar {
+    relocate 'org.bstats', 'ru.nightmirror.wlbytime'
+    archiveClassifier.set(null)
+    configurations = [project.configurations.runtimeClasspath, project.configurations.shadow]
+    archiveFileName.set(project.description + '-' + rootProject.version + '.jar')
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+processResources {
+    def props = [version: rootProject.version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
