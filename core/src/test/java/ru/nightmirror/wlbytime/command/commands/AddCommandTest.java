@@ -85,7 +85,7 @@ public class AddCommandTest {
     @Test
     public void testExecute_WithNicknameAndTime_ShouldAddPlayerWithTime() {
         String nickname = "timedPlayer";
-        String timeArgument = "1d2h";
+        String timeArgument = "1d 2h";
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(convertor.getTimeMs(timeArgument)).thenReturn(90000000L);
         when(convertor.getTimeLine(90000000L)).thenReturn("1 day 2 hours");
@@ -105,7 +105,7 @@ public class AddCommandTest {
         String nickname = "concatPlayer";
         String[] args = {"concatPlayer", "1d", "2h"};
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTimeMs("1d2h")).thenReturn(93600000L);
+        when(convertor.getTimeMs("1d 2h")).thenReturn(93600000L);
         when(convertor.getTimeLine(93600000L)).thenReturn("1 day 2 hours");
         when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 

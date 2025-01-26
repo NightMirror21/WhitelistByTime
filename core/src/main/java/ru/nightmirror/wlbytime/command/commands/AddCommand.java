@@ -72,10 +72,10 @@ public class AddCommand implements Command {
     private void addPlayerWithTime(String[] args, String nickname, CommandIssuer issuer) {
         StringBuilder timeArgument = new StringBuilder();
         for (int i = 1; i < args.length; i++) {
-            timeArgument.append(args[i]);
+            timeArgument.append(args[i]).append(" ");
         }
 
-        long timeInMillis = convertor.getTimeMs(timeArgument.toString());
+        long timeInMillis = convertor.getTimeMs(timeArgument.toString().trim());
         service.create(nickname, timeInMillis + System.currentTimeMillis());
 
         String timeAsString = convertor.getTimeLine(timeInMillis);

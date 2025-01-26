@@ -76,9 +76,9 @@ public class TimeCommand implements Command {
     private String concatenateArgs(String[] args) {
         StringBuilder timeArgument = new StringBuilder();
         for (int i = 2; i < args.length; i++) {
-            timeArgument.append(args[i]);
+            timeArgument.append(args[i]).append(" ");
         }
-        return timeArgument.toString();
+        return timeArgument.toString().trim();
     }
 
     private void processOperation(CommandIssuer issuer, Entry entry, String operation, String nickname, long timeInMillis, String timeAsString) {
