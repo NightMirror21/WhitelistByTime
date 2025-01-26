@@ -50,7 +50,7 @@ shadowJar {
     relocate 'org.bstats', 'ru.nightmirror.wlbytime'
     archiveClassifier.set(null)
     configurations = [project.configurations.runtimeClasspath, project.configurations.shadow]
-    archiveFileName.set(project.description + '-' + project.version + '.jar')
+    archiveFileName.set(project.description + '-' + rootProject.version + '.jar')
 }
 
 java {

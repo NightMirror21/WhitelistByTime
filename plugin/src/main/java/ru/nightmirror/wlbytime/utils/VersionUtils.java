@@ -16,6 +16,7 @@ public final class VersionUtils {
                 .orElse(VERSION_DEFAULT);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static Optional<String> getVersionByExperimental(JavaPlugin plugin) {
         try {
             return Optional.of(plugin.getPluginMeta().getVersion());
@@ -24,6 +25,7 @@ public final class VersionUtils {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static Optional<String> getVersionByDeprecated(JavaPlugin plugin) {
         try {
             return Optional.of(plugin.getDescription().getVersion());
