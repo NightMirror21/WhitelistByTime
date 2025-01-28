@@ -4,7 +4,7 @@
 *Statistics are obtained through bstats metrics.*
 
 ## Links
-[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-12-2-1-20-4.98946/) - over 4500 downloads (26/01/2025).
+[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 4500 downloads (26/01/2025).
 
 ## About
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
@@ -14,13 +14,13 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 ## Commands and Permissions
 | Command                                                | Permission              |
 |--------------------------------------------------------|-------------------------|
-| /whitelistByTime add [nickname] (time)                 | whitelistbytime.add     |
-| /whitelistByTime remove [nickname]                     | whitelistbytime.remove  |
-| /whitelistByTime check [nickname]                      | whitelistbytime.check   |
-| /whitelistByTime checkme                               | whitelistbytime.checkme |
-| /whitelistByTime time set/add/remove [nickname] [time] | whitelistbytime.time    |
-| /whitelistByTime getall (page)                         | whitelistbytime.getall  |
-| /whitelistByTime freeze [nickname] [time]              | whitelistbytime.freeze  |
+| /whitelist add [nickname] (time)                       | whitelistbytime.add     |
+| /whitelist remove [nickname]                           | whitelistbytime.remove  |
+| /whitelist check [nickname]                            | whitelistbytime.check   |
+| /whitelist checkme                                     | whitelistbytime.checkme |
+| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time    |
+| /whitelist getall (page)                               | whitelistbytime.getall  |
+| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze  |
 
 Note:
 - [nickname] - this argument is required.
