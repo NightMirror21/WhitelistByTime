@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,15 @@ public final class PlaceholderHookProxy extends PlaceholderExpansion {
     @Override
     public @NotNull String getVersion() {
         return version;
+    }
+
+    @Override
+    public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
+        if (player == null) {
+            return placeholderParser.getEmpty();
+        }
+
+        return placeholderParser.parse(player.getName(), params);
     }
 
     @Override
