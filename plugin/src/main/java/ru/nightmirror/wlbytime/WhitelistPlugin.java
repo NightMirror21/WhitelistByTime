@@ -13,17 +13,19 @@ import ru.nightmirror.wlbytime.impl.checker.AccessEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.checker.UnfreezeEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.dao.EntryDaoImpl;
 import ru.nightmirror.wlbytime.impl.finder.EntryFinderImpl;
+import ru.nightmirror.wlbytime.impl.parser.PlaceholderParser;
 import ru.nightmirror.wlbytime.impl.service.EntryServiceImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryTimeServiceImpl;
 import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.parser.PlaceholderParserImpl;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.monitor.Monitor;
 import ru.nightmirror.wlbytime.monitor.monitors.ExpireMonitor;
 import ru.nightmirror.wlbytime.monitor.monitors.LastJoinMonitor;
-import ru.nightmirror.wlbytime.placeholder.PlaceholderHook;
+import ru.nightmirror.wlbytime.placeholder.PlaceholderHookProxy;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
@@ -129,7 +131,8 @@ public class WhitelistPlugin extends JavaPlugin {
     private void tryToLoadPapi() {
         try {
             if (configsContainer.getPlaceholders().isPlaceholdersEnabled()) {
-                PlaceholderHook hook = new PlaceholderHook(entryFinder, timeConvertor, configsContainer.getPlaceholders(), version);
+                PlaceholderParser placeholderParser = new PlaceholderParserImpl(entryFinder, timeConvertor, configsContainer.getPlaceholders());
+                PlaceholderHookProxy hook = new PlaceholderHookProxy(placeholderParser, version);
                 hook.register();
                 getLogger().info("PAPI hooked");
             }
