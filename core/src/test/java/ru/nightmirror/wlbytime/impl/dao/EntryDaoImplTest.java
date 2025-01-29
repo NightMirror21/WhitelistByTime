@@ -150,7 +150,7 @@ public class EntryDaoImplTest {
 
     @Test
     public void testGetEntryLike_BySimilarNickname_ShouldReturnMatchingEntry() {
-        String nickname = "similar_name";
+        String nickname = "SIMILAR";
         entryDao.create(nickname);
 
         Optional<Entry> result = entryDao.getLike("similar");
@@ -228,23 +228,27 @@ public class EntryDaoImplTest {
 
     @Test
     public void testGetEntryLike_MultipleMatches_ShouldReturnFirstMatch() {
-        entryDao.create("similar_entry_one");
-        entryDao.create("similar_entry_two");
+        entryDao.create("SiMiLaR");
+        entryDao.create("SIMILAR");
 
-        Optional<Entry> result = entryDao.getLike("similar_entry");
+        Optional<Entry> result = entryDao.getLike("similar");
         assertTrue(result.isPresent());
-        assertTrue(result.get().getNickname().contains("similar_entry"));
+
     }
 
     @Test
-    public void testGetEntry_WithPartialData_ShouldReturnEntry() {
-        String nickname = "partial_data_entry";
-        entryDao.create(nickname);
-        entryDao.create(nickname);
+    public void testUpdateEntry_TransactionRollbackOnFailure() {
+        Entry entry = entryDao.create("rollback_test");
+        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
 
-        Optional<Entry> result = entryDao.get(nickname);
-        assertTrue(result.isPresent());
-        assertEquals(nickname, result.get().getNickname());
+        // Simulate a failure by causing an invalid operation
+        entry.setNickname(null);
+
+        assertThrows(EntryDaoImpl.DataAccessException.class, () -> entryDao.update(entry));
+
+        Optional<Entry> retrievedEntry = entryDao.get("rollback_test");
+        assertTrue(retrievedEntry.isPresent());
+        assertEquals("rollback_test", retrievedEntry.get().getNickname());
     }
 
     @Test

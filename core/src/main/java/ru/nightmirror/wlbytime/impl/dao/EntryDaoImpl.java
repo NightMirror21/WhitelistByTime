@@ -4,6 +4,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
@@ -37,6 +38,7 @@ public class EntryDaoImpl implements EntryDao {
     private static final String MYSQL = "mysql";
 
     private ConnectionSource connectionSource;
+    private TransactionManager transactionManager;
     private Dao<EntryTable, Long> entryDao;
     private Dao<LastJoinTable, Long> lastJoinDao;
     private Dao<FreezingTable, Long> freezingDao;
@@ -70,6 +72,8 @@ public class EntryDaoImpl implements EntryDao {
         connectionSource = SQLITE.equalsIgnoreCase(config.getType())
                 ? new JdbcConnectionSource(databaseUrl)
                 : new JdbcConnectionSource(databaseUrl, config.getUser(), config.getPassword());
+
+        transactionManager = new TransactionManager(connectionSource);
 
         entryDao = DaoManager.createDao(connectionSource, EntryTable.class);
         lastJoinDao = DaoManager.createDao(connectionSource, LastJoinTable.class);
@@ -127,11 +131,14 @@ public class EntryDaoImpl implements EntryDao {
     @Override
     public void update(Entry entry) {
         try {
-            EntryTable entryTable = new EntryTable(entry.getId(), entry.getNickname());
-            entryDao.createOrUpdate(entryTable);
-            updateExpirationTable(entry, entryTable);
-            updateFreezingTable(entry, entryTable);
-            updateLastJoinTable(entry, entryTable);
+            transactionManager.callInTransaction(() -> {
+                EntryTable entryTable = new EntryTable(entry.getId(), entry.getNickname());
+                entryDao.createOrUpdate(entryTable);
+                updateExpirationTable(entry, entryTable);
+                updateFreezingTable(entry, entryTable);
+                updateLastJoinTable(entry, entryTable);
+                return null;
+            });
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating entry entity", e);
             throw new DataAccessException("Failed to update entry entity", e);
@@ -255,11 +262,13 @@ public class EntryDaoImpl implements EntryDao {
     @Override
     public Entry create(String nickname, long until) {
         try {
-            EntryTable entryTable = new EntryTable(null, nickname);
-            entryDao.create(entryTable);
-            ExpirationTable expirationTable = new ExpirationTable(null, entryTable, new Timestamp(until));
-            expirationDao.create(expirationTable);
-            return get(nickname).orElseThrow();
+            return transactionManager.callInTransaction(() -> {
+                EntryTable entryTable = new EntryTable(null, nickname);
+                entryDao.create(entryTable);
+                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, new Timestamp(until));
+                expirationDao.create(expirationTable);
+                return get(nickname).orElseThrow();
+            });
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error creating entry", e);
             throw new DataAccessException("Failed to create entry", e);
@@ -269,21 +278,24 @@ public class EntryDaoImpl implements EntryDao {
     @Override
     public void remove(Entry entry) {
         try {
-            DeleteBuilder<LastJoinTable, Long> lastJoinBuilder = lastJoinDao.deleteBuilder();
-            lastJoinBuilder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
-            lastJoinDao.delete(lastJoinBuilder.prepare());
+            transactionManager.callInTransaction(() -> {
+                DeleteBuilder<LastJoinTable, Long> lastJoinBuilder = lastJoinDao.deleteBuilder();
+                lastJoinBuilder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
+                lastJoinDao.delete(lastJoinBuilder.prepare());
 
-            DeleteBuilder<FreezingTable, Long> freezingBuilder = freezingDao.deleteBuilder();
-            freezingBuilder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
-            freezingDao.delete(freezingBuilder.prepare());
+                DeleteBuilder<FreezingTable, Long> freezingBuilder = freezingDao.deleteBuilder();
+                freezingBuilder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
+                freezingDao.delete(freezingBuilder.prepare());
 
-            DeleteBuilder<ExpirationTable, Long> expirationBuilder = expirationDao.deleteBuilder();
-            expirationBuilder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
-            expirationDao.delete(expirationBuilder.prepare());
+                DeleteBuilder<ExpirationTable, Long> expirationBuilder = expirationDao.deleteBuilder();
+                expirationBuilder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
+                expirationDao.delete(expirationBuilder.prepare());
 
-            DeleteBuilder<EntryTable, Long> entryBuilder = entryDao.deleteBuilder();
-            entryBuilder.where().eq(EntryTable.ID_COLUMN, entry.getId());
-            entryDao.delete(entryBuilder.prepare());
+                DeleteBuilder<EntryTable, Long> entryBuilder = entryDao.deleteBuilder();
+                entryBuilder.where().eq(EntryTable.ID_COLUMN, entry.getId());
+                entryDao.delete(entryBuilder.prepare());
+                return null;
+            });
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error removing entry entity", e);
             throw new DataAccessException("Failed to remove entry entity", e);
