@@ -223,7 +223,7 @@ public class EntryDaoImpl implements EntryDao {
         try {
             EntryTable entryTable = entryDao.queryBuilder()
                     .where()
-                    .like(EntryTable.NICKNAME_COLUMN, "%" + nickname + "%")
+                    .like(EntryTable.NICKNAME_COLUMN, nickname.toLowerCase())
                     .queryForFirst();
             return getEntry(entryTable);
         } catch (SQLException e) {
@@ -364,7 +364,7 @@ public class EntryDaoImpl implements EntryDao {
         @DatabaseField(generatedId = true, columnName = ID_COLUMN, canBeNull = false)
         private Long id;
 
-        @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false)
+        @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false, unique = true)
         private String nickname;
     }
 

@@ -17,6 +17,7 @@ TODO Separate to:
 @NoArgsConstructor
 @Getter
 @Builder
+@Setter
 @EqualsAndHashCode(of = {"id", "nickname"})
 public class Entry {
     long id;

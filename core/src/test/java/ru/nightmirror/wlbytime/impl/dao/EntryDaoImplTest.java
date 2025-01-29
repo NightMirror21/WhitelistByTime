@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.Freezing;
 
 import java.sql.Timestamp;
 import java.util.Optional;
@@ -52,6 +53,53 @@ public class EntryDaoImplTest {
         assertDoesNotThrow(() -> entryDao.reopenConnection(newConfig));
 
         assertNotNull(entryDao);
+    }
+
+    @Test
+    public void testUpdateEntry_WithFreezing_ShouldPersistFreezing() {
+        Entry entry = entryDao.create("freezing_test");
+        Freezing freezing = new Freezing(entry.getId(), 10000L);
+        entry.setFreezing(freezing);
+        entryDao.update(entry);
+
+        Optional<Entry> retrievedEntry = entryDao.get("freezing_test");
+        assertTrue(retrievedEntry.isPresent());
+        assertNotNull(retrievedEntry.get().getFreezing());
+        assertEquals(10000L, retrievedEntry.get().getFreezing().getDurationOfFreeze());
+    }
+
+    @Test
+    public void testUpdateEntry_WithLastJoin_ShouldPersistLastJoin() {
+        Entry entry = entryDao.create("lastjoin_test");
+        entry.updateLastJoin();
+        entryDao.update(entry);
+
+        Optional<Entry> retrievedEntry = entryDao.get("lastjoin_test");
+        assertTrue(retrievedEntry.isPresent());
+        assertNotNull(retrievedEntry.get().getLastJoin());
+        assertTrue(retrievedEntry.get().isJoined());
+    }
+
+    @Test
+    public void testCreateEntry_DuplicateNickname_ShouldThrowException() {
+        entryDao.create("duplicate_test");
+        assertThrows(EntryDaoImpl.DataAccessException.class, () -> entryDao.create("duplicate_test"));
+    }
+
+    @Test
+    public void testGetEntry_WithAllRelatedData_ShouldReturnCompleteEntry() {
+        String nickname = "full_entry_test";
+        Entry entry = entryDao.create(nickname, System.currentTimeMillis() + 10000);
+        entry.freeze(5000L);
+        entry.updateLastJoin();
+        entryDao.update(entry);
+
+        Optional<Entry> retrievedEntry = entryDao.get(nickname);
+        assertTrue(retrievedEntry.isPresent());
+        Entry fullEntry = retrievedEntry.get();
+        assertNotNull(fullEntry.getExpiration());
+        assertNotNull(fullEntry.getFreezing());
+        assertNotNull(fullEntry.getLastJoin());
     }
 
     @Test
