@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
@@ -66,7 +66,7 @@ public class RemoveCommandTest {
     @Test
     public void testExecute_PlayerInWhitelist_ShouldRemovePlayerAndSendSuccessMessage() {
         String nickname = "existingPlayer";
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(messages.getPlayerRemovedFromWhitelist()).thenReturn("Player %nickname% has been removed from the whitelist.");
 

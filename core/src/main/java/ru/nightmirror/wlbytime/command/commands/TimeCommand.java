@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -45,7 +45,7 @@ public class TimeCommand implements Command {
         String nickname = args[1];
         String timeArgument = concatenateArgs(args);
 
-        Optional<Entry> entry = finder.find(nickname);
+        Optional<EntryImpl> entry = finder.find(nickname);
         if (entry.isEmpty()) {
             issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
             return;
@@ -81,7 +81,7 @@ public class TimeCommand implements Command {
         return timeArgument.toString().trim();
     }
 
-    private void processOperation(CommandIssuer issuer, Entry entry, String operation, String nickname, long timeInMillis, String timeAsString) {
+    private void processOperation(CommandIssuer issuer, EntryImpl entry, String operation, String nickname, long timeInMillis, String timeAsString) {
         switch (operation) {
             case "add" -> {
                 if (entry.isForever()) {

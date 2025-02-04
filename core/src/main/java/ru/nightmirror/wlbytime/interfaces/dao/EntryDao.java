@@ -1,26 +1,26 @@
 package ru.nightmirror.wlbytime.interfaces.dao;
 
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 
 import java.util.Optional;
 import java.util.Set;
 
 public interface EntryDao {
-    void update(Entry entry);
+    void update(EntryImpl entry);
 
-    Optional<Entry> getLike(String nickname);
+    Optional<EntryImpl> getLike(String nickname);
 
-    Optional<Entry> get(String nickname);
+    Optional<EntryImpl> get(String nickname);
 
-    Entry create(String nickname, long milliseconds);
+    EntryImpl create(String nickname, long milliseconds);
 
-    Entry create(String nickname);
+    EntryImpl create(String nickname);
 
-    void remove(Entry entry);
+    void remove(EntryImpl entry);
 
     default void create(Set<String> nicknames) {
         nicknames.forEach(this::create);
     }
 
-    Set<Entry> getAll();
+    Set<EntryImpl> getAll();
 }

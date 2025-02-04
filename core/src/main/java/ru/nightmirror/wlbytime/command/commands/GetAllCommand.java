@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
@@ -39,8 +39,8 @@ public class GetAllCommand implements Command {
             return;
         }
 
-        List<Entry> entries = new ArrayList<>(service.getEntries())
-                .stream().sorted(Comparator.comparing(Entry::getNickname))
+        List<EntryImpl> entries = new ArrayList<>(service.getEntries())
+                .stream().sorted(Comparator.comparing(EntryImpl::getNickname))
                 .toList();
 
         if (entries.isEmpty()) {
@@ -65,11 +65,11 @@ public class GetAllCommand implements Command {
         return (totalEntries + entriesPerPage - 1) / entriesPerPage;
     }
 
-    private void sendPaginatedEntries(List<Entry> entries, int page, int entriesPerPage, int totalEntries, CommandIssuer issuer) {
+    private void sendPaginatedEntries(List<EntryImpl> entries, int page, int entriesPerPage, int totalEntries, CommandIssuer issuer) {
         int startIdx = (page - 1) * entriesPerPage;
         int endIdx = Math.min(startIdx + entriesPerPage, totalEntries);
         for (int i = startIdx; i < endIdx; i++) {
-            Entry entry = entries.get(i);
+            EntryImpl entry = entries.get(i);
             String message = formatEntryMessage(entry);
             issuer.sendMessage(message);
         }
@@ -103,14 +103,14 @@ public class GetAllCommand implements Command {
         return true;
     }
 
-    private String formatEntryMessage(Entry entry) {
+    private String formatEntryMessage(EntryImpl entry) {
         String timeOrStatus = getTimeOrStatus(entry);
         return messages.getListElement()
                 .replace("%nickname%", entry.getNickname())
                 .replace("%time-or-status%", timeOrStatus);
     }
 
-    private String getTimeOrStatus(Entry entry) {
+    private String getTimeOrStatus(EntryImpl entry) {
         if (entry.isForever()) {
             return messages.getForever();
         } else if (entry.isFreezeActive()) {

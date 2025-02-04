@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -55,9 +55,9 @@ public class GetAllCommandTest {
 
     @Test
     public void testExecute_WithEntriesOnFirstPage_ShouldSendEntriesWithHeaderAndFooter() {
-        Entry entry1 = mockEntry("player1", true, false, false, 5000);
-        Entry entry2 = mockEntry("player2", true, true, false, 3000);
-        Entry entry3 = mockEntry("player3", false, false, false, 0);
+        EntryImpl entry1 = mockEntry("player1", true, false, false, 5000);
+        EntryImpl entry2 = mockEntry("player2", true, true, false, 3000);
+        EntryImpl entry3 = mockEntry("player3", false, false, false, 0);
 
         when(service.getEntries()).thenReturn(Set.of(entry1, entry2, entry3));
         when(convertor.getTimeLine(5000)).thenReturn("5 seconds");
@@ -74,7 +74,7 @@ public class GetAllCommandTest {
 
     @Test
     public void testExecute_WithPageArgument_ShouldDisplayCorrectPageEntries() {
-        List<Entry> entries = List.of(
+        List<EntryImpl> entries = List.of(
                 mockEntry("player1", true, false, false, 5000),
                 mockEntry("player2", true, false, true, 0),
                 mockEntry("player3", false, false, false, 0),
@@ -101,7 +101,7 @@ public class GetAllCommandTest {
 
     @Test
     public void testExecute_WithInvalidPageNumber_ShouldSendPageNotExistsMessage() {
-        List<Entry> entries = List.of(
+        List<EntryImpl> entries = List.of(
                 mockEntry("player1", true, false, false, 5000),
                 mockEntry("player2", true, false, true, 0)
         );
@@ -140,8 +140,8 @@ public class GetAllCommandTest {
         assertEquals(Set.of(), tabulationResult);
     }
 
-    private Entry mockEntry(String nickname, boolean isActive, boolean isFrozen, boolean isForever, long timeLeft) {
-        Entry entry = mock(Entry.class);
+    private EntryImpl mockEntry(String nickname, boolean isActive, boolean isFrozen, boolean isForever, long timeLeft) {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.getNickname()).thenReturn(nickname);
         when(entry.isActive()).thenReturn(isActive);
         when(entry.isFreezeActive()).thenReturn(isFrozen);

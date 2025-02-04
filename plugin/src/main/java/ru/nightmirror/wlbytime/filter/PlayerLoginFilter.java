@@ -9,7 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -28,7 +28,7 @@ public class PlayerLoginFilter implements Listener {
 
     @EventHandler(priority = EventPriority.LOW)
     private void filter(AsyncPlayerPreLoginEvent event) {
-        Optional<Entry> entry = entryFinder.find(event.getName());
+        Optional<EntryImpl> entry = entryFinder.find(event.getName());
         entry.ifPresent(unfreezeEntryChecker::unfreezeIfRequired);
         boolean allowedLogin = entry.isPresent() && accessEntryChecker.isAllowed(entry.get());
         if (!allowedLogin) {

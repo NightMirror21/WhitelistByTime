@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.impl.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 
@@ -14,7 +14,7 @@ public class EntryTimeServiceImpl implements EntryTimeService {
     EntryDao entryDao;
 
     @Override
-    public void add(Entry entry, long milliseconds) {
+    public void add(EntryImpl entry, long milliseconds) {
         if (entry.isForever()) {
             throw new IllegalArgumentException("Entry is forever");
         }
@@ -24,12 +24,12 @@ public class EntryTimeServiceImpl implements EntryTimeService {
     }
 
     @Override
-    public boolean canAdd(Entry entry, long milliseconds) {
+    public boolean canAdd(EntryImpl entry, long milliseconds) {
         return !entry.isForever() && entry.getExpiration().canAdd(milliseconds);
     }
 
     @Override
-    public void remove(Entry entry, long milliseconds) {
+    public void remove(EntryImpl entry, long milliseconds) {
         if (entry.isForever()) {
             throw new IllegalArgumentException("Entry is forever");
         }
@@ -38,12 +38,12 @@ public class EntryTimeServiceImpl implements EntryTimeService {
     }
 
     @Override
-    public boolean canRemove(Entry entry, long milliseconds) {
+    public boolean canRemove(EntryImpl entry, long milliseconds) {
         return !entry.isForever() && entry.getExpiration().canRemove(milliseconds);
     }
 
     @Override
-    public void set(Entry entry, long milliseconds) {
+    public void set(EntryImpl entry, long milliseconds) {
         entry.getExpiration().set(milliseconds);
         entryDao.update(entry);
     }

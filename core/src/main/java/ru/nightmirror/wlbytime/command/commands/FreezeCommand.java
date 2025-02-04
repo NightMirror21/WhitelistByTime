@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -45,13 +45,13 @@ public class FreezeCommand implements Command {
         String nickname = args[0];
         String timeString = concatenateArgs(args);
 
-        Optional<Entry> entry = finder.find(nickname);
+        Optional<EntryImpl> entry = finder.find(nickname);
         if (entry.isEmpty()) {
             issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
             return;
         }
 
-        Entry userEntry = entry.get();
+        EntryImpl userEntry = entry.get();
         if (!userEntry.isActive()) {
             issuer.sendMessage(messages.getPlayerExpired().replace("%nickname%", nickname));
             return;
@@ -69,7 +69,7 @@ public class FreezeCommand implements Command {
         }
     }
 
-    private void freezePlayer(CommandIssuer issuer, Entry userEntry, long timeInMillis, String nickname) {
+    private void freezePlayer(CommandIssuer issuer, EntryImpl userEntry, long timeInMillis, String nickname) {
         service.freeze(userEntry, timeInMillis);
         String timeAsString = convertor.getTimeLine(timeInMillis);
         issuer.sendMessage(messages.getPlayerFrozen()

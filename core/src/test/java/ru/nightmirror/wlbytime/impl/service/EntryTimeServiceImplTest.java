@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.impl.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Expiration;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
@@ -22,7 +22,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void add_shouldUpdateExpirationAndDao() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
 
         when(entry.isForever()).thenReturn(false);
@@ -36,7 +36,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void add_shouldThrowForForeverEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
 
         when(entry.isForever()).thenReturn(true);
 
@@ -46,7 +46,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void canAdd_shouldReturnTrueWhenValid() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
 
         when(entry.isForever()).thenReturn(false);
@@ -58,7 +58,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void canAdd_shouldReturnFalseForForeverEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
 
         when(entry.isForever()).thenReturn(true);
 
@@ -67,7 +67,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void remove_shouldUpdateExpirationAndDao() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
 
         when(entry.isForever()).thenReturn(false);
@@ -81,7 +81,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void remove_shouldThrowForForeverEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
 
         when(entry.isForever()).thenReturn(true);
 
@@ -91,7 +91,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void canRemove_shouldReturnTrueWhenValid() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
 
         when(entry.isForever()).thenReturn(false);
@@ -103,7 +103,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void canRemove_shouldReturnFalseForForeverEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
 
         when(entry.isForever()).thenReturn(true);
 
@@ -112,7 +112,7 @@ class EntryTimeServiceImplTest {
 
     @Test
     public void set_shouldUpdateExpirationAndDao() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
 
         when(entry.getExpiration()).thenReturn(expiration);

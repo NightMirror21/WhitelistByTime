@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.impl.parser.PlaceholderParser;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -23,7 +23,7 @@ public class PlaceholderParserImpl implements PlaceholderParser {
 
     @Override
     public String parse(String playerNickname, String params) {
-        Entry entry = finder.find(playerNickname).orElse(null);
+        EntryImpl entry = finder.find(playerNickname).orElse(null);
         if (entry == null) {
             return config.getInWhitelistFalse();
         }
@@ -40,7 +40,7 @@ public class PlaceholderParserImpl implements PlaceholderParser {
         return EMPTY;
     }
 
-    private String handleInWhitelistParam(Entry entry) {
+    private String handleInWhitelistParam(EntryImpl entry) {
         if (entry.isFreezeActive()) {
             return config.getFrozen();
         } else if (entry.isActive()) {
@@ -50,7 +50,7 @@ public class PlaceholderParserImpl implements PlaceholderParser {
         }
     }
 
-    private String handleTimeLeftParam(Entry entry) {
+    private String handleTimeLeftParam(EntryImpl entry) {
         long remainingTime;
         String output;
 

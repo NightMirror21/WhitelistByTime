@@ -2,20 +2,20 @@ package ru.nightmirror.wlbytime.interfaces.services;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 
 import java.util.Set;
 
 public interface EntryService {
-    void remove(Entry entry);
+    void remove(EntryImpl entry);
 
-    @NotNull Entry create(String nickname);
+    @NotNull EntryImpl create(String nickname);
 
-    @NotNull Entry create(String nickname, long untilMs);
+    @NotNull EntryImpl create(String nickname, long untilMs);
 
-    void freeze(Entry entry, long durationMs);
+    void freeze(EntryImpl entry, long durationMs);
 
-    void unfreeze(Entry entry);
+    void unfreeze(EntryImpl entry);
 
-    @UnmodifiableView Set<Entry> getEntries();
+    @UnmodifiableView Set<EntryImpl> getEntries();
 }

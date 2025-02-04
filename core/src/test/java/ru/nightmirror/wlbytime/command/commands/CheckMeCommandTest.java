@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -56,7 +56,7 @@ public class CheckMeCommandTest {
 
     @Test
     public void testExecute_WhenEntryInactive_ShouldSendNotInWhitelistMessage() {
-        Entry inactiveEntry = mock(Entry.class);
+        EntryImpl inactiveEntry = mock(EntryImpl.class);
         when(inactiveEntry.isInactive()).thenReturn(true);
         when(issuer.getNickname()).thenReturn("testUser");
         when(finder.find("testUser")).thenReturn(Optional.of(inactiveEntry));
@@ -69,7 +69,7 @@ public class CheckMeCommandTest {
 
     @Test
     public void testExecute_WhenEntryIsForever_ShouldSendForeverMessage() {
-        Entry foreverEntry = mock(Entry.class);
+        EntryImpl foreverEntry = mock(EntryImpl.class);
         when(foreverEntry.isInactive()).thenReturn(false);
         when(foreverEntry.isForever()).thenReturn(true);
         when(issuer.getNickname()).thenReturn("foreverUser");
@@ -83,7 +83,7 @@ public class CheckMeCommandTest {
 
     @Test
     public void testExecute_WhenEntryIsFrozen_ShouldSendFrozenMessage() {
-        Entry frozenEntry = mock(Entry.class);
+        EntryImpl frozenEntry = mock(EntryImpl.class);
         when(frozenEntry.isInactive()).thenReturn(false);
         when(frozenEntry.isForever()).thenReturn(false);
         when(frozenEntry.isFreezeActive()).thenReturn(true);
@@ -100,7 +100,7 @@ public class CheckMeCommandTest {
 
     @Test
     public void testExecute_WhenEntryIsActiveForTime_ShouldSendWhitelistForTimeMessage() {
-        Entry timedEntry = mock(Entry.class);
+        EntryImpl timedEntry = mock(EntryImpl.class);
         when(timedEntry.isInactive()).thenReturn(false);
         when(timedEntry.isForever()).thenReturn(false);
         when(timedEntry.isFreezeActive()).thenReturn(false);

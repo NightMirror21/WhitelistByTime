@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.impl.checker;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 
 import static org.mockito.Mockito.*;
@@ -22,7 +22,7 @@ public class UnfreezeEntryCheckerImplTest {
         boolean unfreezeIfFrozen = true;
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryService);
 
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(true);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
@@ -36,7 +36,7 @@ public class UnfreezeEntryCheckerImplTest {
         boolean unfreezeIfFrozen = true;
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryService);
 
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(false);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
@@ -50,7 +50,7 @@ public class UnfreezeEntryCheckerImplTest {
         boolean unfreezeIfFrozen = false;
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryService);
 
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(true);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);
@@ -64,7 +64,7 @@ public class UnfreezeEntryCheckerImplTest {
         boolean unfreezeIfFrozen = false;
         unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(unfreezeIfFrozen, entryService);
 
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(false);
 
         unfreezeEntryChecker.unfreezeIfRequired(entry);

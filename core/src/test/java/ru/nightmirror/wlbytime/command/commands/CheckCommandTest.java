@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -22,7 +22,7 @@ public class CheckCommandTest {
     private EntryFinder finder;
     private TimeConvertor convertor;
     private CommandIssuer issuer;
-    private Entry entry;
+    private EntryImpl entry;
 
     @BeforeEach
     public void setUp() {
@@ -30,7 +30,7 @@ public class CheckCommandTest {
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
         issuer = mock(CommandIssuer.class);
-        entry = mock(Entry.class);
+        entry = mock(EntryImpl.class);
 
         checkCommand = new CheckCommand(messages, finder, convertor);
 

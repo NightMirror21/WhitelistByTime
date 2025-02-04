@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
@@ -80,7 +80,7 @@ public class FreezeCommandTest {
     public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
         String nickname = "validPlayer";
         String timeString = "invalidTime";
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
@@ -100,7 +100,7 @@ public class FreezeCommandTest {
     @Test
     public void testExecute_PlayerIsInactive_ShouldSendPlayerExpiredMessage() {
         String nickname = "expiredPlayer";
-        Entry expiredEntry = mock(Entry.class);
+        EntryImpl expiredEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(expiredEntry));
         when(expiredEntry.isActive()).thenReturn(false);
@@ -117,7 +117,7 @@ public class FreezeCommandTest {
     @Test
     public void testExecute_PlayerAlreadyFrozen_ShouldSendPlayerAlreadyFrozenMessage() {
         String nickname = "frozenPlayer";
-        Entry frozenEntry = mock(Entry.class);
+        EntryImpl frozenEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(frozenEntry));
         when(frozenEntry.isActive()).thenReturn(true);
@@ -139,7 +139,7 @@ public class FreezeCommandTest {
         String nickname = "activePlayer";
         String timeString = "3h";
         long timeInMillis = 10800000L;
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
@@ -166,7 +166,7 @@ public class FreezeCommandTest {
         String[] args = {nickname, "1d", "2h"};
         String concatenatedTime = "1d2h";
         long timeInMillis = 93600000L;
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         String formattedTime = "1 day 2 hours";
 
         when(issuer.getNickname()).thenReturn(nickname);
@@ -214,7 +214,7 @@ public class FreezeCommandTest {
         String nickname = "testFreezePlayer";
         String timeString = "30m";
         long timeInMillis = 1800000L;
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         String formattedTime = "30 minutes";
 
         when(issuer.getNickname()).thenReturn(nickname);
@@ -227,7 +227,7 @@ public class FreezeCommandTest {
 
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
-        ArgumentCaptor<Entry> entryCaptor = ArgumentCaptor.forClass(Entry.class);
+        ArgumentCaptor<EntryImpl> entryCaptor = ArgumentCaptor.forClass(EntryImpl.class);
         ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
         verify(service).freeze(entryCaptor.capture(), timeCaptor.capture());
 
@@ -254,7 +254,7 @@ public class FreezeCommandTest {
         String timeString = "-1h";
         long timeInMillis = -3600000L;
 
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
@@ -277,7 +277,7 @@ public class FreezeCommandTest {
         String timeString = "0h";
         long timeInMillis = 0L;
 
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
@@ -299,7 +299,7 @@ public class FreezeCommandTest {
         String nickname = "safeFreezePlayer";
         String timeString = "15m";
         long timeInMillis = 900000L;
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         String formattedTime = "15 minutes";
 
         when(issuer.getNickname()).thenReturn(nickname);

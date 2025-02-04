@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Freezing;
 
 import java.sql.Timestamp;
@@ -57,12 +57,12 @@ public class EntryDaoImplTest {
 
     @Test
     public void testUpdateEntry_WithFreezing_ShouldPersistFreezing() {
-        Entry entry = entryDao.create("freezing_test");
+        EntryImpl entry = entryDao.create("freezing_test");
         Freezing freezing = new Freezing(entry.getId(), 10000L);
         entry.setFreezing(freezing);
         entryDao.update(entry);
 
-        Optional<Entry> retrievedEntry = entryDao.get("freezing_test");
+        Optional<EntryImpl> retrievedEntry = entryDao.get("freezing_test");
         assertTrue(retrievedEntry.isPresent());
         assertNotNull(retrievedEntry.get().getFreezing());
         assertEquals(10000L, retrievedEntry.get().getFreezing().getDurationOfFreeze());
@@ -70,11 +70,11 @@ public class EntryDaoImplTest {
 
     @Test
     public void testUpdateEntry_WithLastJoin_ShouldPersistLastJoin() {
-        Entry entry = entryDao.create("lastjoin_test");
+        EntryImpl entry = entryDao.create("lastjoin_test");
         entry.updateLastJoin();
         entryDao.update(entry);
 
-        Optional<Entry> retrievedEntry = entryDao.get("lastjoin_test");
+        Optional<EntryImpl> retrievedEntry = entryDao.get("lastjoin_test");
         assertTrue(retrievedEntry.isPresent());
         assertNotNull(retrievedEntry.get().getLastJoin());
         assertTrue(retrievedEntry.get().isJoined());
@@ -89,14 +89,14 @@ public class EntryDaoImplTest {
     @Test
     public void testGetEntry_WithAllRelatedData_ShouldReturnCompleteEntry() {
         String nickname = "full_entry_test";
-        Entry entry = entryDao.create(nickname, System.currentTimeMillis() + 10000);
+        EntryImpl entry = entryDao.create(nickname, System.currentTimeMillis() + 10000);
         entry.freeze(5000L);
         entry.updateLastJoin();
         entryDao.update(entry);
 
-        Optional<Entry> retrievedEntry = entryDao.get(nickname);
+        Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
         assertTrue(retrievedEntry.isPresent());
-        Entry fullEntry = retrievedEntry.get();
+        EntryImpl fullEntry = retrievedEntry.get();
         assertNotNull(fullEntry.getExpiration());
         assertNotNull(fullEntry.getFreezing());
         assertNotNull(fullEntry.getLastJoin());
@@ -105,12 +105,12 @@ public class EntryDaoImplTest {
     @Test
     public void testCreateEntry_WithNickname_ShouldCreateEntryInDatabase() {
         String nickname = "test_nickname";
-        Entry entry = entryDao.create(nickname);
+        EntryImpl entry = entryDao.create(nickname);
 
         assertNotNull(entry);
         assertEquals(nickname, entry.getNickname());
 
-        Optional<Entry> retrievedEntry = entryDao.get(nickname);
+        Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
         assertTrue(retrievedEntry.isPresent());
         assertEquals(nickname, retrievedEntry.get().getNickname());
     }
@@ -120,7 +120,7 @@ public class EntryDaoImplTest {
         String nickname = "expiring_nickname";
         long expirationTime = System.currentTimeMillis() + 10000;
 
-        Entry entry = entryDao.create(nickname, expirationTime);
+        EntryImpl entry = entryDao.create(nickname, expirationTime);
 
         assertNotNull(entry);
         assertEquals(nickname, entry.getNickname());
@@ -135,7 +135,7 @@ public class EntryDaoImplTest {
         String nickname = "existing_nickname";
         entryDao.create(nickname);
 
-        Optional<Entry> result = entryDao.get(nickname);
+        Optional<EntryImpl> result = entryDao.get(nickname);
 
         assertTrue(result.isPresent());
         assertEquals(nickname, result.get().getNickname());
@@ -143,7 +143,7 @@ public class EntryDaoImplTest {
 
     @Test
     public void testGetEntry_ByNonExistingNickname_ShouldReturnEmptyOptional() {
-        Optional<Entry> result = entryDao.get("non_existing_nickname");
+        Optional<EntryImpl> result = entryDao.get("non_existing_nickname");
 
         assertFalse(result.isPresent());
     }
@@ -153,7 +153,7 @@ public class EntryDaoImplTest {
         String nickname = "SIMILAR";
         entryDao.create(nickname);
 
-        Optional<Entry> result = entryDao.getLike("similar");
+        Optional<EntryImpl> result = entryDao.getLike("similar");
 
         assertTrue(result.isPresent());
         assertEquals(nickname, result.get().getNickname());
@@ -163,7 +163,7 @@ public class EntryDaoImplTest {
     public void testGetEntryLike_ByNoMatchingNickname_ShouldReturnEmptyOptional() {
         entryDao.create("some_nickname");
 
-        Optional<Entry> result = entryDao.getLike("unmatched");
+        Optional<EntryImpl> result = entryDao.getLike("unmatched");
 
         assertFalse(result.isPresent());
     }
@@ -173,18 +173,18 @@ public class EntryDaoImplTest {
         entryDao.create("first_nickname");
         entryDao.create("second_nickname");
 
-        Set<Entry> allEntries = entryDao.getAll();
+        Set<EntryImpl> allEntries = entryDao.getAll();
 
         assertEquals(2, allEntries.size());
     }
 
     @Test
     public void testUpdateEntry_ShouldModifyExistingEntry() {
-        Entry entry = entryDao.create("updatable_nickname");
+        EntryImpl entry = entryDao.create("updatable_nickname");
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
         entryDao.update(entry);
 
-        Optional<Entry> result = entryDao.get(entry.getNickname());
+        Optional<EntryImpl> result = entryDao.get(entry.getNickname());
 
         assertTrue(result.isPresent());
         assertNotNull(result.get().getExpiration());
@@ -192,14 +192,14 @@ public class EntryDaoImplTest {
 
     @Test
     public void testDeleteExpirationTableEntry_ShouldRemoveExpirationForEntry() {
-        Entry entry = entryDao.create("entry_with_expiration");
+        EntryImpl entry = entryDao.create("entry_with_expiration");
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
         entryDao.update(entry);
 
         entry.setForever();
         entryDao.update(entry);
 
-        Optional<Entry> result = entryDao.get(entry.getNickname());
+        Optional<EntryImpl> result = entryDao.get(entry.getNickname());
         assertTrue(result.isPresent());
         assertNull(result.get().getExpiration());
     }
@@ -222,7 +222,7 @@ public class EntryDaoImplTest {
 
     @Test
     public void testGetAll_WithEmptyDatabase_ShouldReturnEmptySet() {
-        Set<Entry> allEntries = entryDao.getAll();
+        Set<EntryImpl> allEntries = entryDao.getAll();
         assertTrue(allEntries.isEmpty());
     }
 
@@ -231,14 +231,14 @@ public class EntryDaoImplTest {
         entryDao.create("SiMiLaR");
         entryDao.create("SIMILAR");
 
-        Optional<Entry> result = entryDao.getLike("similar");
+        Optional<EntryImpl> result = entryDao.getLike("similar");
         assertTrue(result.isPresent());
 
     }
 
     @Test
     public void testUpdateEntry_TransactionRollbackOnFailure() {
-        Entry entry = entryDao.create("rollback_test");
+        EntryImpl entry = entryDao.create("rollback_test");
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
 
         // Simulate a failure by causing an invalid operation
@@ -246,7 +246,7 @@ public class EntryDaoImplTest {
 
         assertThrows(EntryDaoImpl.DataAccessException.class, () -> entryDao.update(entry));
 
-        Optional<Entry> retrievedEntry = entryDao.get("rollback_test");
+        Optional<EntryImpl> retrievedEntry = entryDao.get("rollback_test");
         assertTrue(retrievedEntry.isPresent());
         assertEquals("rollback_test", retrievedEntry.get().getNickname());
     }
@@ -266,13 +266,13 @@ public class EntryDaoImplTest {
         String nickname = "expiring_entry";
         long expirationTime = System.currentTimeMillis() + 10000;
 
-        Entry entry = entryDao.create(nickname, expirationTime);
+        EntryImpl entry = entryDao.create(nickname, expirationTime);
 
         assertNotNull(entry);
         assertNotNull(entry.getExpiration());
         assertEquals(new Timestamp(expirationTime), entry.getExpiration().getExpirationTime());
 
-        Optional<Entry> retrievedEntry = entryDao.get(nickname);
+        Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
         assertTrue(retrievedEntry.isPresent());
         assertNotNull(retrievedEntry.get().getExpiration());
     }
@@ -286,11 +286,11 @@ public class EntryDaoImplTest {
     @Test
     public void testRemoveEntry_ShouldDeleteEntryFromDatabase() {
         String nickname = "removable_nickname";
-        Entry entry = entryDao.create(nickname);
+        EntryImpl entry = entryDao.create(nickname);
 
         entryDao.remove(entry);
 
-        Optional<Entry> result = entryDao.get(nickname);
+        Optional<EntryImpl> result = entryDao.get(nickname);
         assertFalse(result.isPresent());
     }
 
@@ -298,20 +298,20 @@ public class EntryDaoImplTest {
     public void testRemoveEntry_ShouldDeleteRelatedTables() {
         String nickname = "removable_with_related_data";
         long expirationTime = System.currentTimeMillis() + 10000;
-        Entry entry = entryDao.create(nickname, expirationTime);
+        EntryImpl entry = entryDao.create(nickname, expirationTime);
 
         entryDao.remove(entry);
 
-        Optional<Entry> result = entryDao.get(nickname);
+        Optional<EntryImpl> result = entryDao.get(nickname);
         assertFalse(result.isPresent());
 
-        Set<Entry> allEntries = entryDao.getAll();
+        Set<EntryImpl> allEntries = entryDao.getAll();
         assertEquals(0, allEntries.size());
     }
 
     @Test
     public void testRemoveEntry_WhenEntryDoesNotExist_ShouldDoNothing() {
-        Entry nonExistingEntry = Entry.builder().id(999L).nickname("non_existing").build();
+        EntryImpl nonExistingEntry = EntryImpl.builder().id(999L).nickname("non_existing").build();
 
         assertDoesNotThrow(() -> entryDao.remove(nonExistingEntry));
     }

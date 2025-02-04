@@ -11,13 +11,13 @@ import static org.mockito.Mockito.*;
 public class EntryTest {
     private static final long TEST_ID = 123L;
     private static final String TEST_NICKNAME = "TestNickname";
-    private Entry entry;
+    private EntryImpl entry;
     private Expiration expirationMock;
     private Freezing freezingMock;
 
     @BeforeEach
     public void setUp() {
-        entry = new Entry(TEST_ID, TEST_NICKNAME, null, null, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, null, null, null);
         expirationMock = mock(Expiration.class);
         freezingMock = mock(Freezing.class);
     }
@@ -42,7 +42,7 @@ public class EntryTest {
     public void testIsActive_WhenExpirationIsNotExpired_ShouldReturnTrue() {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 1000));
         when(expirationMock.isNotExpired()).thenReturn(true);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, expirationMock, null, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, expirationMock, null, null);
         assertTrue(entry.isActive());
     }
 
@@ -50,7 +50,7 @@ public class EntryTest {
     public void testIsActive_WhenExpirationIsExpired_ShouldReturnFalse() {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() - 1000));
         when(expirationMock.isNotExpired()).thenReturn(false);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, expirationMock, null, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, expirationMock, null, null);
         assertFalse(entry.isActive());
     }
 
@@ -58,7 +58,7 @@ public class EntryTest {
     public void testIsActive_WhenFreezeActiveAndNotExpired_ShouldReturnTrue() {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() - 1000));
         entry.freeze(5000L);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
 
         when(expirationMock.isNotExpired(anyLong())).thenReturn(true);
         when(freezingMock.isFrozen()).thenReturn(true);
@@ -74,7 +74,7 @@ public class EntryTest {
         when(expirationMock.isNotExpired(anyLong())).thenReturn(false);
         when(freezingMock.isFrozen()).thenReturn(false);
 
-        entry = new Entry(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
         assertFalse(entry.isActive());
     }
 
@@ -114,7 +114,7 @@ public class EntryTest {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         when(freezingMock.isFrozen()).thenReturn(true);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
         assertTrue(entry.isFreezeActive());
     }
 
@@ -123,7 +123,7 @@ public class EntryTest {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         when(freezingMock.isFrozen()).thenReturn(false);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
         assertTrue(entry.isFreezeInactive());
     }
 
@@ -199,7 +199,7 @@ public class EntryTest {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(1000L);
         when(freezingMock.isFrozen()).thenReturn(false);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
         assertThrows(IllegalStateException.class, entry::getLeftFreezeTime);
     }
 
@@ -216,7 +216,7 @@ public class EntryTest {
         when(expirationMock.isNotExpired(anyLong())).thenReturn(true);
         when(freezingMock.isFrozen()).thenReturn(true);
 
-        entry = new Entry(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
         assertTrue(entry.isActive());
     }
 
@@ -227,7 +227,7 @@ public class EntryTest {
         when(expirationMock.isNotExpired(anyLong())).thenReturn(false);
         when(freezingMock.isFrozen()).thenReturn(false);
 
-        entry = new Entry(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, expirationMock, freezingMock, null);
         assertFalse(entry.isActive());
     }
 
@@ -243,7 +243,7 @@ public class EntryTest {
         entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000L));
         entry.freeze(5000L);
         when(freezingMock.isFrozen()).thenReturn(false);
-        entry = new Entry(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
+        entry = new EntryImpl(TEST_ID, TEST_NICKNAME, null, freezingMock, null);
         assertTrue(entry.isFreezeInactive());
     }
 

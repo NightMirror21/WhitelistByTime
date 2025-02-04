@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.impl.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
 import java.util.HashSet;
@@ -25,10 +25,10 @@ public class EntryServiceImplTest {
     @Test
     public void testCreate_WithValidNickname_ShouldReturnEntry() {
         String nickname = "test_user";
-        Entry mockEntry = Entry.builder().nickname(nickname).build();
+        EntryImpl mockEntry = EntryImpl.builder().nickname(nickname).build();
         when(entryDao.create(nickname)).thenReturn(mockEntry);
 
-        Entry result = entryService.create(nickname);
+        EntryImpl result = entryService.create(nickname);
 
         assertNotNull(result);
         assertEquals(nickname, result.getNickname());
@@ -39,10 +39,10 @@ public class EntryServiceImplTest {
     public void testCreate_WithUntilInFuture_ShouldReturnEntry() {
         String nickname = "future_user";
         long validUntil = System.currentTimeMillis() + 10000;
-        Entry mockEntry = Entry.builder().nickname(nickname).build();
+        EntryImpl mockEntry = EntryImpl.builder().nickname(nickname).build();
         when(entryDao.create(nickname, validUntil)).thenReturn(mockEntry);
 
-        Entry result = entryService.create(nickname, validUntil);
+        EntryImpl result = entryService.create(nickname, validUntil);
 
         assertNotNull(result);
         assertEquals(nickname, result.getNickname());
@@ -64,7 +64,7 @@ public class EntryServiceImplTest {
 
     @Test
     public void testRemove_ShouldCallDaoRemove() {
-        Entry entry = Entry.builder().nickname("test_user").build();
+        EntryImpl entry = EntryImpl.builder().nickname("test_user").build();
 
         entryService.remove(entry);
 
@@ -73,7 +73,7 @@ public class EntryServiceImplTest {
 
     @Test
     public void testFreeze_WithValidDuration_ShouldFreezeEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         long duration = 10000;
 
         entryService.freeze(entry, duration);
@@ -84,7 +84,7 @@ public class EntryServiceImplTest {
 
     @Test
     public void testFreeze_WithInvalidDuration_ShouldThrowException_AndShouldNotUpdateEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         long invalidDuration = -5000;
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -98,7 +98,7 @@ public class EntryServiceImplTest {
 
     @Test
     public void testUnfreeze_ShouldUnfreezeEntry() {
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
 
         entryService.unfreeze(entry);
 
@@ -108,18 +108,18 @@ public class EntryServiceImplTest {
 
     @Test
     public void testGetEntries_ShouldReturnUnmodifiableSet() {
-        Set<Entry> mockEntries = new HashSet<>();
-        mockEntries.add(Entry.builder().nickname("user1").build());
-        mockEntries.add(Entry.builder().nickname("user2").build());
+        Set<EntryImpl> mockEntries = new HashSet<>();
+        mockEntries.add(EntryImpl.builder().nickname("user1").build());
+        mockEntries.add(EntryImpl.builder().nickname("user2").build());
         when(entryDao.getAll()).thenReturn(mockEntries);
 
-        Set<Entry> result = entryService.getEntries();
+        Set<EntryImpl> result = entryService.getEntries();
 
         assertNotNull(result);
         assertEquals(2, result.size());
         assertTrue(result.containsAll(mockEntries));
 
-        assertThrows(UnsupportedOperationException.class, () -> result.add(Entry.builder().nickname("new_user").build()));
+        assertThrows(UnsupportedOperationException.class, () -> result.add(EntryImpl.builder().nickname("new_user").build()));
 
         verify(entryDao, times(1)).getAll();
     }

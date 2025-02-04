@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
@@ -25,7 +25,7 @@ public class TimeCommandTest {
     private TimeRandom timeRandom;
     private EntryTimeService timeService;
     private CommandIssuer issuer;
-    private Entry entry;
+    private EntryImpl entry;
 
     @BeforeEach
     public void setUp() {
@@ -35,7 +35,7 @@ public class TimeCommandTest {
         timeRandom = mock(TimeRandom.class);
         timeService = mock(EntryTimeService.class);
         issuer = mock(CommandIssuer.class);
-        entry = mock(Entry.class);
+        entry = mock(EntryImpl.class);
 
         timeCommand = new TimeCommand(messages, finder, convertor, timeRandom, timeService);
 

@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Expiration;
 import ru.nightmirror.wlbytime.entry.Freezing;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -56,7 +56,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_InWhitelistParam_ActiveNotFrozen_ReturnsTrue() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
-        Entry entry = Entry.builder().expiration(expiration).freezing(null).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
         when(placeholdersConfig.getInWhitelistTrue()).thenReturn(IN_WHITELIST_TRUE);
@@ -70,7 +70,7 @@ public class PlaceholderParserImplTest {
     public void parse_InWhitelistParam_ActiveFrozen_ReturnsFrozen() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
         Freezing freezing = new Freezing(1L, 10000);
-        Entry entry = Entry.builder().expiration(expiration).freezing(freezing).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(freezing).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
         when(placeholdersConfig.getFrozen()).thenReturn(FROZEN_MSG);
@@ -83,7 +83,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_InWhitelistParam_Inactive_ReturnsFalse() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() - 1000));
-        Entry entry = Entry.builder().expiration(expiration).freezing(null).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
         when(placeholdersConfig.getInWhitelistFalse()).thenReturn(IN_WHITELIST_FALSE);
@@ -97,7 +97,7 @@ public class PlaceholderParserImplTest {
     public void parse_TimeLeftParam_Frozen_ReturnsTimeLeftWithFreeze() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
         Freezing freezing = new Freezing(1L, 10000);
-        Entry entry = Entry.builder().expiration(expiration).freezing(freezing).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(freezing).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
         when(timeConvertor.getTimeLine(anyLong())).thenReturn(MOCKED_TIME);
@@ -112,7 +112,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_TimeLeftParam_ActiveNotFrozen_ReturnsTimeLeft() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
-        Entry entry = Entry.builder().expiration(expiration).freezing(null).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
         when(timeConvertor.getTimeLine(anyLong())).thenReturn(MOCKED_TIME);
@@ -127,7 +127,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_TimeLeftParam_Inactive_ReturnsEmpty() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() - 1000));
-        Entry entry = Entry.builder().expiration(expiration).freezing(null).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
 
@@ -139,7 +139,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_UnknownParam_ReturnsEmpty() {
         Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
-        Entry entry = Entry.builder().expiration(expiration).build();
+        EntryImpl entry = EntryImpl.builder().expiration(expiration).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
 
@@ -150,7 +150,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     void parse_TimeLeftParam_Forever_ReturnsEmpty() {
-        Entry entry = Entry.builder().expiration(null).build();
+        EntryImpl entry = EntryImpl.builder().expiration(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
 
@@ -162,7 +162,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_TimeLeftParam_ForeverFrozen_ReturnsTimeLeftWithFreeze() {
         Freezing freezing = new Freezing(1L, 10000);
-        Entry entry = Entry.builder().expiration(null).freezing(freezing).build();
+        EntryImpl entry = EntryImpl.builder().expiration(null).freezing(freezing).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
         when(timeConvertor.getTimeLine(anyLong())).thenReturn(MOCKED_TIME);

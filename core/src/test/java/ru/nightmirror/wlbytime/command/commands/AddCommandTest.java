@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
@@ -62,7 +62,7 @@ public class AddCommandTest {
     @Test
     public void testExecute_WithPlayerAlreadyInWhitelist_ShouldSendAlreadyInWhitelistMessage() {
         String nickname = "existingPlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(Entry.builder().build()));
+        when(finder.find(nickname)).thenReturn(Optional.of(EntryImpl.builder().build()));
         when(messages.getPlayerAlreadyInWhitelist()).thenReturn("%nickname% is already in the whitelist!");
 
         addCommand.execute(issuer, new String[]{nickname});

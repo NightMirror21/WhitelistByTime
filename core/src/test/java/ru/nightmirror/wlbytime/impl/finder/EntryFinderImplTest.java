@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.impl.finder;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
 import java.util.Optional;
@@ -27,11 +27,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "User123";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.get(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).get(nickname);
         verify(entryDao, never()).getLike(anyString());
@@ -44,11 +44,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "User123";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.getLike(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).getLike(nickname);
         verify(entryDao, never()).get(anyString());
@@ -63,7 +63,7 @@ public class EntryFinderImplTest {
         String nickname = "NonExistentUser";
         when(entryDao.get(nickname)).thenReturn(Optional.empty());
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).get(nickname);
         assertTrue(result.isEmpty());
@@ -77,7 +77,7 @@ public class EntryFinderImplTest {
         String nickname = "NonExistentUser";
         when(entryDao.getLike(nickname)).thenReturn(Optional.empty());
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).getLike(nickname);
         assertTrue(result.isEmpty());
@@ -91,7 +91,7 @@ public class EntryFinderImplTest {
         String nickname = "user123";
         when(entryDao.get(nickname)).thenReturn(Optional.empty());
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).get(nickname);
         assertTrue(result.isEmpty());
@@ -103,11 +103,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "user123";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.getLike(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).getLike(nickname);
         verify(entryDao, never()).get(anyString());
@@ -120,11 +120,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "User@123!";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.get(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).get(nickname);
         assertEquals(expectedEntry, result);
@@ -136,11 +136,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "User@123!";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.getLike(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).getLike(nickname);
         assertEquals(expectedEntry, result);
@@ -151,7 +151,7 @@ public class EntryFinderImplTest {
         boolean caseSensitive = false;
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
-        Optional<Entry> result = entryFinder.find("");
+        Optional<EntryImpl> result = entryFinder.find("");
 
         assertTrue(result.isEmpty());
         verify(entryDao, never()).getLike(anyString());
@@ -163,11 +163,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "UsérÜniçødë";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.get(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).get(nickname);
         assertEquals(expectedEntry, result);
@@ -179,11 +179,11 @@ public class EntryFinderImplTest {
         entryFinder = new EntryFinderImpl(caseSensitive, entryDao);
 
         String nickname = "UsérÜniçødë";
-        Optional<Entry> expectedEntry = Optional.of(mock(Entry.class));
+        Optional<EntryImpl> expectedEntry = Optional.of(mock(EntryImpl.class));
 
         when(entryDao.getLike(nickname)).thenReturn(expectedEntry);
 
-        Optional<Entry> result = entryFinder.find(nickname);
+        Optional<EntryImpl> result = entryFinder.find(nickname);
 
         verify(entryDao).getLike(nickname);
         assertEquals(expectedEntry, result);
