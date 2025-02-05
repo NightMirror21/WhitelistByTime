@@ -158,7 +158,7 @@ public class EntryTest {
         entry.unfreeze();
 
         assertNotNull(entry.getExpiration());
-        assertEquals(initialExpirationTime + 10000L, entry.getExpiration().getExpirationTime().getTime());
+        assertEquals(initialExpirationTime + 10000L, entry.getExpiration().getExpirationTime().toEpochMilli());
 
         assertFalse(entry.isFrozen());
     }

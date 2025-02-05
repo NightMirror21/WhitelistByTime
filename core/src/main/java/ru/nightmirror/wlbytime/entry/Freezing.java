@@ -3,7 +3,8 @@ package ru.nightmirror.wlbytime.entry;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -12,24 +13,24 @@ import java.sql.Timestamp;
 @Builder
 public class Freezing {
     long entryId;
-    Timestamp startTime;
-    Timestamp endTime;
+    Instant startTime;
+    Instant endTime;
 
-    public Freezing(long entryId, long time) {
+    public Freezing(long entryId, long durationMillis) {
         this.entryId = entryId;
-        startTime = new Timestamp(System.currentTimeMillis());
-        endTime = new Timestamp(System.currentTimeMillis() + time);
+        this.startTime = Instant.now();
+        this.endTime = this.startTime.plusMillis(durationMillis);
     }
 
     public boolean isFrozen() {
-        return endTime.after(new Timestamp(System.currentTimeMillis()));
+        return endTime.isAfter(Instant.now());
     }
 
     public long getLeftTime() {
-        return endTime.getTime() - System.currentTimeMillis();
+        return Duration.between(Instant.now(), endTime).toMillis();
     }
 
     public long getDurationOfFreeze() {
-        return endTime.getTime() - startTime.getTime();
+        return Duration.between(startTime, endTime).toMillis();
     }
 }

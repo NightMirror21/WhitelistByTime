@@ -53,7 +53,7 @@ public class EntryImpl implements Entry {
 
     @Override
     public void setExpiration(@NotNull Timestamp timestamp) {
-        expiration = new Expiration(id, timestamp);
+        expiration = new Expiration(id, timestamp.toInstant());
     }
 
     @Override
@@ -94,9 +94,9 @@ public class EntryImpl implements Entry {
             throw new IllegalStateException("Entry is not frozen.");
         }
 
-        long previousExpirationTime = expiration.getExpirationTime().getTime();
+        long previousExpirationTime = expiration.getExpirationTime().toEpochMilli();
         long durationOfFreeze = freezing.getDurationOfFreeze();
-        expiration = new Expiration(id, new Timestamp(previousExpirationTime + durationOfFreeze));
+        expiration = new Expiration(id, new Timestamp(previousExpirationTime + durationOfFreeze).toInstant());
 
         freezing = null;
     }
@@ -123,7 +123,7 @@ public class EntryImpl implements Entry {
             throw new IllegalStateException("Can't get left expiration time cause entry is forever");
         }
         
-        return offset + expiration.getExpirationTime().getTime() - System.currentTimeMillis();
+        return offset + expiration.getExpirationTime().toEpochMilli() - System.currentTimeMillis();
     }
 
     @Override

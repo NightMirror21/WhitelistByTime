@@ -200,15 +200,15 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     private static @NotNull LastJoinTable getLastJoinTable(EntryImpl entry, EntryTable entryTable) {
-        return new LastJoinTable(null, entryTable, entry.getLastJoin().getLastJoinTime());
+        return new LastJoinTable(null, entryTable, Timestamp.from(entry.getLastJoin().getLastJoinTime()));
     }
 
     private static @NotNull FreezingTable getFreezingTable(EntryImpl entry, EntryTable entryTable) {
-        return new FreezingTable(null, entryTable, entry.getFreezing().getStartTime(), entry.getFreezing().getEndTime());
+        return new FreezingTable(null, entryTable, Timestamp.from(entry.getFreezing().getStartTime()), Timestamp.from(entry.getFreezing().getEndTime()));
     }
 
     private static @NotNull ExpirationTable getExpirationTable(EntryImpl entry, EntryTable entryTable) {
-        return new ExpirationTable(null, entryTable, entry.getExpiration().getExpirationTime());
+        return new ExpirationTable(null, entryTable, Timestamp.from(entry.getExpiration().getExpirationTime()));
     }
 
     @Override
@@ -344,16 +344,16 @@ public class EntryDaoImpl implements EntryDao {
                                       FreezingTable freezingTable, ExpirationTable expirationTable) {
         LastJoin lastJoin = lastJoinTable != null ? LastJoin.builder()
                 .entryId(lastJoinTable.getId())
-                .lastJoinTime(lastJoinTable.getLastJoin())
+                .lastJoinTime(lastJoinTable.getLastJoin().toInstant())
                 .build() : null;
         Freezing freezing = freezingTable != null ? Freezing.builder()
                 .entryId(freezingTable.getId())
-                .startTime(freezingTable.getStartTime())
-                .endTime(freezingTable.getEndTime())
+                .startTime(freezingTable.getStartTime().toInstant())
+                .endTime(freezingTable.getEndTime().toInstant())
                 .build() : null;
         Expiration expiration = expirationTable != null ? Expiration.builder()
                 .entryId(expirationTable.getId())
-                .expirationTime(expirationTable.getExpirationTime())
+                .expirationTime(expirationTable.getExpirationTime().toInstant())
                 .build() : null;
         return EntryImpl.builder()
                 .id(entryTable.getId())

@@ -13,7 +13,8 @@ import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.parser.PlaceholderParserImpl;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +56,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_InWhitelistParam_ActiveNotFrozen_ReturnsTrue() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
+        Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
@@ -68,7 +69,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_InWhitelistParam_ActiveFrozen_ReturnsFrozen() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
+        Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
         Freezing freezing = new Freezing(1L, 10000);
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(freezing).build();
 
@@ -82,7 +83,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_InWhitelistParam_Inactive_ReturnsFalse() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() - 1000));
+        Expiration expiration = new Expiration(1L, Instant.now().minus(Duration.ofSeconds(1)));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
@@ -95,7 +96,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_TimeLeftParam_Frozen_ReturnsTimeLeftWithFreeze() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
+        Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
         Freezing freezing = new Freezing(1L, 10000);
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(freezing).build();
 
@@ -111,7 +112,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_TimeLeftParam_ActiveNotFrozen_ReturnsTimeLeft() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
+        Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
@@ -126,7 +127,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_TimeLeftParam_Inactive_ReturnsEmpty() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() - 1000));
+        Expiration expiration = new Expiration(1L, Instant.now().minus(Duration.ofSeconds(1)));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
@@ -138,7 +139,7 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_UnknownParam_ReturnsEmpty() {
-        Expiration expiration = new Expiration(1L, new Timestamp(System.currentTimeMillis() + 3600000));
+        Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));

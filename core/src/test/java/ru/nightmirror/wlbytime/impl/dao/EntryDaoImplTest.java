@@ -8,6 +8,7 @@ import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Freezing;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -125,7 +126,7 @@ public class EntryDaoImplTest {
         assertNotNull(entry);
         assertEquals(nickname, entry.getNickname());
         assertNotNull(entry.getExpiration());
-        assertEquals(new Timestamp(expirationTime), entry.getExpiration().getExpirationTime());
+        assertEquals(Instant.ofEpochMilli(expirationTime), entry.getExpiration().getExpirationTime());
     }
     
     
@@ -270,7 +271,7 @@ public class EntryDaoImplTest {
 
         assertNotNull(entry);
         assertNotNull(entry.getExpiration());
-        assertEquals(new Timestamp(expirationTime), entry.getExpiration().getExpirationTime());
+        assertEquals(Instant.ofEpochMilli(expirationTime), entry.getExpiration().getExpirationTime());
 
         Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
         assertTrue(retrievedEntry.isPresent());
