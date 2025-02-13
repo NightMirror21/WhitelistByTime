@@ -9,6 +9,8 @@ import ru.nightmirror.wlbytime.impl.parser.PlaceholderParser;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
+import java.time.Duration;
+
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PlaceholderParserImpl implements PlaceholderParser {
@@ -51,14 +53,14 @@ public class PlaceholderParserImpl implements PlaceholderParser {
     }
 
     private String handleTimeLeftParam(EntryImpl entry) {
-        long remainingTime;
+        Duration remainingTime;
         String output;
 
         if (entry.isFreezeActive()) {
-            remainingTime = entry.getLeftFreezeTime();
+            remainingTime = entry.getLeftFreezeDuration();
             output = config.getTimeLeftWithFreeze();
         } else if (!entry.isForever() && entry.isActive()) {
-            remainingTime = entry.getLeftActiveTime();
+            remainingTime = entry.getLeftActiveDuration();
             output = config.getTimeLeft();
         } else {
             return EMPTY;

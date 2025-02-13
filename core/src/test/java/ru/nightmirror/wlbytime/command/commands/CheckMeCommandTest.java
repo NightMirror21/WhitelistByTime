@@ -8,6 +8,7 @@ import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -87,10 +88,10 @@ public class CheckMeCommandTest {
         when(frozenEntry.isInactive()).thenReturn(false);
         when(frozenEntry.isForever()).thenReturn(false);
         when(frozenEntry.isFreezeActive()).thenReturn(true);
-        when(frozenEntry.getLeftFreezeTime()).thenReturn(3600000L);
+        when(frozenEntry.getLeftFreezeDuration()).thenReturn(Duration.ofHours(1));
         when(issuer.getNickname()).thenReturn("frozenUser");
         when(finder.find("frozenUser")).thenReturn(Optional.of(frozenEntry));
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
         when(messages.getCheckMeFrozen()).thenReturn("You are frozen for %time%!");
 
         checkMeCommand.execute(issuer, new String[]{});
@@ -104,10 +105,10 @@ public class CheckMeCommandTest {
         when(timedEntry.isInactive()).thenReturn(false);
         when(timedEntry.isForever()).thenReturn(false);
         when(timedEntry.isFreezeActive()).thenReturn(false);
-        when(timedEntry.getLeftActiveTime()).thenReturn(7200000L);
+        when(timedEntry.getLeftActiveDuration()).thenReturn(Duration.ofHours(2));
         when(issuer.getNickname()).thenReturn("timedUser");
         when(finder.find("timedUser")).thenReturn(Optional.of(timedEntry));
-        when(convertor.getTimeLine(7200000L)).thenReturn("2 hours");
+        when(convertor.getTimeLine(Duration.ofHours(2))).thenReturn("2 hours");
         when(messages.getCheckMeStillInWhitelistForTime()).thenReturn("You are in the whitelist for %time%!");
 
         checkMeCommand.execute(issuer, new String[]{});

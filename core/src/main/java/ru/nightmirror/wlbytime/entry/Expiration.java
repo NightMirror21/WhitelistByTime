@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Duration;
 import java.time.Instant;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -16,57 +17,33 @@ public class Expiration {
     final long entryId;
     Instant expirationTime;
 
-    public boolean canAdd(long milliseconds) {
-        if (milliseconds <= 0) {
-            return false;
-        }
-
-        Instant newTime = expirationTime.plusMillis(milliseconds);
+    public boolean canAdd(Duration duration) {
+        Instant newTime = expirationTime.plus(duration);
         return newTime.isAfter(Instant.now());
     }
 
-    public void add(long milliseconds) {
-        if (milliseconds <= 0) {
-            throw new IllegalArgumentException("Milliseconds cannot be negative or zero.");
-        }
-        Instant newTime = expirationTime.plusMillis(milliseconds);
+    public void add(Duration duration) {
+        Instant newTime = expirationTime.plus(duration);
         if (newTime.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Cannot set expiration time to the past.");
         }
         expirationTime = newTime;
     }
 
-    public boolean canRemove(long milliseconds) {
-        if (milliseconds <= 0) {
-            return false;
-        }
-        Instant newTime = expirationTime.minusMillis(milliseconds);
+    public boolean canRemove(Duration duration) {
+        Instant newTime = expirationTime.minus(duration);
         return newTime.isAfter(Instant.now());
     }
 
-    public void remove(long milliseconds) {
-        if (milliseconds <= 0) {
-            throw new IllegalArgumentException("Milliseconds cannot be negative or zero.");
-        }
-        Instant newTime = expirationTime.minusMillis(milliseconds);
+    public void remove(Duration duration) {
+        Instant newTime = expirationTime.minus(duration);
         if (newTime.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Cannot set expiration time to the past.");
         }
         expirationTime = newTime;
     }
 
-    public boolean canSet(long milliseconds) {
-        if (milliseconds <= 0) {
-            return false;
-        }
-        return Instant.ofEpochMilli(milliseconds).isAfter(Instant.now());
-    }
-
-    public void set(long milliseconds) {
-        if (milliseconds <= 0) {
-            throw new IllegalArgumentException("Milliseconds cannot be negative or zero.");
-        }
-        Instant newTime = Instant.ofEpochMilli(milliseconds);
+    public void set(Instant newTime) {
         if (newTime.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Milliseconds must be in the future");
         }
@@ -77,15 +54,15 @@ public class Expiration {
         return expirationTime.isBefore(Instant.now());
     }
 
-    public boolean isExpired(long offset) {
-        return expirationTime.isBefore(Instant.now().plusMillis(offset));
+    public boolean isExpired(Duration offset) {
+        return expirationTime.isBefore(Instant.now().plus(offset));
     }
 
     public boolean isNotExpired() {
         return !isExpired();
     }
 
-    public boolean isNotExpired(long offset) {
+    public boolean isNotExpired(Duration offset) {
         return !isExpired(offset);
     }
 }

@@ -25,6 +25,7 @@ import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import java.io.File;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -260,12 +261,12 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public EntryImpl create(String nickname, long until) {
+    public EntryImpl create(String nickname, Instant until) {
         try {
             return transactionManager.callInTransaction(() -> {
                 EntryTable entryTable = new EntryTable(null, nickname);
                 entryDao.create(entryTable);
-                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, new Timestamp(until));
+                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until));
                 expirationDao.create(expirationTable);
                 return get(nickname).orElseThrow();
             });

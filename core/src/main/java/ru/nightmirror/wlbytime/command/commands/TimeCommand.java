@@ -12,6 +12,8 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -55,14 +57,14 @@ public class TimeCommand implements Command {
             return;
         }
 
-        long timeInMillis = convertor.getTimeMs(timeArgument);
-        if (timeInMillis <= 0) {
+        Duration duration = convertor.getTime(timeArgument);
+        if (duration.isNegative() || duration.isZero()) {
             issuer.sendMessage(messages.getTimeIsIncorrect());
             return;
         }
 
-        String timeAsString = convertor.getTimeLine(timeInMillis);
-        processOperation(issuer, entry.get(), operation, nickname, timeInMillis, timeAsString);
+        String timeAsString = convertor.getTimeLine(duration);
+        processOperation(issuer, entry.get(), operation, nickname, duration, timeAsString);
     }
 
     private boolean areArgsValid(String[] args, CommandIssuer issuer) {
@@ -81,13 +83,13 @@ public class TimeCommand implements Command {
         return timeArgument.toString().trim();
     }
 
-    private void processOperation(CommandIssuer issuer, EntryImpl entry, String operation, String nickname, long timeInMillis, String timeAsString) {
+    private void processOperation(CommandIssuer issuer, EntryImpl entry, String operation, String nickname, Duration duration, String timeAsString) {
         switch (operation) {
             case "add" -> {
                 if (entry.isForever()) {
                     issuer.sendMessage(messages.getCantAddTimeCausePlayerIsForever());
-                } else if (timeService.canAdd(entry, timeInMillis)) {
-                    timeService.add(entry, timeInMillis);
+                } else if (timeService.canAdd(entry, duration)) {
+                    timeService.add(entry, duration);
                     issuer.sendMessage(messages.getAddTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
                 } else {
                     issuer.sendMessage(messages.getCantAddTime());
@@ -96,15 +98,15 @@ public class TimeCommand implements Command {
             case "remove" -> {
                 if (entry.isForever()) {
                     issuer.sendMessage(messages.getCantRemoveTimeCausePlayerIsForever());
-                } else if (timeService.canRemove(entry, timeInMillis)) {
-                    timeService.remove(entry, timeInMillis);
+                } else if (timeService.canRemove(entry, duration)) {
+                    timeService.remove(entry, duration);
                     issuer.sendMessage(messages.getRemoveTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
                 } else {
                     issuer.sendMessage(messages.getCantRemoveTime());
                 }
             }
             case "set" -> {
-                timeService.set(entry, System.currentTimeMillis() + timeInMillis);
+                timeService.set(entry, Instant.now().plus(duration));
                 issuer.sendMessage(messages.getSetTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
             }
             default -> issuer.sendMessage(messages.getIncorrectArguments());

@@ -52,14 +52,12 @@ public class CheckMeCommand implements Command {
     }
 
     private void sendFrozenMessage(CommandIssuer issuer, EntryImpl entry) {
-        long leftOfFreeze = entry.getLeftFreezeTime();
-        String timeAsString = convertor.getTimeLine(leftOfFreeze);
+        String timeAsString = convertor.getTimeLine(entry.getLeftFreezeDuration());
         issuer.sendMessage(messages.getCheckMeFrozen().replace("%time%", timeAsString));
     }
 
     private void sendWhitelistForTimeMessage(CommandIssuer issuer, EntryImpl entry) {
-        long leftOfTime = entry.getLeftActiveTime();
-        String timeAsString = convertor.getTimeLine(leftOfTime);
+        String timeAsString = convertor.getTimeLine(entry.getLeftActiveDuration());
         issuer.sendMessage(messages.getCheckMeStillInWhitelistForTime().replace("%time%", timeAsString));
     }
 

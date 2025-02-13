@@ -11,6 +11,8 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -75,10 +77,10 @@ public class AddCommand implements Command {
             timeArgument.append(args[i]).append(" ");
         }
 
-        long timeInMillis = convertor.getTimeMs(timeArgument.toString().trim());
-        service.create(nickname, timeInMillis + System.currentTimeMillis());
+        Duration duration = convertor.getTime(timeArgument.toString().trim());
+        service.create(nickname, Instant.now().plus(duration));
 
-        String timeAsString = convertor.getTimeLine(timeInMillis);
+        String timeAsString = convertor.getTimeLine(duration);
         String message = messages.getSuccessfullyAddedForTime()
                 .replace("%nickname%", nickname)
                 .replace("%time%", timeAsString);

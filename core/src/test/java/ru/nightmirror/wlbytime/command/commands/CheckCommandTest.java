@@ -8,6 +8,7 @@ import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -76,8 +77,8 @@ public class CheckCommandTest {
         String nickname = "frozenPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isFreezeActive()).thenReturn(true);
-        when(entry.getLeftFreezeTime()).thenReturn(3600000L);
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
+        when(entry.getLeftFreezeDuration()).thenReturn(Duration.ofHours(1));
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
 
         checkCommand.execute(issuer, new String[]{nickname});
 
@@ -104,8 +105,8 @@ public class CheckCommandTest {
         when(entry.isFreezeActive()).thenReturn(false);
         when(entry.isActive()).thenReturn(true);
         when(entry.isForever()).thenReturn(false);
-        when(entry.getLeftActiveTime()).thenReturn(7200000L);
-        when(convertor.getTimeLine(7200000L)).thenReturn("2 hours left");
+        when(entry.getLeftActiveDuration()).thenReturn(Duration.ofHours(2));
+        when(convertor.getTimeLine(Duration.ofHours(2))).thenReturn("2 hours left");
 
         checkCommand.execute(issuer, new String[]{nickname});
 

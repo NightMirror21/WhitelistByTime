@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Duration;
 import java.util.Random;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -17,6 +18,6 @@ public final class TimeRandom {
 
     public String getRandomOneTime() {
         long ms = random.nextLong() + MINIMUM_TIME;
-        return convertor.getTimeLine(ms).split(" ")[0];
+        return convertor.getTimeLine(Duration.ofMillis(ms)).split(" ")[0];
     }
 }

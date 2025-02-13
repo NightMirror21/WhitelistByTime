@@ -16,21 +16,21 @@ public class Freezing {
     Instant startTime;
     Instant endTime;
 
-    public Freezing(long entryId, long durationMillis) {
+    public Freezing(long entryId, Duration duration) {
         this.entryId = entryId;
         this.startTime = Instant.now();
-        this.endTime = this.startTime.plusMillis(durationMillis);
+        this.endTime = this.startTime.plus(duration);
     }
 
     public boolean isFrozen() {
         return endTime.isAfter(Instant.now());
     }
 
-    public long getLeftTime() {
-        return Duration.between(Instant.now(), endTime).toMillis();
+    public Duration getLeftTime() {
+        return Duration.between(Instant.now(), endTime);
     }
 
-    public long getDurationOfFreeze() {
-        return Duration.between(startTime, endTime).toMillis();
+    public Duration getDurationOfFreeze() {
+        return Duration.between(startTime, endTime);
     }
 }

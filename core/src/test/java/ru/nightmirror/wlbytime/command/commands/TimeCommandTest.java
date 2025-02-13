@@ -10,6 +10,8 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,7 +84,7 @@ public class TimeCommandTest {
     public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
-        when(convertor.getTimeMs("1x")).thenReturn(-1L);
+        when(convertor.getTime("1x")).thenReturn(Duration.ZERO);
 
         timeCommand.execute(issuer, new String[]{"add", nickname, "1x"});
 
@@ -94,14 +96,14 @@ public class TimeCommandTest {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(true);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
 
         timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
 
         verify(issuer).sendMessage("Cannot add time because player is forever.");
 
-        verify(timeService, never()).canAdd(any(), anyLong());
-        verify(timeService, never()).add(any(), anyLong());
+        verify(timeService, never()).canAdd(any(), any(Duration.class));
+        verify(timeService, never()).add(any(), any(Duration.class));
     }
 
     @Test
@@ -109,14 +111,14 @@ public class TimeCommandTest {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(true);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
 
         timeCommand.execute(issuer, new String[]{"remove", nickname, "1h"});
 
         verify(issuer).sendMessage("Cannot remove time because player is forever.");
 
-        verify(timeService, never()).canRemove(any(), anyLong());
-        verify(timeService, never()).remove(any(), anyLong());
+        verify(timeService, never()).canRemove(any(), any(Duration.class));
+        verify(timeService, never()).remove(any(), any(Duration.class));
     }
 
     @Test
@@ -124,13 +126,13 @@ public class TimeCommandTest {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
-        when(timeService.canAdd(entry, 3600000L)).thenReturn(true);
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
+        when(timeService.canAdd(entry, Duration.ofHours(1))).thenReturn(true);
 
         timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
 
-        verify(timeService).add(entry, 3600000L);
+        verify(timeService).add(entry, Duration.ofHours(1));
         verify(issuer).sendMessage("Added 1 hour to somePlayer's time.");
     }
 
@@ -139,8 +141,8 @@ public class TimeCommandTest {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
-        when(timeService.canAdd(entry, 3600000L)).thenReturn(false);
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
+        when(timeService.canAdd(entry, Duration.ofHours(1))).thenReturn(false);
 
         timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
 
@@ -152,13 +154,13 @@ public class TimeCommandTest {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
-        when(timeService.canRemove(entry, 3600000L)).thenReturn(true);
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
+        when(timeService.canRemove(entry, Duration.ofHours(1))).thenReturn(true);
 
         timeCommand.execute(issuer, new String[]{"remove", nickname, "1h"});
 
-        verify(timeService).remove(entry, 3600000L);
+        verify(timeService).remove(entry, Duration.ofHours(1));
         verify(issuer).sendMessage("Removed 1 hour from somePlayer's time.");
     }
 
@@ -167,8 +169,8 @@ public class TimeCommandTest {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
-        when(timeService.canRemove(entry, 3600000L)).thenReturn(false);
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
+        when(timeService.canRemove(entry, Duration.ofHours(1))).thenReturn(false);
 
         timeCommand.execute(issuer, new String[]{"remove", nickname, "1h"});
 
@@ -178,19 +180,23 @@ public class TimeCommandTest {
     @Test
     public void testExecute_SetOperation_ShouldSendSetTimeMessage() {
         String nickname = "somePlayer";
+
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
-        when(convertor.getTimeMs("1h")).thenReturn(3600000L);
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
+        when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
 
-        long now = System.currentTimeMillis();
+        Instant now = Instant.now();
         timeCommand.execute(issuer, new String[]{"set", nickname, "1h"});
 
-        verify(timeService).set(eq(entry), longThat(time ->
-                time >= 3600000L + now && time <= 3600000L + now + 1000
+        verify(timeService).set(eq(entry), argThat(instant ->
+                instant.isAfter(now.plus(Duration.ofHours(1)).minusMillis(1)) &&
+                        instant.isBefore(now.plus(Duration.ofHours(1)).plusMillis(1000))
         ));
+
         verify(issuer).sendMessage("Set somePlayer's time to 1 hour.");
     }
+
 
     @Test
     public void testGetTabulate_WithoutArguments_ShouldReturnOperations() {

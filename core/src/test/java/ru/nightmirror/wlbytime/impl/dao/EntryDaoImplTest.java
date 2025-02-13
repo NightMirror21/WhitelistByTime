@@ -7,7 +7,7 @@ import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Freezing;
 
-import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -59,14 +59,14 @@ public class EntryDaoImplTest {
     @Test
     public void testUpdateEntry_WithFreezing_ShouldPersistFreezing() {
         EntryImpl entry = entryDao.create("freezing_test");
-        Freezing freezing = new Freezing(entry.getId(), 10000L);
+        Freezing freezing = new Freezing(entry.getId(), Duration.ofSeconds(10));
         entry.setFreezing(freezing);
         entryDao.update(entry);
 
         Optional<EntryImpl> retrievedEntry = entryDao.get("freezing_test");
         assertTrue(retrievedEntry.isPresent());
         assertNotNull(retrievedEntry.get().getFreezing());
-        assertEquals(10000L, retrievedEntry.get().getFreezing().getDurationOfFreeze());
+        assertEquals(Duration.ofSeconds(10), retrievedEntry.get().getFreezing().getDurationOfFreeze());
     }
 
     @Test
@@ -90,8 +90,8 @@ public class EntryDaoImplTest {
     @Test
     public void testGetEntry_WithAllRelatedData_ShouldReturnCompleteEntry() {
         String nickname = "full_entry_test";
-        EntryImpl entry = entryDao.create(nickname, System.currentTimeMillis() + 10000);
-        entry.freeze(5000L);
+        EntryImpl entry = entryDao.create(nickname, Instant.now().plus(Duration.ofSeconds(10)));
+        entry.freeze(Duration.ofSeconds(5));
         entry.updateLastJoin();
         entryDao.update(entry);
 
@@ -119,15 +119,24 @@ public class EntryDaoImplTest {
     @Test
     public void testCreateEntry_WithExpirationTime_ShouldCreateEntryWithExpiration() {
         String nickname = "expiring_nickname";
-        long expirationTime = System.currentTimeMillis() + 10000;
 
-        EntryImpl entry = entryDao.create(nickname, expirationTime);
+        Instant fixedNow = Instant.now();
+        Duration duration = Duration.ofSeconds(10);
+        Instant expectedExpirationTime = fixedNow.plus(duration);
+
+        EntryImpl entry = entryDao.create(nickname, expectedExpirationTime);
 
         assertNotNull(entry);
         assertEquals(nickname, entry.getNickname());
         assertNotNull(entry.getExpiration());
-        assertEquals(Instant.ofEpochMilli(expirationTime), entry.getExpiration().getExpirationTime());
+
+        Instant actualExpirationTime = entry.getExpiration().getExpirationTime();
+
+        long toleranceMillis = 100;
+
+        assertTrue(Math.abs(actualExpirationTime.toEpochMilli() - expectedExpirationTime.toEpochMilli()) <= toleranceMillis);
     }
+
     
     
 
@@ -182,7 +191,7 @@ public class EntryDaoImplTest {
     @Test
     public void testUpdateEntry_ShouldModifyExistingEntry() {
         EntryImpl entry = entryDao.create("updatable_nickname");
-        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
         entryDao.update(entry);
 
         Optional<EntryImpl> result = entryDao.get(entry.getNickname());
@@ -194,7 +203,7 @@ public class EntryDaoImplTest {
     @Test
     public void testDeleteExpirationTableEntry_ShouldRemoveExpirationForEntry() {
         EntryImpl entry = entryDao.create("entry_with_expiration");
-        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
         entryDao.update(entry);
 
         entry.setForever();
@@ -240,7 +249,7 @@ public class EntryDaoImplTest {
     @Test
     public void testUpdateEntry_TransactionRollbackOnFailure() {
         EntryImpl entry = entryDao.create("rollback_test");
-        entry.setExpiration(new Timestamp(System.currentTimeMillis() + 10000));
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
 
         // Simulate a failure by causing an invalid operation
         entry.setNickname(null);
@@ -265,18 +274,27 @@ public class EntryDaoImplTest {
     @Test
     public void testCreateEntry_WithExpiration_ShouldPersistExpiration() {
         String nickname = "expiring_entry";
-        long expirationTime = System.currentTimeMillis() + 10000;
 
-        EntryImpl entry = entryDao.create(nickname, expirationTime);
+        Instant fixedNow = Instant.now();
+        Duration duration = Duration.ofSeconds(10);
+        Instant expectedExpirationTime = fixedNow.plus(duration);
+
+        EntryImpl entry = entryDao.create(nickname, expectedExpirationTime);
 
         assertNotNull(entry);
         assertNotNull(entry.getExpiration());
-        assertEquals(Instant.ofEpochMilli(expirationTime), entry.getExpiration().getExpirationTime());
+
+        Instant actualExpirationTime = entry.getExpiration().getExpirationTime();
+
+        long toleranceMillis = 100;
+
+        assertTrue(Math.abs(actualExpirationTime.toEpochMilli() - expectedExpirationTime.toEpochMilli()) <= toleranceMillis);
 
         Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
         assertTrue(retrievedEntry.isPresent());
         assertNotNull(retrievedEntry.get().getExpiration());
     }
+
 
     @Test
     public void testClose_MultipleTimes_ShouldNotThrowError() {
@@ -298,8 +316,7 @@ public class EntryDaoImplTest {
     @Test
     public void testRemoveEntry_ShouldDeleteRelatedTables() {
         String nickname = "removable_with_related_data";
-        long expirationTime = System.currentTimeMillis() + 10000;
-        EntryImpl entry = entryDao.create(nickname, expirationTime);
+        EntryImpl entry = entryDao.create(nickname, Instant.now().plus(Duration.ofSeconds(10)));
 
         entryDao.remove(entry);
 

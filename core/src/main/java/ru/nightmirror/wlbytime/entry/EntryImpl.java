@@ -5,7 +5,8 @@ import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.interfaces.entry.Entry;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -52,8 +53,8 @@ public class EntryImpl implements Entry {
     }
 
     @Override
-    public void setExpiration(@NotNull Timestamp timestamp) {
-        expiration = new Expiration(id, timestamp.toInstant());
+    public void setExpiration(@NotNull Instant instant) {
+        expiration = new Expiration(id, instant);
     }
 
     @Override
@@ -72,11 +73,7 @@ public class EntryImpl implements Entry {
     }
 
     @Override
-    public void freeze(long time) {
-        if (time <= 0) {
-            throw new IllegalArgumentException("Time for freeze must be positive and not zero.");
-        }
-
+    public void freeze(Duration duration) {
         if (isFrozen()) {
             throw new IllegalStateException("Entry is already frozen.");
         }
@@ -85,7 +82,11 @@ public class EntryImpl implements Entry {
             throw new IllegalStateException("Can't freeze forever entry.");
         }
 
-        freezing = new Freezing(id, time);
+        if (duration.isNegative() || duration.isZero()) {
+            throw new IllegalArgumentException("Duration must be positive.");
+        }
+
+        freezing = new Freezing(id, duration);
     }
 
     @Override
@@ -94,9 +95,9 @@ public class EntryImpl implements Entry {
             throw new IllegalStateException("Entry is not frozen.");
         }
 
-        long previousExpirationTime = expiration.getExpirationTime().toEpochMilli();
-        long durationOfFreeze = freezing.getDurationOfFreeze();
-        expiration = new Expiration(id, new Timestamp(previousExpirationTime + durationOfFreeze).toInstant());
+        Instant previousExpirationTime = expiration.getExpirationTime();
+        Duration durationOfFreeze = freezing.getDurationOfFreeze();
+        expiration = new Expiration(id, previousExpirationTime.plus(durationOfFreeze));
 
         freezing = null;
     }
@@ -112,22 +113,22 @@ public class EntryImpl implements Entry {
     }
 
     @Override
-    public long getLeftActiveTime() {
-        long offset = 0L;
-        
+    public Duration getLeftActiveDuration() {
+        Duration offset = Duration.ZERO;
+
         if (isFreezeActive()) {
             offset = freezing.getLeftTime();
         }
-        
+
         if (isForever()) {
             throw new IllegalStateException("Can't get left expiration time cause entry is forever");
         }
-        
-        return offset + expiration.getExpirationTime().toEpochMilli() - System.currentTimeMillis();
+
+        return Duration.between(Instant.now(), expiration.getExpirationTime()).plus(offset);
     }
 
     @Override
-    public long getLeftFreezeTime() {
+    public Duration getLeftFreezeDuration() {
         if (isFreezeInactive()) {
             throw new IllegalStateException("Can't get left freeze time cause entry is not frozen");
         }

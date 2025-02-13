@@ -6,6 +6,9 @@ import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Expiration;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -28,9 +31,9 @@ class EntryTimeServiceImplTest {
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
 
-        service.add(entry, 1000L);
+        service.add(entry, Duration.ofSeconds(1));
 
-        verify(expiration).add(1000L);
+        verify(expiration).add(Duration.ofSeconds(1));
         verify(entryDao).update(entry);
     }
 
@@ -40,7 +43,7 @@ class EntryTimeServiceImplTest {
 
         when(entry.isForever()).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> service.add(entry, 5000L));
+        assertThrows(IllegalArgumentException.class, () -> service.add(entry, Duration.ofSeconds(5)));
         verifyNoMoreInteractions(entryDao);
     }
 
@@ -51,9 +54,9 @@ class EntryTimeServiceImplTest {
 
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
-        when(expiration.canAdd(1000L)).thenReturn(true);
+        when(expiration.canAdd(Duration.ofSeconds(1))).thenReturn(true);
 
-        assertTrue(service.canAdd(entry, 1000L));
+        assertTrue(service.canAdd(entry, Duration.ofSeconds(1)));
     }
 
     @Test
@@ -62,7 +65,7 @@ class EntryTimeServiceImplTest {
 
         when(entry.isForever()).thenReturn(true);
 
-        assertFalse(service.canAdd(entry, 1000L));
+        assertFalse(service.canAdd(entry, Duration.ofSeconds(1)));
     }
 
     @Test
@@ -73,9 +76,9 @@ class EntryTimeServiceImplTest {
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
 
-        service.remove(entry, 1000L);
+        service.remove(entry, Duration.ofSeconds(1));
 
-        verify(expiration).remove(1000L);
+        verify(expiration).remove(Duration.ofSeconds(1));
         verify(entryDao).update(entry);
     }
 
@@ -85,7 +88,7 @@ class EntryTimeServiceImplTest {
 
         when(entry.isForever()).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> service.remove(entry, 5000L));
+        assertThrows(IllegalArgumentException.class, () -> service.remove(entry, Duration.ofSeconds(5)));
         verifyNoMoreInteractions(entryDao);
     }
 
@@ -96,9 +99,9 @@ class EntryTimeServiceImplTest {
 
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
-        when(expiration.canRemove(1000L)).thenReturn(true);
+        when(expiration.canRemove(Duration.ofSeconds(1))).thenReturn(true);
 
-        assertTrue(service.canRemove(entry, 1000L));
+        assertTrue(service.canRemove(entry, Duration.ofSeconds(1)));
     }
 
     @Test
@@ -107,7 +110,7 @@ class EntryTimeServiceImplTest {
 
         when(entry.isForever()).thenReturn(true);
 
-        assertFalse(service.canRemove(entry, 1000L));
+        assertFalse(service.canRemove(entry, Duration.ofSeconds(1)));
     }
 
     @Test
@@ -117,9 +120,10 @@ class EntryTimeServiceImplTest {
 
         when(entry.getExpiration()).thenReturn(expiration);
 
-        service.set(entry, 1000L);
+        Instant expirationTime = Instant.now().plus(Duration.ofSeconds(1));
+        service.set(entry, expirationTime);
 
-        verify(expiration).set(1000L);
+        verify(expiration).set(expirationTime);
         verify(entryDao).update(entry);
     }
 }

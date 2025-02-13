@@ -2,14 +2,15 @@ package ru.nightmirror.wlbytime.interfaces.entry;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 
 public interface Entry extends EntryView {
     void setForever();
 
-    void setExpiration(@NotNull Timestamp timestamp);
+    void setExpiration(@NotNull Instant instant);
 
-    void freeze(long time);
+    void freeze(Duration duration);
 
     void unfreeze();
 

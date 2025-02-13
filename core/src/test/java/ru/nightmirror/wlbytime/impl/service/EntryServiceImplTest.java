@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,28 +40,28 @@ public class EntryServiceImplTest {
     @Test
     public void testCreate_WithUntilInFuture_ShouldReturnEntry() {
         String nickname = "future_user";
-        long validUntil = System.currentTimeMillis() + 10000;
         EntryImpl mockEntry = EntryImpl.builder().nickname(nickname).build();
-        when(entryDao.create(nickname, validUntil)).thenReturn(mockEntry);
+        Instant until = Instant.now().plus(Duration.ofSeconds(10));
+        when(entryDao.create(nickname, until)).thenReturn(mockEntry);
 
-        EntryImpl result = entryService.create(nickname, validUntil);
+        EntryImpl result = entryService.create(nickname, until);
 
         assertNotNull(result);
         assertEquals(nickname, result.getNickname());
-        verify(entryDao, times(1)).create(nickname, validUntil);
+        verify(entryDao, times(1)).create(nickname, until);
     }
 
     @Test
     public void testCreate_WithUntilInPast_ShouldThrowException() {
         String nickname = "past_user";
-        long pastUntil = System.currentTimeMillis() - 10000;
+        Instant pastUntil = Instant.now().minus(Duration.ofSeconds(10));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             entryService.create(nickname, pastUntil);
         });
 
         assertEquals("Until must be in the future", exception.getMessage());
-        verify(entryDao, never()).create(anyString(), anyLong());
+        verify(entryDao, never()).create(anyString(), any(Instant.class));
     }
 
     @Test
@@ -74,26 +76,12 @@ public class EntryServiceImplTest {
     @Test
     public void testFreeze_WithValidDuration_ShouldFreezeEntry() {
         EntryImpl entry = mock(EntryImpl.class);
-        long duration = 10000;
+        Duration duration = Duration.ofSeconds(10);
 
         entryService.freeze(entry, duration);
 
         verify(entry, times(1)).freeze(duration);
         verify(entryDao, times(1)).update(entry);
-    }
-
-    @Test
-    public void testFreeze_WithInvalidDuration_ShouldThrowException_AndShouldNotUpdateEntry() {
-        EntryImpl entry = mock(EntryImpl.class);
-        long invalidDuration = -5000;
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            entryService.freeze(entry, invalidDuration);
-        });
-
-        assertEquals("Duration must be positive", exception.getMessage());
-        verify(entry, never()).freeze(anyLong());
-        verify(entryDao, never()).update(entry);
     }
 
     @Test

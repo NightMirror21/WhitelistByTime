@@ -9,6 +9,8 @@ import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Set;
 
@@ -29,21 +31,17 @@ public class EntryServiceImpl implements EntryService {
     }
 
     @Override
-    public @NotNull EntryImpl create(String nickname, long untilMs) {
-        if (untilMs <= System.currentTimeMillis()) {
+    public @NotNull EntryImpl create(String nickname, Instant until) {
+        if (until.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Until must be in the future");
         }
 
-        return entryDao.create(nickname, untilMs);
+        return entryDao.create(nickname, until);
     }
 
     @Override
-    public void freeze(EntryImpl entry, long durationMs) {
-        if (durationMs <= 0) {
-            throw new IllegalArgumentException("Duration must be positive");
-        }
-
-        entry.freeze(durationMs);
+    public void freeze(EntryImpl entry, Duration duration) {
+        entry.freeze(duration);
         entryDao.update(entry);
     }
 

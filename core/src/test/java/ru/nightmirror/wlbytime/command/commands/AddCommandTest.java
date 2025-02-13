@@ -11,6 +11,8 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -87,31 +89,44 @@ public class AddCommandTest {
         String nickname = "timedPlayer";
         String timeArgument = "1d 2h";
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTimeMs(timeArgument)).thenReturn(90000000L);
-        when(convertor.getTimeLine(90000000L)).thenReturn("1 day 2 hours");
+        when(convertor.getTime(timeArgument)).thenReturn(Duration.ofHours(25));
+        when(convertor.getTimeLine(Duration.ofHours(25))).thenReturn("1 day 1 hour");
         when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, new String[]{nickname, timeArgument});
 
-        ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<Instant> timeCaptor = ArgumentCaptor.forClass(Instant.class);
         verify(service).create(eq(nickname), timeCaptor.capture());
-        verify(issuer).sendMessage("Player timedPlayer added for 1 day 2 hours!");
+        verify(issuer).sendMessage("Player timedPlayer added for 1 day 1 hour!");
 
-        assertTrue(timeCaptor.getValue() > System.currentTimeMillis());
+        assertTrue(timeCaptor.getValue().isAfter(Instant.now().minus(Duration.ofHours(25))));
     }
 
     @Test
     public void testExecute_WithMultipleArgumentsForTime_ShouldConcatenateAndConvertTime() {
         String nickname = "concatPlayer";
         String[] args = {"concatPlayer", "1d", "2h"};
+
+        Instant fixedNow = Instant.now();
+        Duration duration = Duration.ofHours(26);
+        Instant expectedTime = fixedNow.plus(duration);
+
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTimeMs("1d 2h")).thenReturn(93600000L);
-        when(convertor.getTimeLine(93600000L)).thenReturn("1 day 2 hours");
+        when(convertor.getTime("1d 2h")).thenReturn(duration);
+        when(convertor.getTimeLine(duration)).thenReturn("1 day 2 hours");
         when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, args);
 
-        verify(service).create(eq(nickname), anyLong());
+        ArgumentCaptor<Instant> instantCaptor = ArgumentCaptor.forClass(Instant.class);
+        verify(service).create(eq(nickname), instantCaptor.capture());
+
+        Instant actualTime = instantCaptor.getValue();
+
+        long allowedDifference = 100L;
+
+        assertTrue(Math.abs(actualTime.toEpochMilli() - expectedTime.toEpochMilli()) < allowedDifference);
+
         verify(issuer).sendMessage("Player concatPlayer added for 1 day 2 hours!");
     }
 
@@ -148,14 +163,25 @@ public class AddCommandTest {
     public void testAddPlayerWithTime_ShouldSendFormattedSuccessMessage() {
         String nickname = "timePlayer";
         String timeArgument = "3d";
+
+        Instant fixedNow = Instant.now();
+        Duration duration = Duration.ofDays(3);
+        Instant expectedTime = fixedNow.plus(duration);
+
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTimeMs(timeArgument)).thenReturn(259200000L);
-        when(convertor.getTimeLine(259200000L)).thenReturn("3 days");
+        when(convertor.getTime(timeArgument)).thenReturn(duration);
+        when(convertor.getTimeLine(duration)).thenReturn("3 days");
         when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, new String[]{nickname, timeArgument});
 
-        verify(service).create(eq(nickname), anyLong());
+        ArgumentCaptor<Instant> instantCaptor = ArgumentCaptor.forClass(Instant.class);
+        verify(service).create(eq(nickname), instantCaptor.capture());
+
+        Instant actualTime = instantCaptor.getValue();
+
+        assertEquals(expectedTime.getEpochSecond(), actualTime.getEpochSecond());
+
         verify(issuer).sendMessage("Player timePlayer added for 3 days!");
     }
 }

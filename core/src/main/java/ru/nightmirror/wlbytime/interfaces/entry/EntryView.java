@@ -1,5 +1,7 @@
 package ru.nightmirror.wlbytime.interfaces.entry;
 
+import java.time.Duration;
+
 public interface EntryView {
     boolean isForever();
 
@@ -21,7 +23,7 @@ public interface EntryView {
 
     boolean isJoined();
 
-    long getLeftActiveTime();
+    Duration getLeftActiveDuration();
 
-    long getLeftFreezeTime();
+    Duration getLeftFreezeDuration();
 }

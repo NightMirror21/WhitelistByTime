@@ -18,7 +18,7 @@ import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,7 +70,7 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_InWhitelistParam_ActiveFrozen_ReturnsFrozen() {
         Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
-        Freezing freezing = new Freezing(1L, 10000);
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(freezing).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
@@ -97,11 +97,11 @@ public class PlaceholderParserImplTest {
     @Test
     public void parse_TimeLeftParam_Frozen_ReturnsTimeLeftWithFreeze() {
         Expiration expiration = new Expiration(1L, Instant.now().plus(Duration.ofHours(1)));
-        Freezing freezing = new Freezing(1L, 10000);
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(freezing).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
-        when(timeConvertor.getTimeLine(anyLong())).thenReturn(MOCKED_TIME);
+        when(timeConvertor.getTimeLine(any(Duration.class))).thenReturn(MOCKED_TIME);
         when(placeholdersConfig.getTimeLeftWithFreeze()).thenReturn(TIME_LEFT_WITH_FREEZE);
 
         String expected = TIME_LEFT_WITH_FREEZE.replace("%time%", MOCKED_TIME);
@@ -116,7 +116,7 @@ public class PlaceholderParserImplTest {
         EntryImpl entry = EntryImpl.builder().expiration(expiration).freezing(null).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
-        when(timeConvertor.getTimeLine(anyLong())).thenReturn(MOCKED_TIME);
+        when(timeConvertor.getTimeLine(any(Duration.class))).thenReturn(MOCKED_TIME);
         when(placeholdersConfig.getTimeLeft()).thenReturn(TIME_LEFT);
 
         String expected = TIME_LEFT.replace("%time%", MOCKED_TIME);
@@ -162,11 +162,11 @@ public class PlaceholderParserImplTest {
 
     @Test
     public void parse_TimeLeftParam_ForeverFrozen_ReturnsTimeLeftWithFreeze() {
-        Freezing freezing = new Freezing(1L, 10000);
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
         EntryImpl entry = EntryImpl.builder().expiration(null).freezing(freezing).build();
 
         when(entryFinder.find(PLAYER)).thenReturn(Optional.of(entry));
-        when(timeConvertor.getTimeLine(anyLong())).thenReturn(MOCKED_TIME);
+        when(timeConvertor.getTimeLine(any(Duration.class))).thenReturn(MOCKED_TIME);
         when(placeholdersConfig.getTimeLeftWithFreeze()).thenReturn(TIME_LEFT_WITH_FREEZE);
 
         String expected = TIME_LEFT_WITH_FREEZE.replace("%time%", MOCKED_TIME);
