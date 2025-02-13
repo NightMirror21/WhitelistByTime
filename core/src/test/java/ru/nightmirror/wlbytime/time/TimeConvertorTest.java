@@ -37,19 +37,19 @@ public class TimeConvertorTest {
     }
 
     @Test
-    public void testGetTimeLine_ZeroMilliseconds() {
+    public void getTimeLineZeroMillisecondsReturnsEmptyString() {
         String result = timeConvertor.getTimeLine(Duration.ofMillis(0));
         assertEquals("", result);
     }
 
     @Test
-    public void testGetTimeLine_OneYear() {
+    public void getTimeLineOneYearReturnsCorrectString() {
         String result = timeConvertor.getTimeLine(Duration.ofMillis(TimeConvertor.YEAR_IN_MS));
         assertEquals("1y", result.trim());
     }
 
     @Test
-    public void testGetTimeLine_ComplexTime() {
+    public void getTimeLineComplexTimeReturnsCorrectString() {
         long ms = TimeConvertor.YEAR_IN_MS + 2 * TimeConvertor.MONTH_IN_MS + 3 * TimeConvertor.DAY_IN_MS +
                 4 * TimeConvertor.HOUR_IN_MS + 5 * TimeConvertor.MINUTE_IN_MS + 6 * TimeConvertor.SECOND_IN_MS;
         String result = timeConvertor.getTimeLine(Duration.ofMillis(ms));
@@ -57,21 +57,20 @@ public class TimeConvertorTest {
     }
 
     @Test
-    public void testGetTimeLine_NegativeTime() {
-        long ms = -1L;
-        String result = timeConvertor.getTimeLine(Duration.ofMillis(ms));
+    public void getTimeLineNegativeTimeReturnsForever() {
+        String result = timeConvertor.getTimeLine(Duration.ofMillis(-1L));
         assertEquals("forever", result);
     }
 
     @Test
-    public void testGetTime_SimpleString() {
+    public void getTimeSimpleStringReturnsCorrectDuration() {
         String timeLine = "1y";
         Duration result = timeConvertor.getTime(timeLine);
         assertEquals(Duration.ofMillis(TimeConvertor.YEAR_IN_MS), result);
     }
 
     @Test
-    public void testGetTime_ComplexString() {
+    public void getTimeComplexStringReturnsCorrectDuration() {
         String timeLine = "1y 2mo 3d 4h 5m 6s";
         long expectedMs = TimeConvertor.YEAR_IN_MS + 2 * TimeConvertor.MONTH_IN_MS + 3 * TimeConvertor.DAY_IN_MS +
                 4 * TimeConvertor.HOUR_IN_MS + 5 * TimeConvertor.MINUTE_IN_MS + 6 * TimeConvertor.SECOND_IN_MS;
@@ -80,16 +79,14 @@ public class TimeConvertorTest {
     }
 
     @Test
-    public void testGetTime_EmptyString() {
-        String timeLine = "";
-        Duration result = timeConvertor.getTime(timeLine);
+    public void getTimeEmptyStringReturnsZeroDuration() {
+        Duration result = timeConvertor.getTime("");
         assertEquals(Duration.ZERO, result);
     }
 
     @Test
-    public void testGetTime_InvalidString() {
-        String timeLine = "abc";
-        Duration result = timeConvertor.getTime(timeLine);
+    public void getTimeInvalidStringReturnsZeroDuration() {
+        Duration result = timeConvertor.getTime("abc");
         assertEquals(Duration.ZERO, result);
     }
 }

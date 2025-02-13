@@ -32,7 +32,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testDispatchExecute_WhenCommandExists_AndIssuerHasPermission_ShouldExecuteCommand() {
+    public void dispatchExecuteWhenCommandExistsAndIssuerHasPermissionExecutesCommand() {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn(commandName);
@@ -46,7 +46,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testDispatchExecute_WhenCommandExists_AndIssuerLacksPermission_ShouldSendNoPermissionMessage() {
+    public void dispatchExecuteWhenCommandExistsAndIssuerLacksPermissionSendsNoPermissionMessage() {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn(commandName);
@@ -60,7 +60,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testDispatchExecute_WhenCommandDoesNotExist_ShouldDoNothing() {
+    public void dispatchExecuteWhenCommandDoesNotExistDoesNothing() {
         String commandName = "nonexistent";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn("test");
@@ -72,7 +72,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testDispatchTabulate_WhenCommandExists_AndIssuerHasPermission_ShouldReturnTabulatedResults() {
+    public void dispatchTabulateWhenCommandExistsAndIssuerHasPermissionReturnsTabulatedResults() {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         Set<String> expectedTabulatedResults = Set.of("tab1", "tab2");
@@ -88,7 +88,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testDispatchTabulate_WhenCommandExists_AndIssuerLacksPermission_ShouldReturnEmptySet() {
+    public void dispatchTabulateWhenCommandExistsAndIssuerLacksPermissionReturnsEmptySet() {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn(commandName);
@@ -102,7 +102,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testDispatchTabulate_WhenCommandDoesNotExist_ShouldReturnEmptySet() {
+    public void dispatchTabulateWhenCommandDoesNotExistReturnsEmptySet() {
         String commandName = "nonexistent";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn("test");
@@ -114,7 +114,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testGetCommands_ShouldReturnSetOfCommandNamesInLowerCase() {
+    public void getCommandsReturnsSetOfCommandNamesInLowerCase() {
         when(command.getName()).thenReturn("TestCommand");
 
         Set<String> result = commandDispatcher.getCommands();
@@ -123,7 +123,7 @@ public class CommandDispatcherTest {
     }
 
     @Test
-    public void testGetCommands_WhenNoCommands_ShouldReturnEmptySet() {
+    public void getCommandsWhenNoCommandsReturnsEmptySet() {
         commandDispatcher = new CommandDispatcher(messagesConfig, Set.of());
 
         Set<String> result = commandDispatcher.getCommands();

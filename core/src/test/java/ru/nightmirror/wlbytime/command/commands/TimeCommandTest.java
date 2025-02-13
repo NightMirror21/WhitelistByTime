@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 public class TimeCommandTest {
@@ -54,14 +56,14 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void executeWithInsufficientArgumentsSendsIncorrectArgumentsMessage() {
         timeCommand.execute(issuer, new String[]{});
 
         verify(issuer).sendMessage("Incorrect arguments.");
     }
 
     @Test
-    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonexistentPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
 
@@ -71,7 +73,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_WithInvalidOperation_ShouldSendIncorrectArgumentsMessage() {
+    public void executeWithInvalidOperationSendsIncorrectArgumentsMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
 
@@ -81,7 +83,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithInvalidTimeSendsTimeIsIncorrectMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(convertor.getTime("1x")).thenReturn(Duration.ZERO);
@@ -92,7 +94,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_AddOperation_EntryIsForever_ShouldSendCantAddTimeForeverMessage() {
+    public void executeAddOperationEntryIsForeverSendsCantAddTimeForeverMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(true);
@@ -101,13 +103,12 @@ public class TimeCommandTest {
         timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
 
         verify(issuer).sendMessage("Cannot add time because player is forever.");
-
         verify(timeService, never()).canAdd(any(), any(Duration.class));
         verify(timeService, never()).add(any(), any(Duration.class));
     }
 
     @Test
-    public void testExecute_RemoveOperation_EntryIsForever_ShouldSendCantRemoveTimeForeverMessage() {
+    public void executeRemoveOperationEntryIsForeverSendsCantRemoveTimeForeverMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(true);
@@ -116,13 +117,12 @@ public class TimeCommandTest {
         timeCommand.execute(issuer, new String[]{"remove", nickname, "1h"});
 
         verify(issuer).sendMessage("Cannot remove time because player is forever.");
-
         verify(timeService, never()).canRemove(any(), any(Duration.class));
         verify(timeService, never()).remove(any(), any(Duration.class));
     }
 
     @Test
-    public void testExecute_AddOperation_CanAdd_ShouldSendAddTimeMessage() {
+    public void executeAddOperationCanAddSendsAddTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
@@ -137,7 +137,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_AddOperation_CannotAdd_ShouldSendCantAddTimeMessage() {
+    public void executeAddOperationCannotAddSendsCantAddTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
@@ -150,7 +150,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_RemoveOperation_CanRemove_ShouldSendRemoveTimeMessage() {
+    public void executeRemoveOperationCanRemoveSendsRemoveTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
@@ -165,7 +165,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_RemoveOperation_CannotRemove_ShouldSendCantRemoveTimeMessage() {
+    public void executeRemoveOperationCannotRemoveSendsCantRemoveTimeMessage() {
         String nickname = "somePlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
@@ -178,9 +178,8 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testExecute_SetOperation_ShouldSendSetTimeMessage() {
+    public void executeSetOperationSendsSetTimeMessage() {
         String nickname = "somePlayer";
-
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
@@ -197,9 +196,8 @@ public class TimeCommandTest {
         verify(issuer).sendMessage("Set somePlayer's time to 1 hour.");
     }
 
-
     @Test
-    public void testGetTabulate_WithoutArguments_ShouldReturnOperations() {
+    public void tabulateWithoutArgumentsReturnsOperations() {
         Set<String> expected = Set.of("add", "remove", "set");
 
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{});
@@ -208,14 +206,14 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithInvalidOperation_ShouldReturnEmptySet() {
+    public void tabulateWithInvalidOperationReturnsEmptySet() {
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{"invalid"});
 
         assertEquals(Set.of(), result);
     }
 
     @Test
-    public void testGetTabulate_WithValidOperation_ShouldReturnIssuerNickname() {
+    public void tabulateWithValidOperationReturnsIssuerNickname() {
         when(issuer.getNickname()).thenReturn("nickname");
 
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{"add"});
@@ -224,7 +222,7 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithOperationAndNickname_ShouldReturnRandomTime() {
+    public void tabulateWithOperationAndNicknameReturnsRandomTime() {
         when(timeRandom.getRandomOneTime()).thenReturn("1h");
 
         Set<String> result = timeCommand.getTabulate(issuer, new String[]{"add", "nickname"});

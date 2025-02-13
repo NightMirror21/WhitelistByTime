@@ -11,54 +11,42 @@ import static org.mockito.Mockito.when;
 
 public class AccessEntryCheckerImplTest {
 
-    private AccessEntryCheckerImpl accessEntryChecker;
+    private AccessEntryCheckerImpl checker;
 
     @BeforeEach
     public void setUp() {
-        accessEntryChecker = new AccessEntryCheckerImpl();
+        checker = new AccessEntryCheckerImpl();
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsCurrentlyActiveAndNotFrozen_ShouldReturnTrue() {
+    public void allowedWhenActiveAndNotFrozen() {
         EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(false);
         when(entry.isActive()).thenReturn(true);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertTrue(result);
+        assertTrue(checker.isAllowed(entry));
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsCurrentlyActiveButFrozen_ShouldReturnFalse() {
+    public void notAllowedWhenActiveAndFrozen() {
         EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(true);
         when(entry.isActive()).thenReturn(true);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertFalse(result);
+        assertFalse(checker.isAllowed(entry));
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsInactiveAndNotFrozen_ShouldReturnFalse() {
+    public void notAllowedWhenInactiveAndNotFrozen() {
         EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(false);
         when(entry.isActive()).thenReturn(false);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertFalse(result);
+        assertFalse(checker.isAllowed(entry));
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsInactiveAndFrozen_ShouldReturnFalse() {
+    public void notAllowedWhenInactiveAndFrozen() {
         EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(true);
         when(entry.isActive()).thenReturn(false);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertFalse(result);
+        assertFalse(checker.isAllowed(entry));
     }
 }

@@ -43,17 +43,17 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testGetPermission_ShouldReturnCorrectPermission() {
+    public void getPermissionReturnsCorrectPermission() {
         assertEquals("wlbytime.add", addCommand.getPermission());
     }
 
     @Test
-    public void testGetName_ShouldReturnCorrectName() {
+    public void getNameReturnsCorrectName() {
         assertEquals("add", addCommand.getName());
     }
 
     @Test
-    public void testExecute_WithNoArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void executeNoArgumentsSendsIncorrectArgumentsMessage() {
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments!");
 
         addCommand.execute(issuer, new String[]{});
@@ -62,7 +62,7 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testExecute_WithPlayerAlreadyInWhitelist_ShouldSendAlreadyInWhitelistMessage() {
+    public void executePlayerAlreadyInWhitelistSendsAlreadyInWhitelistMessage() {
         String nickname = "existingPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(EntryImpl.builder().build()));
         when(messages.getPlayerAlreadyInWhitelist()).thenReturn("%nickname% is already in the whitelist!");
@@ -73,7 +73,7 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testExecute_WithValidNickname_ShouldAddPlayerWithoutTime() {
+    public void executeValidNicknameAddsPlayerWithoutTime() {
         String nickname = "newPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% successfully added!");
@@ -85,12 +85,13 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testExecute_WithNicknameAndTime_ShouldAddPlayerWithTime() {
+    public void executeNicknameAndTimeAddsPlayerWithTime() {
         String nickname = "timedPlayer";
         String timeArgument = "1d 2h";
         when(finder.find(nickname)).thenReturn(Optional.empty());
-        when(convertor.getTime(timeArgument)).thenReturn(Duration.ofHours(25));
-        when(convertor.getTimeLine(Duration.ofHours(25))).thenReturn("1 day 1 hour");
+        Duration duration = Duration.ofHours(25);
+        when(convertor.getTime(timeArgument)).thenReturn(duration);
+        when(convertor.getTimeLine(duration)).thenReturn("1 day 1 hour");
         when(messages.getSuccessfullyAddedForTime()).thenReturn("Player %nickname% added for %time%!");
 
         addCommand.execute(issuer, new String[]{nickname, timeArgument});
@@ -99,11 +100,11 @@ public class AddCommandTest {
         verify(service).create(eq(nickname), timeCaptor.capture());
         verify(issuer).sendMessage("Player timedPlayer added for 1 day 1 hour!");
 
-        assertTrue(timeCaptor.getValue().isAfter(Instant.now().minus(Duration.ofHours(25))));
+        assertTrue(timeCaptor.getValue().isAfter(Instant.now().minus(duration)));
     }
 
     @Test
-    public void testExecute_WithMultipleArgumentsForTime_ShouldConcatenateAndConvertTime() {
+    public void executeMultipleArgumentsForTimeConcatenatesAndConvertsTime() {
         String nickname = "concatPlayer";
         String[] args = {"concatPlayer", "1d", "2h"};
 
@@ -122,16 +123,14 @@ public class AddCommandTest {
         verify(service).create(eq(nickname), instantCaptor.capture());
 
         Instant actualTime = instantCaptor.getValue();
-
         long allowedDifference = 100L;
 
         assertTrue(Math.abs(actualTime.toEpochMilli() - expectedTime.toEpochMilli()) < allowedDifference);
-
         verify(issuer).sendMessage("Player concatPlayer added for 1 day 2 hours!");
     }
 
     @Test
-    public void testGetTabulate_WithNoArgs_ShouldReturnIssuerNickname() {
+    public void getTabulateNoArgsReturnsIssuerNickname() {
         when(issuer.getNickname()).thenReturn("issuerNickname");
 
         Set<String> tabulate = addCommand.getTabulate(issuer, new String[]{});
@@ -140,7 +139,7 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithArgs_ShouldReturnRandomOneTime() {
+    public void getTabulateWithArgsReturnsRandomOneTime() {
         when(random.getRandomOneTime()).thenReturn("1h");
 
         Set<String> tabulate = addCommand.getTabulate(issuer, new String[]{"someArg"});
@@ -149,7 +148,7 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testAddPlayerWithoutTime_ShouldSendSuccessMessage() {
+    public void executePlayerWithoutTimeSendsSuccessMessage() {
         String nickname = "noTimePlayer";
         when(messages.getSuccessfullyAdded()).thenReturn("Player %nickname% successfully added!");
 
@@ -160,7 +159,7 @@ public class AddCommandTest {
     }
 
     @Test
-    public void testAddPlayerWithTime_ShouldSendFormattedSuccessMessage() {
+    public void executePlayerWithTimeSendsFormattedSuccessMessage() {
         String nickname = "timePlayer";
         String timeArgument = "3d";
 
@@ -179,7 +178,6 @@ public class AddCommandTest {
         verify(service).create(eq(nickname), instantCaptor.capture());
 
         Instant actualTime = instantCaptor.getValue();
-
         assertEquals(expectedTime.getEpochSecond(), actualTime.getEpochSecond());
 
         verify(issuer).sendMessage("Player timePlayer added for 3 days!");

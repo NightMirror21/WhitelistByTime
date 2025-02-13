@@ -35,17 +35,17 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testGetPermission_ShouldReturnCorrectPermission() {
+    public void getPermissionReturnsCorrectPermission() {
         assertEquals("wlbytime.checkme", checkMeCommand.getPermission());
     }
 
     @Test
-    public void testGetName_ShouldReturnCorrectName() {
+    public void getNameReturnsCorrectName() {
         assertEquals("checkme", checkMeCommand.getName());
     }
 
     @Test
-    public void testExecute_WhenEntryNotFound_ShouldSendNotInWhitelistMessage() {
+    public void executeWhenEntryNotFoundSendsNotInWhitelistMessage() {
         when(issuer.getNickname()).thenReturn("testUser");
         when(finder.find("testUser")).thenReturn(Optional.empty());
         when(messages.getCheckMeNotInWhitelist()).thenReturn("You are not in the whitelist!");
@@ -56,7 +56,7 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryInactive_ShouldSendNotInWhitelistMessage() {
+    public void executeWhenEntryInactiveSendsNotInWhitelistMessage() {
         EntryImpl inactiveEntry = mock(EntryImpl.class);
         when(inactiveEntry.isInactive()).thenReturn(true);
         when(issuer.getNickname()).thenReturn("testUser");
@@ -69,7 +69,7 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryIsForever_ShouldSendForeverMessage() {
+    public void executeWhenEntryIsForeverSendsForeverMessage() {
         EntryImpl foreverEntry = mock(EntryImpl.class);
         when(foreverEntry.isInactive()).thenReturn(false);
         when(foreverEntry.isForever()).thenReturn(true);
@@ -83,7 +83,7 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryIsFrozen_ShouldSendFrozenMessage() {
+    public void executeWhenEntryIsFrozenSendsFrozenMessage() {
         EntryImpl frozenEntry = mock(EntryImpl.class);
         when(frozenEntry.isInactive()).thenReturn(false);
         when(frozenEntry.isForever()).thenReturn(false);
@@ -100,7 +100,7 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryIsActiveForTime_ShouldSendWhitelistForTimeMessage() {
+    public void executeWhenEntryIsActiveForTimeSendsWhitelistForTimeMessage() {
         EntryImpl timedEntry = mock(EntryImpl.class);
         when(timedEntry.isInactive()).thenReturn(false);
         when(timedEntry.isForever()).thenReturn(false);
@@ -117,7 +117,7 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_ShouldReturnEmptySet() {
+    public void getTabulateReturnsEmptySet() {
         Set<String> tabulate = checkMeCommand.getTabulate(issuer, new String[]{});
         assertTrue(tabulate.isEmpty());
     }

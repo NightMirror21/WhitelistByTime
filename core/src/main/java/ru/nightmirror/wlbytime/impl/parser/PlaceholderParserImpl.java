@@ -1,12 +1,12 @@
-package ru.nightmirror.wlbytime.interfaces.parser;
+package ru.nightmirror.wlbytime.impl.parser;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
-import ru.nightmirror.wlbytime.impl.parser.PlaceholderParser;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.parser.PlaceholderParser;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 import java.time.Duration;

@@ -42,17 +42,17 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testGetPermission_ShouldReturnCorrectPermission() {
+    public void getPermissionReturnsCorrectPermission() {
         assertEquals("wlbytime.freeze", freezeCommand.getPermission());
     }
 
     @Test
-    public void testGetName_ShouldReturnCorrectName() {
+    public void getNameReturnsCorrectName() {
         assertEquals("freeze", freezeCommand.getName());
     }
 
     @Test
-    public void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void executeWithInsufficientArgumentsSendsIncorrectArgumentsMessage() {
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided!");
 
         freezeCommand.execute(issuer, new String[]{});
@@ -63,7 +63,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonExistentPlayer";
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.empty());
@@ -78,7 +78,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithInvalidTimeSendsTimeIsIncorrectMessage() {
         String nickname = "validPlayer";
         String timeString = "invalidTime";
         EntryImpl activeEntry = mock(EntryImpl.class);
@@ -99,7 +99,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerIsInactive_ShouldSendPlayerExpiredMessage() {
+    public void executePlayerInactiveSendsPlayerExpiredMessage() {
         String nickname = "expiredPlayer";
         EntryImpl expiredEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
@@ -116,7 +116,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerAlreadyFrozen_ShouldSendPlayerAlreadyFrozenMessage() {
+    public void executePlayerAlreadyFrozenSendsPlayerAlreadyFrozenMessage() {
         String nickname = "frozenPlayer";
         EntryImpl frozenEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
@@ -136,7 +136,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_SuccessfullyFreezePlayer_ShouldSendPlayerFrozenMessage() {
+    public void executeSuccessfullyFreezesPlayerSendsPlayerFrozenMessage() {
         String nickname = "activePlayer";
         String timeString = "3h";
         EntryImpl activeEntry = mock(EntryImpl.class);
@@ -161,7 +161,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithMultipleTimeArguments_ShouldConcatenateAndFreezePlayer() {
+    public void executeWithMultipleTimeArgumentsConcatenatesAndFreezesPlayer() {
         String nickname = "multiTimePlayer";
         String[] args = {nickname, "1d", "2h"};
         String concatenatedTime = "1d2h";
@@ -190,7 +190,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithNoArguments_ShouldReturnIssuerNickname() {
+    public void getTabulateNoArgsReturnsIssuerNickname() {
         String nickname = "issuerUser";
         when(issuer.getNickname()).thenReturn(nickname);
 
@@ -200,7 +200,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithArguments_ShouldReturnRandomTime() {
+    public void getTabulateWithArgsReturnsRandomTime() {
         String randomTime = "45m";
         when(timeRandom.getRandomOneTime()).thenReturn(randomTime);
 
@@ -210,7 +210,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_FreezePlayer_ConstructsCorrectMessage() {
+    public void executeFreezePlayerConstructsCorrectMessage() {
         String nickname = "testFreezePlayer";
         String timeString = "30m";
         Duration duration = Duration.ofMinutes(30);
@@ -237,7 +237,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithEmptyTimeArguments_ShouldConcatenateToEmptyString() {
+    public void executeWithEmptyTimeArgumentsConcatenatesToEmptyString() {
         String nickname = "emptyTimePlayer";
         String[] args = {nickname};
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided!");
@@ -249,7 +249,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithNegativeTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithNegativeTimeSendsTimeIsIncorrectMessage() {
         String nickname = "negativeTimePlayer";
         String timeString = "-1h";
         Duration duration = Duration.ofHours(-1);
@@ -272,7 +272,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithZeroTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithZeroTimeSendsTimeIsIncorrectMessage() {
         String nickname = "zeroTimePlayer";
         String timeString = "0h";
         Duration duration = Duration.ofHours(0);
@@ -295,7 +295,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_SuccessfulFreeze_ShouldNotThrowException() {
+    public void executeSuccessfulFreezeDoesNotThrowException() {
         String nickname = "safeFreezePlayer";
         String timeString = "15m";
         Duration duration = Duration.ofMinutes(15);

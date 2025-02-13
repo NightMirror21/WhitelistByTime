@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class GetAllCommandTest {
@@ -45,7 +46,7 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testExecute_WithNoEntries_ShouldSendEmptyListMessage() {
+    public void executeNoEntriesSendsEmptyListMessage() {
         when(service.getEntries()).thenReturn(Set.of());
 
         getAllCommand.execute(issuer, new String[]{});
@@ -55,7 +56,7 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testExecute_WithEntriesOnFirstPage_ShouldSendEntriesWithHeaderAndFooter() {
+    public void executeEntriesOnFirstPageSendsEntriesWithHeaderAndFooter() {
         EntryImpl entry1 = mockEntry("player1", true, false, false, Duration.ofSeconds(5));
         EntryImpl entry2 = mockEntry("player2", true, true, false, Duration.ofSeconds(3));
         EntryImpl entry3 = mockEntry("player3", false, false, false, Duration.ZERO);
@@ -74,7 +75,7 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testExecute_WithPageArgument_ShouldDisplayCorrectPageEntries() {
+    public void executeWithPageArgumentDisplaysCorrectPageEntries() {
         List<EntryImpl> entries = List.of(
                 mockEntry("player1", true, false, false, Duration.ofSeconds(5)),
                 mockEntry("player2", true, false, true, Duration.ZERO),
@@ -101,7 +102,7 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testExecute_WithInvalidPageNumber_ShouldSendPageNotExistsMessage() {
+    public void executeWithInvalidPageNumberSendsPageNotExistsMessage() {
         List<EntryImpl> entries = List.of(
                 mockEntry("player1", true, false, false, Duration.ofSeconds(5)),
                 mockEntry("player2", true, false, true, Duration.ZERO)
@@ -117,7 +118,7 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testExecute_WithInvalidPageArgument_ShouldSendIncorrectArgumentsMessage() {
+    public void executeWithInvalidPageArgumentSendsIncorrectArgumentsMessage() {
         getAllCommand.execute(issuer, new String[]{"abc"});
 
         verify(issuer).sendMessage("Incorrect arguments provided.");
@@ -125,17 +126,17 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void testTabulate_WithNoArgs_ShouldReturnPagesUpTo20() {
+    public void tabulateNoArgsReturnsPagesUpTo20() {
         Set<String> tabulationResult = getAllCommand.getTabulate(issuer, new String[]{});
 
         assertEquals(20, tabulationResult.size());
         for (int i = 1; i <= 20; i++) {
-            assert(tabulationResult.contains(String.valueOf(i)));
+            assertTrue(tabulationResult.contains(String.valueOf(i)));
         }
     }
 
     @Test
-    public void testTabulate_WithArgs_ShouldReturnEmptySet() {
+    public void tabulateWithArgsReturnsEmptySet() {
         Set<String> tabulationResult = getAllCommand.getTabulate(issuer, new String[]{"1"});
 
         assertEquals(Set.of(), tabulationResult);

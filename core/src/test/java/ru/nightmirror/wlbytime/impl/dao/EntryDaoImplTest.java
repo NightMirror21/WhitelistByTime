@@ -7,14 +7,17 @@ import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Freezing;
 
+import java.io.File;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class EntryDaoImplTest {
 
@@ -23,9 +26,9 @@ public class EntryDaoImplTest {
 
     @BeforeEach
     public void setUp() {
-        databaseConfig = mock(DatabaseConfig.class);
-        when(databaseConfig.getType()).thenReturn("sqlite");
-        when(databaseConfig.getName()).thenReturn(":memory:");
+        databaseConfig = new DatabaseConfig();
+        databaseConfig.setType("sqlite");
+        databaseConfig.setName(":memory:");
         entryDao = new EntryDaoImpl(databaseConfig);
     }
 
@@ -35,302 +38,326 @@ public class EntryDaoImplTest {
     }
 
     @Test
-    public void testInitialization_WithValidConfig_ShouldInitializeDao() {
+    public void initializationWithValidConfigCreatesDao() {
         assertNotNull(entryDao);
     }
 
     @Test
-    public void testInitialization_WithInvalidDatabaseType_ShouldThrowException() {
-        when(databaseConfig.getType()).thenReturn("unsupported_db_type");
+    public void initializationWithInvalidDatabaseTypeThrowsException() {
+        databaseConfig.setType("unsupported_db_type");
         assertThrows(EntryDaoImpl.UnsupportedDatabaseTypeException.class, () -> new EntryDaoImpl(databaseConfig));
     }
 
     @Test
-    public void testReopenConnection_WithNewConfig_ShouldCloseOldConnectionAndReinitialize() {
-        DatabaseConfig newConfig = mock(DatabaseConfig.class);
-        when(newConfig.getType()).thenReturn("sqlite");
-        when(newConfig.getName()).thenReturn(":memory:");
-
-        assertDoesNotThrow(() -> entryDao.reopenConnection(newConfig));
-
-        assertNotNull(entryDao);
+    public void constructorWithDataFolderCreatesDao() {
+        File folder = new File(System.getProperty("java.io.tmpdir"), "testDaoFolder");
+        folder.mkdirs();
+        EntryDaoImpl dao = new EntryDaoImpl(folder, databaseConfig);
+        assertNotNull(dao);
     }
 
     @Test
-    public void testUpdateEntry_WithFreezing_ShouldPersistFreezing() {
+    public void reopenConnectionWithNewConfigReinitializesDao() {
+        DatabaseConfig newConfig = new DatabaseConfig();
+        newConfig.setType("sqlite");
+        newConfig.setName(":memory:");
+        assertDoesNotThrow(() -> entryDao.reopenConnection(newConfig));
+    }
+
+    @Test
+    public void reopenConnectionThrowsOnFailure() {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("unsupported");
+        assertThrows(EntryDaoImpl.UnsupportedDatabaseTypeException.class, () -> entryDao.reopenConnection(config));
+    }
+
+    @Test
+    public void createEntriesWithEmptySet() {
+        Set<String> emptySet = Collections.emptySet();
+        entryDao.create(emptySet);
+        Set<EntryImpl> allEntries = entryDao.getAll();
+        assertTrue(allEntries.isEmpty());
+    }
+
+    @Test
+    public void createEntriesWithMultipleNicknames() {
+        Set<String> nicknames = Set.of("user1", "user2", "user3");
+        entryDao.create(nicknames);
+
+        Set<EntryImpl> allEntries = entryDao.getAll();
+        assertEquals(3, allEntries.size());
+
+        Set<String> retrievedNicknames = allEntries.stream()
+                .map(EntryImpl::getNickname)
+                .collect(Collectors.toSet());
+        assertTrue(retrievedNicknames.containsAll(nicknames));
+    }
+
+
+    @Test
+    public void closeMultipleTimesDoesNotThrowError() {
+        assertDoesNotThrow(() -> entryDao.close());
+        assertDoesNotThrow(() -> entryDao.close());
+    }
+
+    @Test
+    public void updateEntryWithFreezingPersistsFreezing() {
         EntryImpl entry = entryDao.create("freezing_test");
         Freezing freezing = new Freezing(entry.getId(), Duration.ofSeconds(10));
         entry.setFreezing(freezing);
         entryDao.update(entry);
-
-        Optional<EntryImpl> retrievedEntry = entryDao.get("freezing_test");
-        assertTrue(retrievedEntry.isPresent());
-        assertNotNull(retrievedEntry.get().getFreezing());
-        assertEquals(Duration.ofSeconds(10), retrievedEntry.get().getFreezing().getDurationOfFreeze());
+        Optional<EntryImpl> retrieved = entryDao.get("freezing_test");
+        assertTrue(retrieved.isPresent());
+        assertNotNull(retrieved.get().getFreezing());
+        assertEquals(Duration.ofSeconds(10), retrieved.get().getFreezing().getDurationOfFreeze());
     }
 
     @Test
-    public void testUpdateEntry_WithLastJoin_ShouldPersistLastJoin() {
+    public void updateEntryWithLastJoinPersistsLastJoin() {
         EntryImpl entry = entryDao.create("lastjoin_test");
         entry.updateLastJoin();
         entryDao.update(entry);
-
-        Optional<EntryImpl> retrievedEntry = entryDao.get("lastjoin_test");
-        assertTrue(retrievedEntry.isPresent());
-        assertNotNull(retrievedEntry.get().getLastJoin());
-        assertTrue(retrievedEntry.get().isJoined());
+        Optional<EntryImpl> retrieved = entryDao.get("lastjoin_test");
+        assertTrue(retrieved.isPresent());
+        assertNotNull(retrieved.get().getLastJoin());
+        assertTrue(retrieved.get().isJoined());
     }
 
     @Test
-    public void testCreateEntry_DuplicateNickname_ShouldThrowException() {
+    public void createEntryDuplicateNicknameThrowsException() {
         entryDao.create("duplicate_test");
         assertThrows(EntryDaoImpl.DataAccessException.class, () -> entryDao.create("duplicate_test"));
     }
 
     @Test
-    public void testGetEntry_WithAllRelatedData_ShouldReturnCompleteEntry() {
+    public void getEntryWithAllRelatedDataReturnsCompleteEntry() {
         String nickname = "full_entry_test";
         EntryImpl entry = entryDao.create(nickname, Instant.now().plus(Duration.ofSeconds(10)));
         entry.freeze(Duration.ofSeconds(5));
         entry.updateLastJoin();
         entryDao.update(entry);
-
-        Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
-        assertTrue(retrievedEntry.isPresent());
-        EntryImpl fullEntry = retrievedEntry.get();
+        Optional<EntryImpl> retrieved = entryDao.get(nickname);
+        assertTrue(retrieved.isPresent());
+        EntryImpl fullEntry = retrieved.get();
         assertNotNull(fullEntry.getExpiration());
         assertNotNull(fullEntry.getFreezing());
         assertNotNull(fullEntry.getLastJoin());
     }
 
     @Test
-    public void testCreateEntry_WithNickname_ShouldCreateEntryInDatabase() {
+    public void createEntryWithNicknameCreatesEntryInDatabase() {
         String nickname = "test_nickname";
         EntryImpl entry = entryDao.create(nickname);
-
         assertNotNull(entry);
         assertEquals(nickname, entry.getNickname());
-
-        Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
-        assertTrue(retrievedEntry.isPresent());
-        assertEquals(nickname, retrievedEntry.get().getNickname());
+        Optional<EntryImpl> retrieved = entryDao.get(nickname);
+        assertTrue(retrieved.isPresent());
+        assertEquals(nickname, retrieved.get().getNickname());
     }
 
     @Test
-    public void testCreateEntry_WithExpirationTime_ShouldCreateEntryWithExpiration() {
+    public void createEntryWithExpirationTimeCreatesEntryWithExpiration() {
         String nickname = "expiring_nickname";
-
-        Instant fixedNow = Instant.now();
-        Duration duration = Duration.ofSeconds(10);
-        Instant expectedExpirationTime = fixedNow.plus(duration);
-
-        EntryImpl entry = entryDao.create(nickname, expectedExpirationTime);
-
+        Instant expectedTime = Instant.now().plus(Duration.ofSeconds(10));
+        EntryImpl entry = entryDao.create(nickname, expectedTime);
         assertNotNull(entry);
         assertEquals(nickname, entry.getNickname());
         assertNotNull(entry.getExpiration());
-
-        Instant actualExpirationTime = entry.getExpiration().getExpirationTime();
-
-        long toleranceMillis = 100;
-
-        assertTrue(Math.abs(actualExpirationTime.toEpochMilli() - expectedExpirationTime.toEpochMilli()) <= toleranceMillis);
+        Instant actualTime = entry.getExpiration().getExpirationTime();
+        long tolerance = 100;
+        assertTrue(Math.abs(actualTime.toEpochMilli() - expectedTime.toEpochMilli()) <= tolerance);
     }
 
-    
-    
-
     @Test
-    public void testGetEntry_ByExistingNickname_ShouldReturnEntry() {
+    public void getEntryByExistingNicknameReturnsEntry() {
         String nickname = "existing_nickname";
         entryDao.create(nickname);
-
         Optional<EntryImpl> result = entryDao.get(nickname);
-
         assertTrue(result.isPresent());
         assertEquals(nickname, result.get().getNickname());
     }
 
     @Test
-    public void testGetEntry_ByNonExistingNickname_ShouldReturnEmptyOptional() {
+    public void getEntryByNonExistingNicknameReturnsEmptyOptional() {
         Optional<EntryImpl> result = entryDao.get("non_existing_nickname");
-
         assertFalse(result.isPresent());
     }
 
     @Test
-    public void testGetEntryLike_BySimilarNickname_ShouldReturnMatchingEntry() {
+    public void getEntryLikeBySimilarNicknameReturnsMatchingEntry() {
         String nickname = "SIMILAR";
         entryDao.create(nickname);
-
         Optional<EntryImpl> result = entryDao.getLike("similar");
-
         assertTrue(result.isPresent());
         assertEquals(nickname, result.get().getNickname());
     }
 
     @Test
-    public void testGetEntryLike_ByNoMatchingNickname_ShouldReturnEmptyOptional() {
+    public void getEntryLikeByNoMatchingNicknameReturnsEmptyOptional() {
         entryDao.create("some_nickname");
-
         Optional<EntryImpl> result = entryDao.getLike("unmatched");
-
         assertFalse(result.isPresent());
     }
 
     @Test
-    public void testGetAll_ShouldReturnAllEntries() {
+    public void getAllReturnsAllEntries() {
         entryDao.create("first_nickname");
         entryDao.create("second_nickname");
-
-        Set<EntryImpl> allEntries = entryDao.getAll();
-
-        assertEquals(2, allEntries.size());
+        Set<EntryImpl> all = entryDao.getAll();
+        assertEquals(2, all.size());
     }
 
     @Test
-    public void testUpdateEntry_ShouldModifyExistingEntry() {
+    public void updateEntryModifiesExistingEntry() {
         EntryImpl entry = entryDao.create("updatable_nickname");
         entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
         entryDao.update(entry);
-
         Optional<EntryImpl> result = entryDao.get(entry.getNickname());
-
         assertTrue(result.isPresent());
         assertNotNull(result.get().getExpiration());
     }
 
     @Test
-    public void testDeleteExpirationTableEntry_ShouldRemoveExpirationForEntry() {
+    public void updateEntryRemoveExpirationDeletesExpirationRecord() {
         EntryImpl entry = entryDao.create("entry_with_expiration");
         entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
         entryDao.update(entry);
-
         entry.setForever();
         entryDao.update(entry);
-
         Optional<EntryImpl> result = entryDao.get(entry.getNickname());
         assertTrue(result.isPresent());
         assertNull(result.get().getExpiration());
     }
 
     @Test
-    public void testClose_WithOpenConnection_ShouldCloseWithoutError() {
-        assertDoesNotThrow(() -> entryDao.close());
+    public void updateEntryRemoveFreezingDeletesFreezingRecord() {
+        String nickname = "freezing_removal";
+        EntryImpl entry = entryDao.create(nickname, Instant.now().plus(Duration.ofSeconds(10)));
+        entry.freeze(Duration.ofSeconds(5));
+        entryDao.update(entry);
+        Optional<EntryImpl> before = entryDao.get(nickname);
+        assertTrue(before.isPresent());
+        assertNotNull(before.get().getFreezing());
+        entry.setFreezing(null);
+        entryDao.update(entry);
+        Optional<EntryImpl> after = entryDao.get(nickname);
+        assertTrue(after.isPresent());
+        assertNull(after.get().getFreezing());
     }
 
     @Test
-    public void testInitialization_WithUnsupportedDatabaseType_ShouldThrowUnsupportedDatabaseTypeException() {
-        when(databaseConfig.getType()).thenReturn("unknown_db");
-        assertThrows(EntryDaoImpl.UnsupportedDatabaseTypeException.class, () -> new EntryDaoImpl(databaseConfig));
+    public void updateEntryRemoveLastJoinDeletesLastJoinRecord() {
+        String nickname = "lastjoin_removal";
+        EntryImpl entry = entryDao.create(nickname);
+        entry.updateLastJoin();
+        entryDao.update(entry);
+        Optional<EntryImpl> before = entryDao.get(nickname);
+        assertTrue(before.isPresent());
+        assertNotNull(before.get().getLastJoin());
+        entry.setLastJoin(null);
+        entryDao.update(entry);
+        Optional<EntryImpl> after = entryDao.get(nickname);
+        assertTrue(after.isPresent());
+        assertNull(after.get().getLastJoin());
     }
 
     @Test
-    public void testReopenConnection_WithSameConfig_ShouldNotThrowErrors() {
-        assertDoesNotThrow(() -> entryDao.reopenConnection(databaseConfig));
-    }
-
-    @Test
-    public void testGetAll_WithEmptyDatabase_ShouldReturnEmptySet() {
-        Set<EntryImpl> allEntries = entryDao.getAll();
-        assertTrue(allEntries.isEmpty());
-    }
-
-    @Test
-    public void testGetEntryLike_MultipleMatches_ShouldReturnFirstMatch() {
-        entryDao.create("SiMiLaR");
-        entryDao.create("SIMILAR");
-
-        Optional<EntryImpl> result = entryDao.getLike("similar");
-        assertTrue(result.isPresent());
-
-    }
-
-    @Test
-    public void testUpdateEntry_TransactionRollbackOnFailure() {
-        EntryImpl entry = entryDao.create("rollback_test");
-        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
-
-        // Simulate a failure by causing an invalid operation
-        entry.setNickname(null);
-
-        assertThrows(EntryDaoImpl.DataAccessException.class, () -> entryDao.update(entry));
-
-        Optional<EntryImpl> retrievedEntry = entryDao.get("rollback_test");
-        assertTrue(retrievedEntry.isPresent());
-        assertEquals("rollback_test", retrievedEntry.get().getNickname());
-    }
-
-    @Test
-    public void testInitConnection_ShouldCreateRequiredTables() {
-        DatabaseConfig newConfig = mock(DatabaseConfig.class);
-        when(newConfig.getType()).thenReturn("sqlite");
-        when(newConfig.getName()).thenReturn(":memory:");
-
-        EntryDaoImpl dao = new EntryDaoImpl(newConfig);
-        assertNotNull(dao);
-    }
-
-    @Test
-    public void testCreateEntry_WithExpiration_ShouldPersistExpiration() {
-        String nickname = "expiring_entry";
-
-        Instant fixedNow = Instant.now();
-        Duration duration = Duration.ofSeconds(10);
-        Instant expectedExpirationTime = fixedNow.plus(duration);
-
-        EntryImpl entry = entryDao.create(nickname, expectedExpirationTime);
-
-        assertNotNull(entry);
-        assertNotNull(entry.getExpiration());
-
-        Instant actualExpirationTime = entry.getExpiration().getExpirationTime();
-
-        long toleranceMillis = 100;
-
-        assertTrue(Math.abs(actualExpirationTime.toEpochMilli() - expectedExpirationTime.toEpochMilli()) <= toleranceMillis);
-
-        Optional<EntryImpl> retrievedEntry = entryDao.get(nickname);
-        assertTrue(retrievedEntry.isPresent());
-        assertNotNull(retrievedEntry.get().getExpiration());
-    }
-
-
-    @Test
-    public void testClose_MultipleTimes_ShouldNotThrowError() {
-        assertDoesNotThrow(() -> entryDao.close());
-        assertDoesNotThrow(() -> entryDao.close());
-    }
-
-    @Test
-    public void testRemoveEntry_ShouldDeleteEntryFromDatabase() {
+    public void removeEntryDeletesEntryFromDatabase() {
         String nickname = "removable_nickname";
         EntryImpl entry = entryDao.create(nickname);
-
         entryDao.remove(entry);
-
         Optional<EntryImpl> result = entryDao.get(nickname);
         assertFalse(result.isPresent());
     }
 
     @Test
-    public void testRemoveEntry_ShouldDeleteRelatedTables() {
+    public void removeEntryDeletesRelatedTables() {
         String nickname = "removable_with_related_data";
         EntryImpl entry = entryDao.create(nickname, Instant.now().plus(Duration.ofSeconds(10)));
-
         entryDao.remove(entry);
-
         Optional<EntryImpl> result = entryDao.get(nickname);
         assertFalse(result.isPresent());
-
-        Set<EntryImpl> allEntries = entryDao.getAll();
-        assertEquals(0, allEntries.size());
+        Set<EntryImpl> all = entryDao.getAll();
+        assertEquals(0, all.size());
     }
 
     @Test
-    public void testRemoveEntry_WhenEntryDoesNotExist_ShouldDoNothing() {
-        EntryImpl nonExistingEntry = EntryImpl.builder().id(999L).nickname("non_existing").build();
+    public void removeEntryWhenEntryDoesNotExistDoesNothing() {
+        EntryImpl nonExisting = EntryImpl.builder().id(999L).nickname("non_existing").build();
+        assertDoesNotThrow(() -> entryDao.remove(nonExisting));
+    }
 
-        assertDoesNotThrow(() -> entryDao.remove(nonExistingEntry));
+    @Test
+    public void updateEntryTransactionRollbackOnFailure() {
+        EntryImpl entry = entryDao.create("rollback_test");
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
+        entry.setNickname(null);
+        assertThrows(EntryDaoImpl.DataAccessException.class, () -> entryDao.update(entry));
+        Optional<EntryImpl> retrieved = entryDao.get("rollback_test");
+        assertTrue(retrieved.isPresent());
+        assertEquals("rollback_test", retrieved.get().getNickname());
+    }
+
+    @Test
+    public void getDatabaseUrlSqliteMemoryBranch() throws Exception {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("sqlite");
+        config.setName(":memory:");
+        Method method = EntryDaoImpl.class.getDeclaredMethod("getDatabaseUrl", DatabaseConfig.class);
+        method.setAccessible(true);
+        String url = (String) method.invoke(entryDao, config);
+        assertEquals("jdbc:sqlite::memory:", url);
+    }
+
+    @Test
+    public void getDatabaseUrlSqliteFileNoDataFolderBranch() throws Exception {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("sqlite");
+        config.setName("testdb");
+        Method method = EntryDaoImpl.class.getDeclaredMethod("getDatabaseUrl", DatabaseConfig.class);
+        method.setAccessible(true);
+        String url = (String) method.invoke(entryDao, config);
+        assertTrue(url.startsWith("jdbc:sqlite:"));
+        assertTrue(url.contains("testdb.db"));
+    }
+
+    @Test
+    public void getDatabaseUrlSqliteWithDataFolderBranch() throws Exception {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("sqlite");
+        config.setName("testdb");
+        File folder = new File(System.getProperty("java.io.tmpdir"), "folderTest");
+        folder.mkdirs();
+        EntryDaoImpl daoWithFolder = new EntryDaoImpl(folder, config);
+        Method method = EntryDaoImpl.class.getDeclaredMethod("getDatabaseUrl", DatabaseConfig.class);
+        method.setAccessible(true);
+        String url = (String) method.invoke(daoWithFolder, config);
+        String expectedPath = new File(folder, "testdb.db").getAbsolutePath();
+        assertTrue(url.startsWith("jdbc:sqlite:"));
+        assertTrue(url.contains(expectedPath));
+    }
+
+    @Test
+    public void getDatabaseUrlMysqlBranch() throws Exception {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("mysql");
+        config.setAddress("localhost");
+        config.setName("testdb");
+        config.setParams(List.of("autoReconnect=true", "useSSL=false"));
+        config.setUser("user");
+        config.setPassword("pass");
+        Method method = EntryDaoImpl.class.getDeclaredMethod("getDatabaseUrl", DatabaseConfig.class);
+        method.setAccessible(true);
+        String url = (String) method.invoke(entryDao, config);
+        assertEquals("jdbc:mysql://localhost/testdb?autoReconnect=true&useSSL=false", url);
+    }
+
+    @Test
+    public void getDatabaseUrlUnsupportedBranchThrowsException() throws Exception {
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("unsupported");
+        Method method = EntryDaoImpl.class.getDeclaredMethod("getDatabaseUrl", DatabaseConfig.class);
+        method.setAccessible(true);
+        assertThrows(Exception.class, () -> method.invoke(entryDao, config));
     }
 }

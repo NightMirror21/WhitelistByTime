@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.2'
+    id 'jacoco'
 }
 
 def javaVersion = JavaVersion.VERSION_21
@@ -62,9 +63,25 @@ tasks {
                 throw new GradleException("Mockito agent jar not found.")
             }
         }
+
+        finalizedBy jacocoTestReport
+    }
+
+    jacocoTestReport {
+        dependsOn test
+        reports {
+            xml.required = true
+            csv.required = false
+            html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+        }
     }
 
     shadowJar {
         dependsOn test
     }
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
