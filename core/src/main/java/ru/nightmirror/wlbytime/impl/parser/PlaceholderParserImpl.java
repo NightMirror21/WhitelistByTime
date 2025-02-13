@@ -62,9 +62,13 @@ public class PlaceholderParserImpl implements PlaceholderParser {
         } else if (!entry.isForever() && entry.isActive()) {
             remainingTime = entry.getLeftActiveDuration();
             output = config.getTimeLeft();
+        } else if (entry.isForever()) {
+            remainingTime = Duration.ofMillis(Long.MIN_VALUE);
+            output = config.getTimeLeft();
         } else {
             return EMPTY;
         }
+
 
         String time = timeConvertor.getTimeLine(remainingTime);
         return output.replace("%time%", time);
