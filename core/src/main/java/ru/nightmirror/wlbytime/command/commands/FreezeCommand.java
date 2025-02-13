@@ -92,6 +92,6 @@ public class FreezeCommand implements Command {
             return Set.of(issuer.getNickname());
         }
 
-        return Set.of(timeRandom.getRandomOneTime());
+        return timeRandom.getTimes();
     }
 }

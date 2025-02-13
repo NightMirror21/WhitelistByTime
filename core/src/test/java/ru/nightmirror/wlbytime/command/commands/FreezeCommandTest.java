@@ -201,12 +201,12 @@ public class FreezeCommandTest {
 
     @Test
     public void getTabulateWithArgsReturnsRandomTime() {
-        String randomTime = "45m";
-        when(timeRandom.getRandomOneTime()).thenReturn(randomTime);
+        when(timeRandom.getRandomOneTime()).thenReturn("1h");
+        when(timeRandom.getTimes()).thenReturn(Set.of("1h", "2h", "3h"));
 
         Set<String> tabulate = freezeCommand.getTabulate(issuer, new String[]{"arg1", "arg2"});
 
-        assertEquals(Set.of(randomTime), tabulate);
+        assertEquals(Set.of("1h", "2h", "3h"), tabulate);
     }
 
     @Test

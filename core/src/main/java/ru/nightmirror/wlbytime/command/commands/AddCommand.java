@@ -92,7 +92,7 @@ public class AddCommand implements Command {
         if (args.length == 0) {
             return Set.of(issuer.getNickname());
         } else {
-            return Set.of(random.getRandomOneTime());
+            return random.getTimes();
         }
     }
 }

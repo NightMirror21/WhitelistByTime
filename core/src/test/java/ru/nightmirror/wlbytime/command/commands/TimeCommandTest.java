@@ -224,9 +224,10 @@ public class TimeCommandTest {
     @Test
     public void tabulateWithOperationAndNicknameReturnsRandomTime() {
         when(timeRandom.getRandomOneTime()).thenReturn("1h");
+        when(timeRandom.getTimes()).thenReturn(Set.of("1h", "2h", "3h"));
 
-        Set<String> result = timeCommand.getTabulate(issuer, new String[]{"add", "nickname"});
+        Set<String> tabulate = timeCommand.getTabulate(issuer, new String[]{"add", "nickname"});
 
-        assertEquals(Set.of("1h"), result);
+        assertEquals(Set.of("1h", "2h", "3h"), tabulate);
     }
 }

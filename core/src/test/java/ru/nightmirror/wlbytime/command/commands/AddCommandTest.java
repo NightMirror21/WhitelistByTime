@@ -139,12 +139,13 @@ public class AddCommandTest {
     }
 
     @Test
-    public void getTabulateWithArgsReturnsRandomOneTime() {
+    public void getTabulateWithArgsReturnsRandomTime() {
         when(random.getRandomOneTime()).thenReturn("1h");
+        when(random.getTimes()).thenReturn(Set.of("1h", "2h", "3h"));
 
         Set<String> tabulate = addCommand.getTabulate(issuer, new String[]{"someArg"});
 
-        assertEquals(Set.of("1h"), tabulate);
+        assertEquals(Set.of("1h", "2h", "3h"), tabulate);
     }
 
     @Test

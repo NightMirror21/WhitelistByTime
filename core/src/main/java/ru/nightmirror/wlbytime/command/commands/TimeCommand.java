@@ -127,6 +127,6 @@ public class TimeCommand implements Command {
             return Set.of(issuer.getNickname());
         }
 
-        return Set.of(timeRandom.getRandomOneTime());
+        return timeRandom.getTimes();
     }
 }
