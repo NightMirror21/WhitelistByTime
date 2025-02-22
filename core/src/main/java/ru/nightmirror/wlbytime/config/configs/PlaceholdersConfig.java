@@ -31,6 +31,7 @@ public class PlaceholdersConfig extends YamlSerializable {
     @Comment(value = {
             @CommentValue("%wlbytime_time_left% - How much is left in whitelist")
     }, at = Comment.At.PREPEND)
+    String forever = "∞";
     String timeLeft = "%time%";
     String timeLeftWithFreeze = "❄️%time%❄️";
 

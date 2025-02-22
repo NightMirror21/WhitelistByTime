@@ -159,18 +159,14 @@ public class PlaceholderParserImplTest {
     @Test
     public void parseTimeLeftForeverReturnsForever() {
         String player = "testPlayer";
-        String timeLeft = "Time: %time%";
-        String mockedTime = "Forever";
         EntryImpl entry = EntryImpl.builder().expiration(null).build();
 
         when(entryFinder.find(player)).thenReturn(Optional.of(entry));
-        when(timeConvertor.getTimeLine(any(Duration.class))).thenReturn(mockedTime);
-        when(placeholdersConfig.getTimeLeft()).thenReturn(timeLeft);
+        when(placeholdersConfig.getForever()).thenReturn("Forever");
 
-        String expected = timeLeft.replace("%time%", mockedTime);
         String result = parser.parse(player, "time_left");
 
-        assertEquals(expected, result);
+        assertEquals("Forever", result);
     }
 
     @Test
