@@ -40,7 +40,7 @@ public class CommandProxy implements TabExecutor {
             return new ArrayList<>(commandDispatcher.getCommands());
         } else {
             String commandName = args[0];
-            String[] commandArgs = Arrays.copyOfRange(args, 1, args.length);
+            String[] commandArgs = Arrays.copyOfRange(args, 1, args.length - 1);
             return new ArrayList<>(commandDispatcher.dispatchTabulate(new CommandIssuerImpl(sender), commandName, commandArgs));
         }
     }
