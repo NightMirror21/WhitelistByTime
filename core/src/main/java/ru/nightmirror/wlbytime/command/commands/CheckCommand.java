@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -39,11 +39,10 @@ public class CheckCommand implements Command {
         }
 
         String nickname = args[0];
-        Optional<Entry> entry = finder.find(nickname);
+        Optional<EntryImpl> entry = finder.find(nickname);
         if (entry.isPresent()) {
             if (entry.get().isFreezeActive()) {
-                long timeInMillis = entry.get().getLeftFreezeTime();
-                String timeAsString = convertor.getTimeLine(timeInMillis);
+                String timeAsString = convertor.getTimeLine(entry.get().getLeftFreezeDuration());
                 issuer.sendMessage(messages.getPlayerFrozen()
                         .replace("%nickname%", nickname)
                         .replace("%time%", timeAsString));
@@ -51,8 +50,7 @@ public class CheckCommand implements Command {
                 if (entry.get().isForever()) {
                     issuer.sendMessage(messages.getCheckStillInWhitelist().replace("%nickname%", nickname));
                 } else {
-                    long timeInMillis = entry.get().getLeftActiveTime();
-                    String timeAsString = convertor.getTimeLine(timeInMillis);
+                    String timeAsString = convertor.getTimeLine(entry.get().getLeftActiveDuration());
                     issuer.sendMessage(messages.getCheckStillInWhitelistForTime()
                             .replace("%nickname%", nickname)
                             .replace("%time%", timeAsString));

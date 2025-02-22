@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -39,7 +39,7 @@ public class RemoveCommand implements Command {
         }
 
         String nickname = args[0];
-        Optional<Entry> entry = finder.find(nickname);
+        Optional<EntryImpl> entry = finder.find(nickname);
         if (entry.isPresent()) {
             service.remove(entry.get());
             issuer.sendMessage(messages.getPlayerRemovedFromWhitelist()

@@ -3,16 +3,17 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class CheckCommandTest {
@@ -22,7 +23,7 @@ public class CheckCommandTest {
     private EntryFinder finder;
     private TimeConvertor convertor;
     private CommandIssuer issuer;
-    private Entry entry;
+    private EntryImpl entry;
 
     @BeforeEach
     public void setUp() {
@@ -30,7 +31,7 @@ public class CheckCommandTest {
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
         issuer = mock(CommandIssuer.class);
-        entry = mock(Entry.class);
+        entry = mock(EntryImpl.class);
 
         checkCommand = new CheckCommand(messages, finder, convertor);
 
@@ -43,17 +44,17 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testGetPermission_ShouldReturnCorrectPermission() {
+    public void getPermissionReturnsCorrectPermission() {
         assertEquals("wlbytime.check", checkCommand.getPermission());
     }
 
     @Test
-    public void testGetName_ShouldReturnCorrectName() {
+    public void getNameReturnsCorrectName() {
         assertEquals("check", checkCommand.getName());
     }
 
     @Test
-    public void testExecute_NoArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void executeNoArgumentsSendsIncorrectArgumentsMessage() {
         checkCommand.execute(issuer, new String[]{});
 
         verify(issuer).sendMessage("Incorrect arguments!");
@@ -61,7 +62,7 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "unknownPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
 
@@ -72,12 +73,12 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerIsFrozen_ShouldSendPlayerFrozenMessage() {
+    public void executePlayerIsFrozenSendsPlayerFrozenMessage() {
         String nickname = "frozenPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isFreezeActive()).thenReturn(true);
-        when(entry.getLeftFreezeTime()).thenReturn(3600000L);
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
+        when(entry.getLeftFreezeDuration()).thenReturn(Duration.ofHours(1));
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
 
         checkCommand.execute(issuer, new String[]{nickname});
 
@@ -85,7 +86,7 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerIsActiveAndForever_ShouldSendStillInWhitelistMessage() {
+    public void executePlayerActiveAndForeverSendsStillInWhitelistMessage() {
         String nickname = "foreverPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isFreezeActive()).thenReturn(false);
@@ -98,14 +99,14 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerIsActiveAndNotForever_ShouldSendStillInWhitelistForTimeMessage() {
+    public void executePlayerActiveAndNotForeverSendsStillInWhitelistForTimeMessage() {
         String nickname = "tempPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isFreezeActive()).thenReturn(false);
         when(entry.isActive()).thenReturn(true);
         when(entry.isForever()).thenReturn(false);
-        when(entry.getLeftActiveTime()).thenReturn(7200000L);
-        when(convertor.getTimeLine(7200000L)).thenReturn("2 hours left");
+        when(entry.getLeftActiveDuration()).thenReturn(Duration.ofHours(2));
+        when(convertor.getTimeLine(Duration.ofHours(2))).thenReturn("2 hours left");
 
         checkCommand.execute(issuer, new String[]{nickname});
 
@@ -113,7 +114,7 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerNotActive_ShouldSendPlayerExpiredMessage() {
+    public void executePlayerNotActiveSendsPlayerExpiredMessage() {
         String nickname = "expiredPlayer";
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(entry.isFreezeActive()).thenReturn(false);
@@ -125,7 +126,7 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testGetTabulate_NoArgs_ShouldReturnIssuerNickname() {
+    public void getTabulateNoArgsReturnsIssuerNickname() {
         when(issuer.getNickname()).thenReturn("myNickname");
 
         Set<String> result = checkCommand.getTabulate(issuer, new String[]{});
@@ -134,7 +135,7 @@ public class CheckCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithArgs_ShouldReturnEmptySet() {
+    public void getTabulateWithArgsReturnsEmptySet() {
         Set<String> result = checkCommand.getTabulate(issuer, new String[]{"arg1"});
 
         assertTrue(result.isEmpty());

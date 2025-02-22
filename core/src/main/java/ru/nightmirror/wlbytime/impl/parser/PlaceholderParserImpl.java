@@ -1,13 +1,15 @@
-package ru.nightmirror.wlbytime.interfaces.parser;
+package ru.nightmirror.wlbytime.impl.parser;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
-import ru.nightmirror.wlbytime.impl.parser.PlaceholderParser;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.parser.PlaceholderParser;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
+
+import java.time.Duration;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -23,7 +25,7 @@ public class PlaceholderParserImpl implements PlaceholderParser {
 
     @Override
     public String parse(String playerNickname, String params) {
-        Entry entry = finder.find(playerNickname).orElse(null);
+        EntryImpl entry = finder.find(playerNickname).orElse(null);
         if (entry == null) {
             return config.getInWhitelistFalse();
         }
@@ -40,7 +42,7 @@ public class PlaceholderParserImpl implements PlaceholderParser {
         return EMPTY;
     }
 
-    private String handleInWhitelistParam(Entry entry) {
+    private String handleInWhitelistParam(EntryImpl entry) {
         if (entry.isFreezeActive()) {
             return config.getFrozen();
         } else if (entry.isActive()) {
@@ -50,19 +52,22 @@ public class PlaceholderParserImpl implements PlaceholderParser {
         }
     }
 
-    private String handleTimeLeftParam(Entry entry) {
-        long remainingTime;
+    private String handleTimeLeftParam(EntryImpl entry) {
+        Duration remainingTime;
         String output;
 
         if (entry.isFreezeActive()) {
-            remainingTime = entry.getLeftFreezeTime();
+            remainingTime = entry.getLeftFreezeDuration();
             output = config.getTimeLeftWithFreeze();
         } else if (!entry.isForever() && entry.isActive()) {
-            remainingTime = entry.getLeftActiveTime();
+            remainingTime = entry.getLeftActiveDuration();
             output = config.getTimeLeft();
+        } else if (entry.isForever()) {
+            return config.getForever();
         } else {
             return EMPTY;
         }
+
 
         String time = timeConvertor.getTimeLine(remainingTime);
         return output.replace("%time%", time);

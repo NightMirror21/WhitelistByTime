@@ -3,22 +3,19 @@ package ru.nightmirror.wlbytime.entry;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
+import ru.nightmirror.wlbytime.interfaces.entry.Entry;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 
-/*
-TODO Separate to:
- EntryView (interface) - only view,
- Entry extends EntryView (interface) - editable,
- EntryImpl implements Entry (class) - implementation
- */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Builder
+@Setter
 @EqualsAndHashCode(of = {"id", "nickname"})
-public class Entry {
+public class EntryImpl implements Entry {
     long id;
     String nickname;
     @Builder.Default
@@ -28,10 +25,12 @@ public class Entry {
     @Builder.Default
     LastJoin lastJoin = null;
 
+    @Override
     public boolean isForever() {
         return expiration == null;
     }
 
+    @Override
     public boolean isActive() {
         if (isForever()) {
             return true;
@@ -48,39 +47,33 @@ public class Entry {
         }
     }
 
-    public boolean isInactive() {
-        return !isActive();
-    }
-
+    @Override
     public void setForever() {
         expiration = null;
     }
 
-    public void setExpiration(@NotNull Timestamp timestamp) {
-        expiration = new Expiration(id, timestamp);
+    @Override
+    public void setExpiration(@NotNull Instant instant) {
+        expiration = new Expiration(id, instant);
     }
 
+    @Override
     public boolean isFrozen() {
         return freezing != null;
     }
 
-    public boolean isNotFrozen() {
-        return !isFrozen();
-    }
-
+    @Override
     public boolean isFreezeActive() {
         return isFrozen() && freezing.isFrozen();
     }
 
+    @Override
     public boolean isFreezeInactive() {
         return isFrozen() && !freezing.isFrozen();
     }
 
-    public void freeze(long time) {
-        if (time <= 0) {
-            throw new IllegalArgumentException("Time for freeze must be positive and not zero.");
-        }
-
+    @Override
+    public void freeze(Duration duration) {
         if (isFrozen()) {
             throw new IllegalStateException("Entry is already frozen.");
         }
@@ -89,44 +82,53 @@ public class Entry {
             throw new IllegalStateException("Can't freeze forever entry.");
         }
 
-        freezing = new Freezing(id, time);
+        if (duration.isNegative() || duration.isZero()) {
+            throw new IllegalArgumentException("Duration must be positive.");
+        }
+
+        freezing = new Freezing(id, duration);
     }
 
+    @Override
     public void unfreeze() {
         if (isNotFrozen()) {
             throw new IllegalStateException("Entry is not frozen.");
         }
 
-        long previousExpirationTime = expiration.getExpirationTime().getTime();
-        long durationOfFreeze = freezing.getDurationOfFreeze();
-        expiration = new Expiration(id, new Timestamp(previousExpirationTime + durationOfFreeze));
+        Instant previousExpirationTime = expiration.getExpirationTime();
+        Duration durationOfFreeze = freezing.getDurationOfFreeze();
+        expiration = new Expiration(id, previousExpirationTime.plus(durationOfFreeze));
 
         freezing = null;
     }
 
+    @Override
     public void updateLastJoin() {
         lastJoin = new LastJoin(id);
     }
 
+    @Override
     public boolean isJoined() {
         return lastJoin != null;
     }
-    
-    public long getLeftActiveTime() {
-        long offset = 0L;
-        
+
+    @Override
+    public Duration getLeftActiveDuration() {
+        Duration offset = Duration.ZERO;
+
         if (isFreezeActive()) {
             offset = freezing.getLeftTime();
         }
-        
+
         if (isForever()) {
             throw new IllegalStateException("Can't get left expiration time cause entry is forever");
         }
-        
-        return offset + expiration.getExpirationTime().getTime() - System.currentTimeMillis();
+
+        return Duration.between(Instant.now(), expiration.getExpirationTime()).plus(offset);
     }
 
-    public long getLeftFreezeTime() {
+    @Override
+    public Duration getLeftFreezeDuration() {
         if (isFreezeInactive()) {
             throw new IllegalStateException("Can't get left freeze time cause entry is not frozen");
         }

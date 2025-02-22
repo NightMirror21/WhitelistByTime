@@ -4,6 +4,7 @@ import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
+import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.DatabaseTable;
@@ -15,7 +16,7 @@ import lombok.ToString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Expiration;
 import ru.nightmirror.wlbytime.entry.Freezing;
 import ru.nightmirror.wlbytime.entry.LastJoin;
@@ -24,6 +25,7 @@ import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import java.io.File;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -37,6 +39,7 @@ public class EntryDaoImpl implements EntryDao {
     private static final String MYSQL = "mysql";
 
     private ConnectionSource connectionSource;
+    private TransactionManager transactionManager;
     private Dao<EntryTable, Long> entryDao;
     private Dao<LastJoinTable, Long> lastJoinDao;
     private Dao<FreezingTable, Long> freezingDao;
@@ -70,6 +73,8 @@ public class EntryDaoImpl implements EntryDao {
         connectionSource = SQLITE.equalsIgnoreCase(config.getType())
                 ? new JdbcConnectionSource(databaseUrl)
                 : new JdbcConnectionSource(databaseUrl, config.getUser(), config.getPassword());
+
+        transactionManager = new TransactionManager(connectionSource);
 
         entryDao = DaoManager.createDao(connectionSource, EntryTable.class);
         lastJoinDao = DaoManager.createDao(connectionSource, LastJoinTable.class);
@@ -125,20 +130,23 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public void update(Entry entry) {
+    public void update(EntryImpl entry) {
         try {
-            EntryTable entryTable = new EntryTable(entry.getId(), entry.getNickname());
-            entryDao.createOrUpdate(entryTable);
-            updateExpirationTable(entry, entryTable);
-            updateFreezingTable(entry, entryTable);
-            updateLastJoinTable(entry, entryTable);
+            transactionManager.callInTransaction(() -> {
+                EntryTable entryTable = new EntryTable(entry.getId(), entry.getNickname());
+                entryDao.createOrUpdate(entryTable);
+                updateExpirationTable(entry, entryTable);
+                updateFreezingTable(entry, entryTable);
+                updateLastJoinTable(entry, entryTable);
+                return null;
+            });
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error updating entry entity", e);
             throw new DataAccessException("Failed to update entry entity", e);
         }
     }
 
-    private void updateExpirationTable(Entry entry, EntryTable entryTable) throws SQLException {
+    private void updateExpirationTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getExpiration() != null) {
             ExpirationTable existing = expirationDao.queryBuilder()
                     .where()
@@ -158,13 +166,13 @@ public class EntryDaoImpl implements EntryDao {
     }
 
 
-    private void deleteExpiredTableEntry(Entry entry) throws SQLException {
+    private void deleteExpiredTableEntry(EntryImpl entry) throws SQLException {
         DeleteBuilder<ExpirationTable, Long> builder = expirationDao.deleteBuilder();
         builder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
         expirationDao.delete(builder.prepare());
     }
 
-    private void updateFreezingTable(Entry entry, EntryTable entryTable) throws SQLException {
+    private void updateFreezingTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getFreezing() != null) {
             freezingDao.createOrUpdate(getFreezingTable(entry, entryTable));
         } else {
@@ -172,13 +180,13 @@ public class EntryDaoImpl implements EntryDao {
         }
     }
 
-    private void deleteFreezingTableEntry(Entry entry) throws SQLException {
+    private void deleteFreezingTableEntry(EntryImpl entry) throws SQLException {
         DeleteBuilder<FreezingTable, Long> builder = freezingDao.deleteBuilder();
         builder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
         freezingDao.delete(builder.prepare());
     }
 
-    private void updateLastJoinTable(Entry entry, EntryTable entryTable) throws SQLException {
+    private void updateLastJoinTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getLastJoin() != null) {
             lastJoinDao.createOrUpdate(getLastJoinTable(entry, entryTable));
         } else {
@@ -186,26 +194,26 @@ public class EntryDaoImpl implements EntryDao {
         }
     }
 
-    private void deleteLastJoinTableEntry(Entry entry) throws SQLException {
+    private void deleteLastJoinTableEntry(EntryImpl entry) throws SQLException {
         DeleteBuilder<LastJoinTable, Long> builder = lastJoinDao.deleteBuilder();
         builder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
         lastJoinDao.delete(builder.prepare());
     }
 
-    private static @NotNull LastJoinTable getLastJoinTable(Entry entry, EntryTable entryTable) {
-        return new LastJoinTable(null, entryTable, entry.getLastJoin().getLastJoinTime());
+    private static @NotNull LastJoinTable getLastJoinTable(EntryImpl entry, EntryTable entryTable) {
+        return new LastJoinTable(null, entryTable, Timestamp.from(entry.getLastJoin().getLastJoinTime()));
     }
 
-    private static @NotNull FreezingTable getFreezingTable(Entry entry, EntryTable entryTable) {
-        return new FreezingTable(null, entryTable, entry.getFreezing().getStartTime(), entry.getFreezing().getEndTime());
+    private static @NotNull FreezingTable getFreezingTable(EntryImpl entry, EntryTable entryTable) {
+        return new FreezingTable(null, entryTable, Timestamp.from(entry.getFreezing().getStartTime()), Timestamp.from(entry.getFreezing().getEndTime()));
     }
 
-    private static @NotNull ExpirationTable getExpirationTable(Entry entry, EntryTable entryTable) {
-        return new ExpirationTable(null, entryTable, entry.getExpiration().getExpirationTime());
+    private static @NotNull ExpirationTable getExpirationTable(EntryImpl entry, EntryTable entryTable) {
+        return new ExpirationTable(null, entryTable, Timestamp.from(entry.getExpiration().getExpirationTime()));
     }
 
     @Override
-    public Optional<Entry> get(String nickname) {
+    public Optional<EntryImpl> get(String nickname) {
         try {
             EntryTable entryTable = entryDao.queryBuilder()
                     .where()
@@ -219,11 +227,11 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public Optional<Entry> getLike(String nickname) {
+    public Optional<EntryImpl> getLike(String nickname) {
         try {
             EntryTable entryTable = entryDao.queryBuilder()
                     .where()
-                    .like(EntryTable.NICKNAME_COLUMN, "%" + nickname + "%")
+                    .like(EntryTable.NICKNAME_COLUMN, nickname.toLowerCase())
                     .queryForFirst();
             return getEntry(entryTable);
         } catch (SQLException e) {
@@ -233,7 +241,7 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @NotNull
-    private Optional<Entry> getEntry(EntryTable entryTable) throws SQLException {
+    private Optional<EntryImpl> getEntry(EntryTable entryTable) throws SQLException {
         if (entryTable == null) {
             return Optional.empty();
         }
@@ -253,13 +261,15 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public Entry create(String nickname, long until) {
+    public EntryImpl create(String nickname, Instant until) {
         try {
-            EntryTable entryTable = new EntryTable(null, nickname);
-            entryDao.create(entryTable);
-            ExpirationTable expirationTable = new ExpirationTable(null, entryTable, new Timestamp(until));
-            expirationDao.create(expirationTable);
-            return get(nickname).orElseThrow();
+            return transactionManager.callInTransaction(() -> {
+                EntryTable entryTable = new EntryTable(null, nickname);
+                entryDao.create(entryTable);
+                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until));
+                expirationDao.create(expirationTable);
+                return get(nickname).orElseThrow();
+            });
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error creating entry", e);
             throw new DataAccessException("Failed to create entry", e);
@@ -267,23 +277,26 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public void remove(Entry entry) {
+    public void remove(EntryImpl entry) {
         try {
-            DeleteBuilder<LastJoinTable, Long> lastJoinBuilder = lastJoinDao.deleteBuilder();
-            lastJoinBuilder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
-            lastJoinDao.delete(lastJoinBuilder.prepare());
+            transactionManager.callInTransaction(() -> {
+                DeleteBuilder<LastJoinTable, Long> lastJoinBuilder = lastJoinDao.deleteBuilder();
+                lastJoinBuilder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
+                lastJoinDao.delete(lastJoinBuilder.prepare());
 
-            DeleteBuilder<FreezingTable, Long> freezingBuilder = freezingDao.deleteBuilder();
-            freezingBuilder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
-            freezingDao.delete(freezingBuilder.prepare());
+                DeleteBuilder<FreezingTable, Long> freezingBuilder = freezingDao.deleteBuilder();
+                freezingBuilder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
+                freezingDao.delete(freezingBuilder.prepare());
 
-            DeleteBuilder<ExpirationTable, Long> expirationBuilder = expirationDao.deleteBuilder();
-            expirationBuilder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
-            expirationDao.delete(expirationBuilder.prepare());
+                DeleteBuilder<ExpirationTable, Long> expirationBuilder = expirationDao.deleteBuilder();
+                expirationBuilder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
+                expirationDao.delete(expirationBuilder.prepare());
 
-            DeleteBuilder<EntryTable, Long> entryBuilder = entryDao.deleteBuilder();
-            entryBuilder.where().eq(EntryTable.ID_COLUMN, entry.getId());
-            entryDao.delete(entryBuilder.prepare());
+                DeleteBuilder<EntryTable, Long> entryBuilder = entryDao.deleteBuilder();
+                entryBuilder.where().eq(EntryTable.ID_COLUMN, entry.getId());
+                entryDao.delete(entryBuilder.prepare());
+                return null;
+            });
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error removing entry entity", e);
             throw new DataAccessException("Failed to remove entry entity", e);
@@ -291,7 +304,7 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public Entry create(String nickname) {
+    public EntryImpl create(String nickname) {
         try {
             EntryTable entryTable = new EntryTable(null, nickname);
             entryDao.create(entryTable);
@@ -303,9 +316,9 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
-    public Set<Entry> getAll() {
+    public Set<EntryImpl> getAll() {
         try {
-            Set<Entry> entries = new HashSet<>();
+            Set<EntryImpl> entries = new HashSet<>();
             for (EntryTable entryTable : entryDao.queryForAll()) {
                 LastJoinTable lastJoinTable = lastJoinDao.queryBuilder()
                         .where()
@@ -328,22 +341,22 @@ public class EntryDaoImpl implements EntryDao {
         }
     }
 
-    private Entry fromEntryTables(EntryTable entryTable, LastJoinTable lastJoinTable,
-                                  FreezingTable freezingTable, ExpirationTable expirationTable) {
+    private EntryImpl fromEntryTables(EntryTable entryTable, LastJoinTable lastJoinTable,
+                                      FreezingTable freezingTable, ExpirationTable expirationTable) {
         LastJoin lastJoin = lastJoinTable != null ? LastJoin.builder()
                 .entryId(lastJoinTable.getId())
-                .lastJoinTime(lastJoinTable.getLastJoin())
+                .lastJoinTime(lastJoinTable.getLastJoin().toInstant())
                 .build() : null;
         Freezing freezing = freezingTable != null ? Freezing.builder()
                 .entryId(freezingTable.getId())
-                .startTime(freezingTable.getStartTime())
-                .endTime(freezingTable.getEndTime())
+                .startTime(freezingTable.getStartTime().toInstant())
+                .endTime(freezingTable.getEndTime().toInstant())
                 .build() : null;
         Expiration expiration = expirationTable != null ? Expiration.builder()
                 .entryId(expirationTable.getId())
-                .expirationTime(expirationTable.getExpirationTime())
+                .expirationTime(expirationTable.getExpirationTime().toInstant())
                 .build() : null;
-        return Entry.builder()
+        return EntryImpl.builder()
                 .id(entryTable.getId())
                 .nickname(entryTable.getNickname())
                 .lastJoin(lastJoin)
@@ -364,7 +377,7 @@ public class EntryDaoImpl implements EntryDao {
         @DatabaseField(generatedId = true, columnName = ID_COLUMN, canBeNull = false)
         private Long id;
 
-        @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false)
+        @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false, unique = true)
         private String nickname;
     }
 

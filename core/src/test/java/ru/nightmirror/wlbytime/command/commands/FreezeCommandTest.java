@@ -4,13 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,17 +42,17 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testGetPermission_ShouldReturnCorrectPermission() {
+    public void getPermissionReturnsCorrectPermission() {
         assertEquals("wlbytime.freeze", freezeCommand.getPermission());
     }
 
     @Test
-    public void testGetName_ShouldReturnCorrectName() {
+    public void getNameReturnsCorrectName() {
         assertEquals("freeze", freezeCommand.getName());
     }
 
     @Test
-    public void testExecute_WithInsufficientArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void executeWithInsufficientArgumentsSendsIncorrectArgumentsMessage() {
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided!");
 
         freezeCommand.execute(issuer, new String[]{});
@@ -62,7 +63,7 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonExistentPlayer";
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.empty());
@@ -77,30 +78,30 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithInvalidTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithInvalidTimeSendsTimeIsIncorrectMessage() {
         String nickname = "validPlayer";
         String timeString = "invalidTime";
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(timeString)).thenReturn(0L);
+        when(convertor.getTime(timeString)).thenReturn(Duration.ZERO);
         when(messages.getTimeIsIncorrect()).thenReturn("The provided time is incorrect!");
 
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(issuer).sendMessage("The provided time is incorrect!");
         verify(finder).find(nickname);
-        verify(convertor).getTimeMs(timeString);
+        verify(convertor).getTime(timeString);
         verifyNoMoreInteractions(issuer);
         verifyNoInteractions(service);
     }
 
     @Test
-    public void testExecute_PlayerIsInactive_ShouldSendPlayerExpiredMessage() {
+    public void executePlayerInactiveSendsPlayerExpiredMessage() {
         String nickname = "expiredPlayer";
-        Entry expiredEntry = mock(Entry.class);
+        EntryImpl expiredEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(expiredEntry));
         when(expiredEntry.isActive()).thenReturn(false);
@@ -115,9 +116,9 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerAlreadyFrozen_ShouldSendPlayerAlreadyFrozenMessage() {
+    public void executePlayerAlreadyFrozenSendsPlayerAlreadyFrozenMessage() {
         String nickname = "frozenPlayer";
-        Entry frozenEntry = mock(Entry.class);
+        EntryImpl frozenEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(frozenEntry));
         when(frozenEntry.isActive()).thenReturn(true);
@@ -135,62 +136,61 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_SuccessfullyFreezePlayer_ShouldSendPlayerFrozenMessage() {
+    public void executeSuccessfullyFreezesPlayerSendsPlayerFrozenMessage() {
         String nickname = "activePlayer";
         String timeString = "3h";
-        long timeInMillis = 10800000L;
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(timeString)).thenReturn(timeInMillis);
+        when(convertor.getTime(timeString)).thenReturn(Duration.ofHours(3));
         String formattedTime = "3 hours";
-        when(convertor.getTimeLine(timeInMillis)).thenReturn(formattedTime);
+        when(convertor.getTimeLine(Duration.ofHours(3))).thenReturn(formattedTime);
         when(messages.getPlayerFrozen()).thenReturn("Player %nickname% has been frozen for %time%!");
 
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(activeEntry).isActive();
         verify(activeEntry).isFreezeActive();
-        verify(convertor).getTimeMs(timeString);
-        verify(convertor).getTimeLine(timeInMillis);
-        verify(service).freeze(activeEntry, timeInMillis);
+        verify(convertor).getTime(timeString);
+        verify(convertor).getTimeLine(Duration.ofHours(3));
+        verify(service).freeze(activeEntry, Duration.ofHours(3));
         verify(issuer).sendMessage("Player activePlayer has been frozen for 3 hours!");
         verifyNoMoreInteractions(issuer);
     }
 
     @Test
-    public void testExecute_WithMultipleTimeArguments_ShouldConcatenateAndFreezePlayer() {
+    public void executeWithMultipleTimeArgumentsConcatenatesAndFreezesPlayer() {
         String nickname = "multiTimePlayer";
         String[] args = {nickname, "1d", "2h"};
         String concatenatedTime = "1d2h";
-        long timeInMillis = 93600000L;
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         String formattedTime = "1 day 2 hours";
+        Duration duration = Duration.ofDays(1).plusHours(2);
 
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(concatenatedTime)).thenReturn(timeInMillis);
-        when(convertor.getTimeLine(timeInMillis)).thenReturn(formattedTime);
+        when(convertor.getTime(concatenatedTime)).thenReturn(duration);
+        when(convertor.getTimeLine(duration)).thenReturn(formattedTime);
         when(messages.getPlayerFrozen()).thenReturn("Player %nickname% has been frozen for %time%!");
 
         freezeCommand.execute(issuer, args);
 
         verify(finder).find(nickname);
-        verify(convertor).getTimeMs(concatenatedTime);
-        verify(convertor).getTimeLine(timeInMillis);
+        verify(convertor).getTime(concatenatedTime);
+        verify(convertor).getTimeLine(duration);
         verify(activeEntry).isActive();
         verify(activeEntry).isFreezeActive();
-        verify(service).freeze(activeEntry, timeInMillis);
+        verify(service).freeze(activeEntry, duration);
         verify(issuer).sendMessage("Player multiTimePlayer has been frozen for 1 day 2 hours!");
         verifyNoMoreInteractions(issuer);
     }
 
     @Test
-    public void testGetTabulate_WithNoArguments_ShouldReturnIssuerNickname() {
+    public void getTabulateNoArgsReturnsIssuerNickname() {
         String nickname = "issuerUser";
         when(issuer.getNickname()).thenReturn(nickname);
 
@@ -200,44 +200,44 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithArguments_ShouldReturnRandomTime() {
-        String randomTime = "45m";
-        when(timeRandom.getRandomOneTime()).thenReturn(randomTime);
+    public void getTabulateWithArgsReturnsRandomTime() {
+        when(timeRandom.getRandomOneTime()).thenReturn("1h");
+        when(timeRandom.getTimes()).thenReturn(Set.of("1h", "2h", "3h"));
 
         Set<String> tabulate = freezeCommand.getTabulate(issuer, new String[]{"arg1", "arg2"});
 
-        assertEquals(Set.of(randomTime), tabulate);
+        assertEquals(Set.of("1h", "2h", "3h"), tabulate);
     }
 
     @Test
-    public void testExecute_FreezePlayer_ConstructsCorrectMessage() {
+    public void executeFreezePlayerConstructsCorrectMessage() {
         String nickname = "testFreezePlayer";
         String timeString = "30m";
-        long timeInMillis = 1800000L;
-        Entry activeEntry = mock(Entry.class);
+        Duration duration = Duration.ofMinutes(30);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         String formattedTime = "30 minutes";
 
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(timeString)).thenReturn(timeInMillis);
-        when(convertor.getTimeLine(timeInMillis)).thenReturn(formattedTime);
+        when(convertor.getTime(timeString)).thenReturn(duration);
+        when(convertor.getTimeLine(duration)).thenReturn(formattedTime);
         when(messages.getPlayerFrozen()).thenReturn("Player %nickname% has been frozen for %time%!");
 
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
-        ArgumentCaptor<Entry> entryCaptor = ArgumentCaptor.forClass(Entry.class);
-        ArgumentCaptor<Long> timeCaptor = ArgumentCaptor.forClass(Long.class);
+        ArgumentCaptor<EntryImpl> entryCaptor = ArgumentCaptor.forClass(EntryImpl.class);
+        ArgumentCaptor<Duration> timeCaptor = ArgumentCaptor.forClass(Duration.class);
         verify(service).freeze(entryCaptor.capture(), timeCaptor.capture());
 
         assertEquals(activeEntry, entryCaptor.getValue());
-        assertEquals(timeInMillis, timeCaptor.getValue());
+        assertEquals(duration, timeCaptor.getValue());
         verify(issuer).sendMessage("Player testFreezePlayer has been frozen for 30 minutes!");
     }
 
     @Test
-    public void testExecute_WithEmptyTimeArguments_ShouldConcatenateToEmptyString() {
+    public void executeWithEmptyTimeArgumentsConcatenatesToEmptyString() {
         String nickname = "emptyTimePlayer";
         String[] args = {nickname};
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided!");
@@ -249,70 +249,70 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void testExecute_WithNegativeTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithNegativeTimeSendsTimeIsIncorrectMessage() {
         String nickname = "negativeTimePlayer";
         String timeString = "-1h";
-        long timeInMillis = -3600000L;
+        Duration duration = Duration.ofHours(-1);
 
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(timeString)).thenReturn(timeInMillis);
+        when(convertor.getTime(timeString)).thenReturn(duration);
         when(messages.getTimeIsIncorrect()).thenReturn("The provided time is incorrect!");
 
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(issuer).sendMessage("The provided time is incorrect!");
         verify(finder).find(nickname);
-        verify(convertor).getTimeMs(timeString);
+        verify(convertor).getTime(timeString);
         verifyNoMoreInteractions(issuer);
         verifyNoInteractions(service);
     }
 
     @Test
-    public void testExecute_WithZeroTime_ShouldSendTimeIsIncorrectMessage() {
+    public void executeWithZeroTimeSendsTimeIsIncorrectMessage() {
         String nickname = "zeroTimePlayer";
         String timeString = "0h";
-        long timeInMillis = 0L;
+        Duration duration = Duration.ofHours(0);
 
-        Entry activeEntry = mock(Entry.class);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(timeString)).thenReturn(timeInMillis);
+        when(convertor.getTime(timeString)).thenReturn(duration);
         when(messages.getTimeIsIncorrect()).thenReturn("The provided time is incorrect!");
 
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(issuer).sendMessage("The provided time is incorrect!");
         verify(finder).find(nickname);
-        verify(convertor).getTimeMs(timeString);
+        verify(convertor).getTime(timeString);
         verifyNoMoreInteractions(issuer);
         verifyNoInteractions(service);
     }
 
     @Test
-    public void testExecute_SuccessfulFreeze_ShouldNotThrowException() {
+    public void executeSuccessfulFreezeDoesNotThrowException() {
         String nickname = "safeFreezePlayer";
         String timeString = "15m";
-        long timeInMillis = 900000L;
-        Entry activeEntry = mock(Entry.class);
+        Duration duration = Duration.ofMinutes(15);
+        EntryImpl activeEntry = mock(EntryImpl.class);
         String formattedTime = "15 minutes";
 
         when(issuer.getNickname()).thenReturn(nickname);
         when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
-        when(convertor.getTimeMs(timeString)).thenReturn(timeInMillis);
-        when(convertor.getTimeLine(timeInMillis)).thenReturn(formattedTime);
+        when(convertor.getTime(timeString)).thenReturn(duration);
+        when(convertor.getTimeLine(duration)).thenReturn(formattedTime);
         when(messages.getPlayerFrozen()).thenReturn("Player %nickname% has been frozen for %time%!");
 
         assertDoesNotThrow(() -> freezeCommand.execute(issuer, new String[]{nickname, timeString}));
 
-        verify(service).freeze(activeEntry, timeInMillis);
+        verify(service).freeze(activeEntry, duration);
         verify(issuer).sendMessage("Player safeFreezePlayer has been frozen for 15 minutes!");
     }
 }

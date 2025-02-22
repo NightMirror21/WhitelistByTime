@@ -3,11 +3,12 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -34,17 +35,17 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testGetPermission_ShouldReturnCorrectPermission() {
+    public void getPermissionReturnsCorrectPermission() {
         assertEquals("wlbytime.checkme", checkMeCommand.getPermission());
     }
 
     @Test
-    public void testGetName_ShouldReturnCorrectName() {
+    public void getNameReturnsCorrectName() {
         assertEquals("checkme", checkMeCommand.getName());
     }
 
     @Test
-    public void testExecute_WhenEntryNotFound_ShouldSendNotInWhitelistMessage() {
+    public void executeWhenEntryNotFoundSendsNotInWhitelistMessage() {
         when(issuer.getNickname()).thenReturn("testUser");
         when(finder.find("testUser")).thenReturn(Optional.empty());
         when(messages.getCheckMeNotInWhitelist()).thenReturn("You are not in the whitelist!");
@@ -55,8 +56,8 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryInactive_ShouldSendNotInWhitelistMessage() {
-        Entry inactiveEntry = mock(Entry.class);
+    public void executeWhenEntryInactiveSendsNotInWhitelistMessage() {
+        EntryImpl inactiveEntry = mock(EntryImpl.class);
         when(inactiveEntry.isInactive()).thenReturn(true);
         when(issuer.getNickname()).thenReturn("testUser");
         when(finder.find("testUser")).thenReturn(Optional.of(inactiveEntry));
@@ -68,8 +69,8 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryIsForever_ShouldSendForeverMessage() {
-        Entry foreverEntry = mock(Entry.class);
+    public void executeWhenEntryIsForeverSendsForeverMessage() {
+        EntryImpl foreverEntry = mock(EntryImpl.class);
         when(foreverEntry.isInactive()).thenReturn(false);
         when(foreverEntry.isForever()).thenReturn(true);
         when(issuer.getNickname()).thenReturn("foreverUser");
@@ -82,15 +83,15 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryIsFrozen_ShouldSendFrozenMessage() {
-        Entry frozenEntry = mock(Entry.class);
+    public void executeWhenEntryIsFrozenSendsFrozenMessage() {
+        EntryImpl frozenEntry = mock(EntryImpl.class);
         when(frozenEntry.isInactive()).thenReturn(false);
         when(frozenEntry.isForever()).thenReturn(false);
         when(frozenEntry.isFreezeActive()).thenReturn(true);
-        when(frozenEntry.getLeftFreezeTime()).thenReturn(3600000L);
+        when(frozenEntry.getLeftFreezeDuration()).thenReturn(Duration.ofHours(1));
         when(issuer.getNickname()).thenReturn("frozenUser");
         when(finder.find("frozenUser")).thenReturn(Optional.of(frozenEntry));
-        when(convertor.getTimeLine(3600000L)).thenReturn("1 hour");
+        when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
         when(messages.getCheckMeFrozen()).thenReturn("You are frozen for %time%!");
 
         checkMeCommand.execute(issuer, new String[]{});
@@ -99,15 +100,15 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testExecute_WhenEntryIsActiveForTime_ShouldSendWhitelistForTimeMessage() {
-        Entry timedEntry = mock(Entry.class);
+    public void executeWhenEntryIsActiveForTimeSendsWhitelistForTimeMessage() {
+        EntryImpl timedEntry = mock(EntryImpl.class);
         when(timedEntry.isInactive()).thenReturn(false);
         when(timedEntry.isForever()).thenReturn(false);
         when(timedEntry.isFreezeActive()).thenReturn(false);
-        when(timedEntry.getLeftActiveTime()).thenReturn(7200000L);
+        when(timedEntry.getLeftActiveDuration()).thenReturn(Duration.ofHours(2));
         when(issuer.getNickname()).thenReturn("timedUser");
         when(finder.find("timedUser")).thenReturn(Optional.of(timedEntry));
-        when(convertor.getTimeLine(7200000L)).thenReturn("2 hours");
+        when(convertor.getTimeLine(Duration.ofHours(2))).thenReturn("2 hours");
         when(messages.getCheckMeStillInWhitelistForTime()).thenReturn("You are in the whitelist for %time%!");
 
         checkMeCommand.execute(issuer, new String[]{});
@@ -116,7 +117,7 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void testGetTabulate_ShouldReturnEmptySet() {
+    public void getTabulateReturnsEmptySet() {
         Set<String> tabulate = checkMeCommand.getTabulate(issuer, new String[]{});
         assertTrue(tabulate.isEmpty());
     }

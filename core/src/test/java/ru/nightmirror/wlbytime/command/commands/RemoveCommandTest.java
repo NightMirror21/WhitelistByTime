@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
@@ -36,7 +36,7 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void testExecute_WithNoArguments_ShouldSendIncorrectArgumentsMessage() {
+    public void executeNoArgumentsSendsIncorrectArgumentsMessage() {
         removeCommand.execute(issuer, new String[]{});
 
         verify(issuer).sendMessage("Incorrect arguments provided.");
@@ -44,7 +44,7 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void testExecute_WithMoreThanOneArgument_ShouldSendIncorrectArgumentsMessage() {
+    public void executeMoreThanOneArgumentSendsIncorrectArgumentsMessage() {
         removeCommand.execute(issuer, new String[]{"player1", "extraArg"});
 
         verify(issuer).sendMessage("Incorrect arguments provided.");
@@ -52,7 +52,7 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerNotInWhitelist_ShouldSendPlayerNotInWhitelistMessage() {
+    public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonexistentPlayer";
         when(finder.find(nickname)).thenReturn(Optional.empty());
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
@@ -64,9 +64,9 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void testExecute_PlayerInWhitelist_ShouldRemovePlayerAndSendSuccessMessage() {
+    public void executePlayerInWhitelistRemovesPlayerAndSendsSuccessMessage() {
         String nickname = "existingPlayer";
-        Entry entry = mock(Entry.class);
+        EntryImpl entry = mock(EntryImpl.class);
         when(finder.find(nickname)).thenReturn(Optional.of(entry));
         when(messages.getPlayerRemovedFromWhitelist()).thenReturn("Player %nickname% has been removed from the whitelist.");
 
@@ -77,7 +77,7 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithNoArguments_ShouldReturnNickname() {
+    public void tabulateNoArgumentsReturnsNickname() {
         when(issuer.getNickname()).thenReturn("testNickname");
 
         Set<String> tabulationResult = removeCommand.getTabulate(issuer, new String[]{});
@@ -86,7 +86,7 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void testGetTabulate_WithArguments_ShouldReturnEmptySet() {
+    public void tabulateWithArgumentsReturnsEmptySet() {
         Set<String> tabulationResult = removeCommand.getTabulate(issuer, new String[]{"someArg"});
 
         assertEquals(Set.of(), tabulationResult);

@@ -2,17 +2,20 @@ package ru.nightmirror.wlbytime.impl.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.entry.Expiration;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
+
+import java.time.Duration;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class EntryTimeServiceImplTest {
+public class EntryTimeServiceImplTest {
 
-    EntryDao entryDao;
-    EntryTimeServiceImpl service;
+    private EntryDao entryDao;
+    private EntryTimeServiceImpl service;
 
     @BeforeEach
     public void setUp() {
@@ -21,105 +24,105 @@ class EntryTimeServiceImplTest {
     }
 
     @Test
-    public void add_shouldUpdateExpirationAndDao() {
-        Entry entry = mock(Entry.class);
+    public void addUpdatesExpirationAndDao() {
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
-
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
-
-        service.add(entry, 1000L);
-
-        verify(expiration).add(1000L);
+        service.add(entry, Duration.ofSeconds(1));
+        verify(expiration).add(Duration.ofSeconds(1));
         verify(entryDao).update(entry);
     }
 
     @Test
-    public void add_shouldThrowForForeverEntry() {
-        Entry entry = mock(Entry.class);
-
+    public void addThrowsForForeverEntry() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isForever()).thenReturn(true);
-
-        assertThrows(IllegalArgumentException.class, () -> service.add(entry, 5000L));
-        verifyNoMoreInteractions(entryDao);
+        assertThrows(IllegalArgumentException.class, () -> service.add(entry, Duration.ofSeconds(5)));
+        verify(entryDao, never()).update(any());
     }
 
     @Test
-    public void canAdd_shouldReturnTrueWhenValid() {
-        Entry entry = mock(Entry.class);
+    public void canAddReturnsTrueWhenAllowed() {
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
-
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
-        when(expiration.canAdd(1000L)).thenReturn(true);
-
-        assertTrue(service.canAdd(entry, 1000L));
+        when(expiration.canAdd(Duration.ofSeconds(1))).thenReturn(true);
+        assertTrue(service.canAdd(entry, Duration.ofSeconds(1)));
     }
 
     @Test
-    public void canAdd_shouldReturnFalseForForeverEntry() {
-        Entry entry = mock(Entry.class);
-
+    public void canAddReturnsFalseForForeverEntry() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isForever()).thenReturn(true);
-
-        assertFalse(service.canAdd(entry, 1000L));
+        assertFalse(service.canAdd(entry, Duration.ofSeconds(1)));
     }
 
     @Test
-    public void remove_shouldUpdateExpirationAndDao() {
-        Entry entry = mock(Entry.class);
+    public void canAddReturnsFalseWhenExpirationDisallows() {
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
-
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
+        when(expiration.canAdd(Duration.ofSeconds(1))).thenReturn(false);
+        assertFalse(service.canAdd(entry, Duration.ofSeconds(1)));
+    }
 
-        service.remove(entry, 1000L);
-
-        verify(expiration).remove(1000L);
+    @Test
+    public void removeUpdatesExpirationAndDao() {
+        EntryImpl entry = mock(EntryImpl.class);
+        Expiration expiration = mock(Expiration.class);
+        when(entry.isForever()).thenReturn(false);
+        when(entry.getExpiration()).thenReturn(expiration);
+        service.remove(entry, Duration.ofSeconds(1));
+        verify(expiration).remove(Duration.ofSeconds(1));
         verify(entryDao).update(entry);
     }
 
     @Test
-    public void remove_shouldThrowForForeverEntry() {
-        Entry entry = mock(Entry.class);
-
+    public void removeThrowsForForeverEntry() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isForever()).thenReturn(true);
-
-        assertThrows(IllegalArgumentException.class, () -> service.remove(entry, 5000L));
-        verifyNoMoreInteractions(entryDao);
+        assertThrows(IllegalArgumentException.class, () -> service.remove(entry, Duration.ofSeconds(5)));
+        verify(entryDao, never()).update(any());
     }
 
     @Test
-    public void canRemove_shouldReturnTrueWhenValid() {
-        Entry entry = mock(Entry.class);
+    public void canRemoveReturnsTrueWhenAllowed() {
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
-
         when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
-        when(expiration.canRemove(1000L)).thenReturn(true);
-
-        assertTrue(service.canRemove(entry, 1000L));
+        when(expiration.canRemove(Duration.ofSeconds(1))).thenReturn(true);
+        assertTrue(service.canRemove(entry, Duration.ofSeconds(1)));
     }
 
     @Test
-    public void canRemove_shouldReturnFalseForForeverEntry() {
-        Entry entry = mock(Entry.class);
-
+    public void canRemoveReturnsFalseForForeverEntry() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isForever()).thenReturn(true);
-
-        assertFalse(service.canRemove(entry, 1000L));
+        assertFalse(service.canRemove(entry, Duration.ofSeconds(1)));
     }
 
     @Test
-    public void set_shouldUpdateExpirationAndDao() {
-        Entry entry = mock(Entry.class);
+    public void canRemoveReturnsFalseWhenExpirationDisallows() {
+        EntryImpl entry = mock(EntryImpl.class);
         Expiration expiration = mock(Expiration.class);
-
+        when(entry.isForever()).thenReturn(false);
         when(entry.getExpiration()).thenReturn(expiration);
+        when(expiration.canRemove(Duration.ofSeconds(1))).thenReturn(false);
+        assertFalse(service.canRemove(entry, Duration.ofSeconds(1)));
+    }
 
-        service.set(entry, 1000L);
-
-        verify(expiration).set(1000L);
+    @Test
+    public void setUpdatesExpirationAndDao() {
+        EntryImpl entry = mock(EntryImpl.class);
+        Expiration expiration = mock(Expiration.class);
+        when(entry.getExpiration()).thenReturn(expiration);
+        Instant instant = Instant.now().plus(Duration.ofSeconds(1));
+        service.set(entry, instant);
+        verify(expiration).set(instant);
         verify(entryDao).update(entry);
     }
 }

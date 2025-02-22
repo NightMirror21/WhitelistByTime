@@ -2,7 +2,7 @@ package ru.nightmirror.wlbytime.impl.checker;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,54 +11,42 @@ import static org.mockito.Mockito.when;
 
 public class AccessEntryCheckerImplTest {
 
-    private AccessEntryCheckerImpl accessEntryChecker;
+    private AccessEntryCheckerImpl checker;
 
     @BeforeEach
     public void setUp() {
-        accessEntryChecker = new AccessEntryCheckerImpl();
+        checker = new AccessEntryCheckerImpl();
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsCurrentlyActiveAndNotFrozen_ShouldReturnTrue() {
-        Entry entry = mock(Entry.class);
+    public void allowedWhenActiveAndNotFrozen() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(false);
         when(entry.isActive()).thenReturn(true);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertTrue(result);
+        assertTrue(checker.isAllowed(entry));
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsCurrentlyActiveButFrozen_ShouldReturnFalse() {
-        Entry entry = mock(Entry.class);
+    public void notAllowedWhenActiveAndFrozen() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(true);
         when(entry.isActive()).thenReturn(true);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertFalse(result);
+        assertFalse(checker.isAllowed(entry));
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsInactiveAndNotFrozen_ShouldReturnFalse() {
-        Entry entry = mock(Entry.class);
+    public void notAllowedWhenInactiveAndNotFrozen() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(false);
         when(entry.isActive()).thenReturn(false);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertFalse(result);
+        assertFalse(checker.isAllowed(entry));
     }
 
     @Test
-    public void testIsAllowed_WhenEntryIsInactiveAndFrozen_ShouldReturnFalse() {
-        Entry entry = mock(Entry.class);
+    public void notAllowedWhenInactiveAndFrozen() {
+        EntryImpl entry = mock(EntryImpl.class);
         when(entry.isFreezeActive()).thenReturn(true);
         when(entry.isActive()).thenReturn(false);
-
-        boolean result = accessEntryChecker.isAllowed(entry);
-
-        assertFalse(result);
+        assertFalse(checker.isAllowed(entry));
     }
 }

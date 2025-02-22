@@ -24,11 +24,6 @@ public class SettingsConfig extends YamlSerializable {
     }
 
     @Comment(value = {
-            @CommentValue("Enable or disable whitelist by default at server startup")
-    }, at = Comment.At.PREPEND)
-    boolean whitelistEnabledOnStartup = true;
-
-    @Comment(value = {
             @CommentValue("Automatically unfreeze player time when they join the server if their time is frozen")
     }, at = Comment.At.PREPEND)
     boolean unfreezeTimeOnPlayerJoin = false;

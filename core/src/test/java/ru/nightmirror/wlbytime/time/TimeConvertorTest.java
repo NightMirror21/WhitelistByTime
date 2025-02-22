@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.time;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,61 +37,56 @@ public class TimeConvertorTest {
     }
 
     @Test
-    public void testGetTimeLine_ZeroMilliseconds() {
-        long ms = 0L;
-        String result = timeConvertor.getTimeLine(ms);
+    public void getTimeLineZeroMillisecondsReturnsEmptyString() {
+        String result = timeConvertor.getTimeLine(Duration.ofMillis(0));
         assertEquals("", result);
     }
 
     @Test
-    public void testGetTimeLine_OneYear() {
-        long ms = TimeConvertor.YEAR_IN_MS;
-        String result = timeConvertor.getTimeLine(ms);
+    public void getTimeLineOneYearReturnsCorrectString() {
+        String result = timeConvertor.getTimeLine(Duration.ofMillis(TimeConvertor.YEAR_IN_MS));
         assertEquals("1y", result.trim());
     }
 
     @Test
-    public void testGetTimeLine_ComplexTime() {
+    public void getTimeLineComplexTimeReturnsCorrectString() {
         long ms = TimeConvertor.YEAR_IN_MS + 2 * TimeConvertor.MONTH_IN_MS + 3 * TimeConvertor.DAY_IN_MS +
                 4 * TimeConvertor.HOUR_IN_MS + 5 * TimeConvertor.MINUTE_IN_MS + 6 * TimeConvertor.SECOND_IN_MS;
-        String result = timeConvertor.getTimeLine(ms);
+        String result = timeConvertor.getTimeLine(Duration.ofMillis(ms));
         assertEquals("1y 2mo 3d 4h 5m 6s", result.trim());
     }
 
     @Test
-    public void testGetTimeLine_NegativeTime() {
-        long ms = -1L;
-        String result = timeConvertor.getTimeLine(ms);
+    public void getTimeLineNegativeTimeReturnsForever() {
+        String result = timeConvertor.getTimeLine(Duration.ofMillis(-1L));
         assertEquals("forever", result);
     }
 
     @Test
-    public void testGetTimeMs_SimpleString() {
+    public void getTimeSimpleStringReturnsCorrectDuration() {
         String timeLine = "1y";
-        long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(TimeConvertor.YEAR_IN_MS, result);
+        Duration result = timeConvertor.getTime(timeLine);
+        assertEquals(Duration.ofMillis(TimeConvertor.YEAR_IN_MS), result);
     }
 
     @Test
-    public void testGetTimeMs_ComplexString() {
+    public void getTimeComplexStringReturnsCorrectDuration() {
         String timeLine = "1y 2mo 3d 4h 5m 6s";
         long expectedMs = TimeConvertor.YEAR_IN_MS + 2 * TimeConvertor.MONTH_IN_MS + 3 * TimeConvertor.DAY_IN_MS +
                 4 * TimeConvertor.HOUR_IN_MS + 5 * TimeConvertor.MINUTE_IN_MS + 6 * TimeConvertor.SECOND_IN_MS;
-        long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(expectedMs, result);
+        Duration result = timeConvertor.getTime(timeLine);
+        assertEquals(Duration.ofMillis(expectedMs), result);
     }
 
     @Test
-    public void testGetTimeMs_EmptyString() {
-        String timeLine = "";
-        long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(0L, result);
+    public void getTimeEmptyStringReturnsZeroDuration() {
+        Duration result = timeConvertor.getTime("");
+        assertEquals(Duration.ZERO, result);
     }
 
     @Test
-    public void testGetTimeMs_InvalidString() {
-        String timeLine = "abc";
-        long result = timeConvertor.getTimeMs(timeLine);
-        assertEquals(0L, result);
+    public void getTimeInvalidStringReturnsZeroDuration() {
+        Duration result = timeConvertor.getTime("abc");
+        assertEquals(Duration.ZERO, result);
     }
 }

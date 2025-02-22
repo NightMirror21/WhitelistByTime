@@ -3,9 +3,12 @@ package ru.nightmirror.wlbytime.impl.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
+
+import java.time.Duration;
+import java.time.Instant;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
@@ -14,37 +17,37 @@ public class EntryTimeServiceImpl implements EntryTimeService {
     EntryDao entryDao;
 
     @Override
-    public void add(Entry entry, long milliseconds) {
+    public void add(EntryImpl entry, Duration duration) {
         if (entry.isForever()) {
             throw new IllegalArgumentException("Entry is forever");
         }
 
-        entry.getExpiration().add(milliseconds);
+        entry.getExpiration().add(duration);
         entryDao.update(entry);
     }
 
     @Override
-    public boolean canAdd(Entry entry, long milliseconds) {
-        return !entry.isForever() && entry.getExpiration().canAdd(milliseconds);
+    public boolean canAdd(EntryImpl entry, Duration duration) {
+        return !entry.isForever() && entry.getExpiration().canAdd(duration);
     }
 
     @Override
-    public void remove(Entry entry, long milliseconds) {
+    public void remove(EntryImpl entry, Duration duration) {
         if (entry.isForever()) {
             throw new IllegalArgumentException("Entry is forever");
         }
-        entry.getExpiration().remove(milliseconds);
+        entry.getExpiration().remove(duration);
         entryDao.update(entry);
     }
 
     @Override
-    public boolean canRemove(Entry entry, long milliseconds) {
-        return !entry.isForever() && entry.getExpiration().canRemove(milliseconds);
+    public boolean canRemove(EntryImpl entry, Duration duration) {
+        return !entry.isForever() && entry.getExpiration().canRemove(duration);
     }
 
     @Override
-    public void set(Entry entry, long milliseconds) {
-        entry.getExpiration().set(milliseconds);
+    public void set(EntryImpl entry, Instant instant) {
+        entry.getExpiration().set(instant);
         entryDao.update(entry);
     }
 }

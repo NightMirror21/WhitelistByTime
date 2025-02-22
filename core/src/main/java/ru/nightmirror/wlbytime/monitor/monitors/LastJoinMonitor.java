@@ -25,7 +25,7 @@ public class LastJoinMonitor extends Monitor {
     protected void run() {
         dao.getAll().stream().filter(entry -> {
             if (entry.getLastJoin() != null) {
-                Instant lastJoinInstant = entry.getLastJoin().getLastJoinTime().toInstant();
+                Instant lastJoinInstant = entry.getLastJoin().getLastJoinTime();
                 return lastJoinInstant.isBefore(Instant.now().minusMillis(lastJoinThresholdMs));
             }
             return false;

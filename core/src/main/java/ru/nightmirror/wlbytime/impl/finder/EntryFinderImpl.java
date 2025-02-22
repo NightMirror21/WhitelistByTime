@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 
@@ -18,7 +18,7 @@ public class EntryFinderImpl implements EntryFinder {
     EntryDao dao;
 
     @Override
-    public Optional<Entry> find(@NotNull String nickname) {
+    public Optional<EntryImpl> find(@NotNull String nickname) {
         if (nickname.isEmpty()) {
             return Optional.empty();
         }

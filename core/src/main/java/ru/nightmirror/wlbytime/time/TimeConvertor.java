@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import java.time.Duration;
 import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,8 +40,9 @@ public final class TimeConvertor {
         }
     }
 
-    public String getTimeLine(long ms) {
+    public String getTimeLine(Duration duration) {
         String line = "";
+        long ms = duration.toMillis();
 
         line = appendTimeUnit(line, ms, YEAR_IN_MS, settings.getFirstYearOrDefault());
         ms %= YEAR_IN_MS;
@@ -74,7 +76,7 @@ public final class TimeConvertor {
         return line;
     }
 
-    public long getTimeMs(String line) {
+    public Duration getTime(String line) {
         long time = 0;
         for (String timeStr : line.split(" ")) {
             time += getTimeForUnit(timeStr, settings.getYear(), YEAR_IN_MS);
@@ -85,7 +87,7 @@ public final class TimeConvertor {
             time += getTimeForUnit(timeStr, settings.getMinute(), MINUTE_IN_MS);
             time += getTimeForUnit(timeStr, settings.getSecond(), SECOND_IN_MS);
         }
-        return time;
+        return Duration.ofMillis(time);
     }
 
     private long getTimeForUnit(String timeStr, Set<String> patterns, long unitMs) {

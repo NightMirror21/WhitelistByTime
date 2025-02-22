@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -12,6 +12,7 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
@@ -45,13 +46,13 @@ public class FreezeCommand implements Command {
         String nickname = args[0];
         String timeString = concatenateArgs(args);
 
-        Optional<Entry> entry = finder.find(nickname);
+        Optional<EntryImpl> entry = finder.find(nickname);
         if (entry.isEmpty()) {
             issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
             return;
         }
 
-        Entry userEntry = entry.get();
+        EntryImpl userEntry = entry.get();
         if (!userEntry.isActive()) {
             issuer.sendMessage(messages.getPlayerExpired().replace("%nickname%", nickname));
             return;
@@ -60,18 +61,18 @@ public class FreezeCommand implements Command {
         if (userEntry.isFreezeActive()) {
             issuer.sendMessage(messages.getPlayerAlreadyFrozen().replace("%nickname%", nickname));
         } else {
-            long timeInMillis = convertor.getTimeMs(timeString);
-            if (timeInMillis <= 0) {
+            Duration duration = convertor.getTime(timeString);
+            if (duration.isNegative() || duration.isZero()) {
                 issuer.sendMessage(messages.getTimeIsIncorrect());
                 return;
             }
-            freezePlayer(issuer, userEntry, timeInMillis, nickname);
+            freezePlayer(issuer, userEntry, duration, nickname);
         }
     }
 
-    private void freezePlayer(CommandIssuer issuer, Entry userEntry, long timeInMillis, String nickname) {
-        service.freeze(userEntry, timeInMillis);
-        String timeAsString = convertor.getTimeLine(timeInMillis);
+    private void freezePlayer(CommandIssuer issuer, EntryImpl userEntry, Duration duration, String nickname) {
+        service.freeze(userEntry, duration);
+        String timeAsString = convertor.getTimeLine(duration);
         issuer.sendMessage(messages.getPlayerFrozen()
                 .replace("%nickname%", nickname)
                 .replace("%time%", timeAsString));
@@ -91,6 +92,6 @@ public class FreezeCommand implements Command {
             return Set.of(issuer.getNickname());
         }
 
-        return Set.of(timeRandom.getRandomOneTime());
+        return timeRandom.getTimes();
     }
 }

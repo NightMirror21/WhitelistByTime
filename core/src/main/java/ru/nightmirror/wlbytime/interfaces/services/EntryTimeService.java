@@ -1,15 +1,18 @@
 package ru.nightmirror.wlbytime.interfaces.services;
 
-import ru.nightmirror.wlbytime.entry.Entry;
+import ru.nightmirror.wlbytime.entry.EntryImpl;
+
+import java.time.Duration;
+import java.time.Instant;
 
 public interface EntryTimeService {
-    void add(Entry entry, long milliseconds);
+    void add(EntryImpl entry, Duration duration);
 
-    boolean canAdd(Entry entry, long milliseconds);
+    boolean canAdd(EntryImpl entry, Duration duration);
 
-    void remove(Entry entry, long milliseconds);
+    void remove(EntryImpl entry, Duration duration);
 
-    boolean canRemove(Entry entry, long milliseconds);
+    boolean canRemove(EntryImpl entry, Duration duration);
 
-    void set(Entry entry, long milliseconds);
+    void set(EntryImpl entry, Instant instant);
 }

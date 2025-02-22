@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.entry;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -12,10 +12,10 @@ import java.sql.Timestamp;
 @Builder
 public class LastJoin {
     long entryId;
-    Timestamp lastJoinTime;
+    Instant lastJoinTime;
 
     public LastJoin(long entryId) {
         this.entryId = entryId;
-        lastJoinTime = new Timestamp(System.currentTimeMillis());
+        lastJoinTime = Instant.now();
     }
 }

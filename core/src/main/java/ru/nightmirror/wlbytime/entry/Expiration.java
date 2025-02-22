@@ -1,91 +1,68 @@
 package ru.nightmirror.wlbytime.entry;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
 @Getter
 @Builder
 public class Expiration {
-    long entryId;
-    Timestamp expirationTime;
+    final long entryId;
+    Instant expirationTime;
 
-    public boolean canAdd(long milliseconds) {
-        if (milliseconds <= 0) {
-            return false;
-        }
-
-        long newTime = expirationTime.getTime() + milliseconds;
-        return newTime > System.currentTimeMillis();
+    public boolean canAdd(Duration duration) {
+        Instant newTime = expirationTime.plus(duration);
+        return newTime.isAfter(Instant.now());
     }
-    
-    public void add(long milliseconds) {
-        if (milliseconds <= 0) {
-            throw new IllegalArgumentException("Milliseconds cannot be negative or zero.");
-        }
-        long newTime = expirationTime.getTime() + milliseconds;
-        if (newTime < System.currentTimeMillis()) {
+
+    public void add(Duration duration) {
+        Instant newTime = expirationTime.plus(duration);
+        if (newTime.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Cannot set expiration time to the past.");
         }
-        expirationTime.setTime(expirationTime.getTime() + milliseconds);
+        expirationTime = newTime;
     }
 
-    public boolean canRemove(long milliseconds) {
-        if (milliseconds <= 0) {
-            return false;
-        }
-
-        long newTime = expirationTime.getTime() - milliseconds;
-        return newTime > System.currentTimeMillis();
+    public boolean canRemove(Duration duration) {
+        Instant newTime = expirationTime.minus(duration);
+        return newTime.isAfter(Instant.now());
     }
-    
-    public void remove(long milliseconds) {
-        if (milliseconds <= 0) {
-            throw new IllegalArgumentException("Milliseconds cannot be negative or zero.");
-        }
-        long newTime = expirationTime.getTime() - milliseconds;
-        if (newTime < System.currentTimeMillis()) {
+
+    public void remove(Duration duration) {
+        Instant newTime = expirationTime.minus(duration);
+        if (newTime.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Cannot set expiration time to the past.");
         }
-        expirationTime.setTime(newTime);
+        expirationTime = newTime;
     }
 
-    public boolean canSet(long milliseconds) {
-        if (milliseconds <= 0) {
-            return false;
-        }
-        return milliseconds < System.currentTimeMillis();
-    }
-
-    public void set(long milliseconds) {
-        if (milliseconds <= 0) {
-            throw new IllegalArgumentException("Milliseconds cannot be negative or zero.");
-        }
-        if (milliseconds <= System.currentTimeMillis()) {
+    public void set(Instant newTime) {
+        if (newTime.isBefore(Instant.now())) {
             throw new IllegalArgumentException("Milliseconds must be in the future");
         }
-        expirationTime.setTime(milliseconds);
+        expirationTime = newTime;
     }
 
     public boolean isExpired() {
-        return expirationTime.before(new Timestamp(System.currentTimeMillis()));
+        return expirationTime.isBefore(Instant.now());
     }
 
-    public boolean isExpired(long offset) {
-        return expirationTime.before(new Timestamp(System.currentTimeMillis() + offset));
+    public boolean isExpired(Duration offset) {
+        return expirationTime.isBefore(Instant.now().plus(offset));
     }
 
     public boolean isNotExpired() {
         return !isExpired();
     }
 
-    public boolean isNotExpired(long offset) {
+    public boolean isNotExpired(Duration offset) {
         return !isExpired(offset);
     }
 }
