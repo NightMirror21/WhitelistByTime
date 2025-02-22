@@ -78,6 +78,10 @@ public class AddCommand implements Command {
         }
 
         Duration duration = convertor.getTime(timeArgument.toString().trim());
+        if (duration.isNegative() || duration.isZero()) {
+            issuer.sendMessage(messages.getTimeIsIncorrect());
+            return;
+        }
         service.create(nickname, Instant.now().plus(duration));
 
         String timeAsString = convertor.getTimeLine(duration);
