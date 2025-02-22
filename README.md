@@ -1,8 +1,5 @@
 <img src="./images/header.svg">
 
-![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
-*Statistics are obtained through bstats metrics.*
-
 ## Links
 [SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 4800 downloads (22/02/2025).\
 [Modrinth](https://modrinth.com/plugin/whitelistbytime) - 5 downloads (22/02/2025).\
@@ -197,3 +194,6 @@ help:
   - "| Example: 2d 3h 10m"
   - "| Leave this value empty if you want to add player forever"
 ```
+
+![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
+*Statistics are obtained through bstats metrics.*
