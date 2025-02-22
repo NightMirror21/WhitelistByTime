@@ -194,6 +194,6 @@ help:
   - "| Example: 2d 3h 10m"
   - "| Leave this value empty if you want to add player forever"
 ```
-
+## Stats
 ![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
 *Statistics are obtained through bstats metrics.*
