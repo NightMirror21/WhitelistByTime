@@ -1,8 +1,5 @@
 <img src="./images/header.svg">
 
-![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
-*Statistics are obtained through bstats metrics.*
-
 ## Links
 [SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 5200 downloads (10/04/2025).\
 [Modrinth](https://modrinth.com/plugin/whitelistbytime) - 250 downloads (10/04/2025).\
@@ -209,3 +206,7 @@ get-all-permission: "wlbytime.getall"
 remove-permission: "wlbytime.remove"
 time-permission: "wlbytime.time"
 ```
+
+## Stats
+![BStats](https://bstats.org/signatures/bukkit/WhitelistByTime.svg)
+*Statistics are obtained through bstats metrics.*
