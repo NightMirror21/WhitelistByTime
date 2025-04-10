@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 public class AddCommandTest {
 
+    private CommandsConfig commandsConfig;
     private AddCommand addCommand;
     private MessagesConfig messages;
     private EntryFinder finder;
@@ -32,6 +34,7 @@ public class AddCommandTest {
 
     @BeforeEach
     public void setUp() {
+        commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
@@ -39,11 +42,12 @@ public class AddCommandTest {
         random = mock(TimeRandom.class);
         issuer = mock(CommandIssuer.class);
 
-        addCommand = new AddCommand(messages, finder, convertor, service, random);
+        addCommand = new AddCommand(commandsConfig, messages, finder, convertor, service, random);
     }
 
     @Test
     public void getPermissionReturnsCorrectPermission() {
+        when(commandsConfig.getAddPermission()).thenReturn("wlbytime.add");
         assertEquals("wlbytime.add", addCommand.getPermission());
     }
 

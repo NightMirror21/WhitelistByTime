@@ -4,10 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import ru.nightmirror.wlbytime.config.configs.DatabaseConfig;
-import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
-import ru.nightmirror.wlbytime.config.configs.PlaceholdersConfig;
-import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
+import ru.nightmirror.wlbytime.config.configs.*;
 import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
 
 import java.io.File;
@@ -24,6 +21,7 @@ public class ConfigsContainer {
     DatabaseConfig database;
     PlaceholdersConfig placeholders;
     SettingsConfig settings;
+    CommandsConfig commandsConfig;
 
     public void load() {
         messages = new MessagesConfig();
@@ -37,6 +35,9 @@ public class ConfigsContainer {
 
         settings = new SettingsConfig();
         settings.reload(new File(folder, "settings.yml").toPath());
+
+        commandsConfig = new CommandsConfig();
+        commandsConfig.reload(new File(folder, "commands.yml").toPath());
     }
 
     public TimeUnitsConvertorSettings getTimeUnitsConvertorSettings() {
