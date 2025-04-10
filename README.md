@@ -4,9 +4,9 @@
 *Statistics are obtained through bstats metrics.*
 
 ## Links
-[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 4800 downloads (22/02/2025).\
-[Modrinth](https://modrinth.com/plugin/whitelistbytime) - 5 downloads (22/02/2025).\
-[GitHub](https://github.com/NightMirror21/WhitelistByTime) - 8 stars (22/02/2025).
+[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 5200 downloads (10/04/2025).\
+[Modrinth](https://modrinth.com/plugin/whitelistbytime) - 250 downloads (10/04/2025).\
+[GitHub](https://github.com/NightMirror21/WhitelistByTime) - 9 stars (10/04/2025).
 
 ## About
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
@@ -196,4 +196,16 @@ help:
   - "| (time) - time for which the player will be added to the whitelist"
   - "| Example: 2d 3h 10m"
   - "| Leave this value empty if you want to add player forever"
+```
+
+### `commands.yml`
+```yaml
+#Permissions for whitelist subcommands
+add-permission: "wlbytime.add"
+check-permission: "wlbytime.check"
+check-me-permission: "wlbytime.checkme"
+freeze-permission: "wlbytime.freeze"
+get-all-permission: "wlbytime.getall"
+remove-permission: "wlbytime.remove"
+time-permission: "wlbytime.time"
 ```
