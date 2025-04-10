@@ -24,13 +24,15 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 ## Commands and Permissions
 | Command                                                | Permission              |
 |--------------------------------------------------------|-------------------------|
-| /whitelist add [nickname] (time)                       | whitelistbytime.add     |
-| /whitelist remove [nickname]                           | whitelistbytime.remove  |
-| /whitelist check [nickname]                            | whitelistbytime.check   |
-| /whitelist checkme                                     | whitelistbytime.checkme |
-| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time    |
-| /whitelist getall (page)                               | whitelistbytime.getall  |
-| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze  |
+| /whitelist add [nickname] (time)                       | wlbytime.add     |
+| /whitelist remove [nickname]                           | wlbytime.remove  |
+| /whitelist check [nickname]                            | wlbytime.check   |
+| /whitelist checkme                                     | wlbytime.checkme |
+| /whitelist time set/add/remove [nickname] [time]       | wlbytime.time    |
+| /whitelist getall (page)                               | wlbytime.getall  |
+| /whitelist freeze [nickname] [time]                    | wlbytime.freeze  |
+
+**Permissions can be configured in the `commands.yml` config!**
 
 ### Notes:
 - `[nickname]` - required argument.
