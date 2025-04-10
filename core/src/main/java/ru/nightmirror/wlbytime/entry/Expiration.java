@@ -55,7 +55,7 @@ public class Expiration {
     }
 
     public boolean isExpired(Duration offset) {
-        return expirationTime.isBefore(Instant.now().plus(offset));
+        return expirationTime.plus(offset).isBefore(Instant.now());
     }
 
     public boolean isNotExpired() {
