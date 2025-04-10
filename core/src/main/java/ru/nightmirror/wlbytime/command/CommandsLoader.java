@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.Unmodifiable;
 import ru.nightmirror.wlbytime.command.commands.*;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
@@ -19,6 +20,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommandsLoader {
 
+    CommandsConfig commandsConfig;
     MessagesConfig messages;
     EntryFinder finder;
     TimeConvertor convertor;
@@ -28,13 +30,13 @@ public class CommandsLoader {
 
     public @Unmodifiable Set<Command> load() {
         return Set.of(
-                new AddCommand(messages, finder, convertor, entryService, random),
-                new CheckCommand(messages, finder, convertor),
-                new CheckMeCommand(messages, finder, convertor),
-                new FreezeCommand(messages, finder, convertor, random, entryService),
-                new GetAllCommand(messages, entryService, convertor),
-                new RemoveCommand(messages, finder, entryService),
-                new TimeCommand(messages, finder, convertor, random, entryTimeService)
+                new AddCommand(commandsConfig, messages, finder, convertor, entryService, random),
+                new CheckCommand(commandsConfig, messages, finder, convertor),
+                new CheckMeCommand(commandsConfig, messages, finder, convertor),
+                new FreezeCommand(commandsConfig, messages, finder, convertor, random, entryService),
+                new GetAllCommand(commandsConfig, messages, entryService, convertor),
+                new RemoveCommand(commandsConfig, messages, finder, entryService),
+                new TimeCommand(commandsConfig, messages, finder, convertor, random, entryTimeService)
         );
     }
 }

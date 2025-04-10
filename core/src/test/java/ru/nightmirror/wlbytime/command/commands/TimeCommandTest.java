@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
 
 public class TimeCommandTest {
 
+    private CommandsConfig commandsConfig;
     private TimeCommand timeCommand;
     private MessagesConfig messages;
     private EntryFinder finder;
@@ -33,6 +35,7 @@ public class TimeCommandTest {
 
     @BeforeEach
     public void setUp() {
+        commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
@@ -41,8 +44,9 @@ public class TimeCommandTest {
         issuer = mock(CommandIssuer.class);
         entry = mock(EntryImpl.class);
 
-        timeCommand = new TimeCommand(messages, finder, convertor, timeRandom, timeService);
+        timeCommand = new TimeCommand(commandsConfig, messages, finder, convertor, timeRandom, timeService);
 
+        when(commandsConfig.getTimePermission()).thenReturn("wlbytime.time");
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments.");
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
         when(messages.getTimeIsIncorrect()).thenReturn("Time provided is incorrect.");
@@ -53,6 +57,12 @@ public class TimeCommandTest {
         when(messages.getSetTime()).thenReturn("Set %nickname%'s time to %time%.");
         when(messages.getCantAddTimeCausePlayerIsForever()).thenReturn("Cannot add time because player is forever.");
         when(messages.getCantRemoveTimeCausePlayerIsForever()).thenReturn("Cannot remove time because player is forever.");
+    }
+
+    @Test
+    public void getPermissionReturnsCorrectPermission() {
+        when(commandsConfig.getTimePermission()).thenReturn("wlbytime.time");
+        assertEquals("wlbytime.time", timeCommand.getPermission());
     }
 
     @Test

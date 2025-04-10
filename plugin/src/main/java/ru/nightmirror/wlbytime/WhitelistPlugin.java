@@ -100,7 +100,8 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Player login filter loaded");
 
         getLogger().info("Loading commands...");
-        CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getMessages(), entryFinder, timeConvertor,
+        CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getCommandsConfig(), configsContainer.getMessages(),
+                entryFinder, timeConvertor,
                 entryService, timeRandom, entryTimeService);
         CommandDispatcher commandDispatcher = new CommandDispatcher(configsContainer.getMessages(), commandsLoader.load());
         CommandProxy commandProxy = new CommandProxy(configsContainer.getMessages(), commandDispatcher);

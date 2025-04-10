@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
@@ -20,6 +21,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FreezeCommand implements Command {
 
+    CommandsConfig commandsConfig;
     MessagesConfig messages;
     EntryFinder finder;
     TimeConvertor convertor;
@@ -28,7 +30,7 @@ public class FreezeCommand implements Command {
 
     @Override
     public String getPermission() {
-        return "wlbytime.freeze";
+        return commandsConfig.getFreezePermission();
     }
 
     @Override

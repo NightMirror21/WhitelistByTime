@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 public class CheckCommandTest {
 
+    private CommandsConfig commandsConfig;
     private CheckCommand checkCommand;
     private MessagesConfig messages;
     private EntryFinder finder;
@@ -27,13 +29,14 @@ public class CheckCommandTest {
 
     @BeforeEach
     public void setUp() {
+        commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
         issuer = mock(CommandIssuer.class);
         entry = mock(EntryImpl.class);
 
-        checkCommand = new CheckCommand(messages, finder, convertor);
+        checkCommand = new CheckCommand(commandsConfig, messages, finder, convertor);
 
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments!");
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% not found in whitelist!");
@@ -45,6 +48,7 @@ public class CheckCommandTest {
 
     @Test
     public void getPermissionReturnsCorrectPermission() {
+        when(commandsConfig.getCheckPermission()).thenReturn("wlbytime.check");
         assertEquals("wlbytime.check", checkCommand.getPermission());
     }
 

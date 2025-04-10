@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
@@ -18,13 +19,14 @@ public class GetAllCommand implements Command {
 
     private static final int DEFAULT_PAGE = 1;
 
+    CommandsConfig commandsConfig;
     MessagesConfig messages;
     EntryService service;
     TimeConvertor convertor;
 
     @Override
     public String getPermission() {
-        return "wlbytime.getall";
+        return commandsConfig.getGetAllPermission();
     }
 
     @Override

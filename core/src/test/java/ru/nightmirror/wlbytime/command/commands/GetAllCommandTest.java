@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.*;
 
 public class GetAllCommandTest {
 
+    private CommandsConfig commandsConfig;
     private GetAllCommand getAllCommand;
     private MessagesConfig messages;
     private EntryService service;
@@ -26,11 +28,12 @@ public class GetAllCommandTest {
 
     @BeforeEach
     public void setUp() {
+        commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
         service = mock(EntryService.class);
         convertor = mock(TimeConvertor.class);
         issuer = mock(CommandIssuer.class);
-        getAllCommand = new GetAllCommand(messages, service, convertor);
+        getAllCommand = new GetAllCommand(commandsConfig, messages, service, convertor);
 
         when(messages.getListEmpty()).thenReturn("The list is empty.");
         when(messages.getListHeader()).thenReturn("List of entries:");
@@ -43,6 +46,12 @@ public class GetAllCommandTest {
         when(messages.getFrozen()).thenReturn("Frozen for %time%");
         when(messages.getActive()).thenReturn("Active for %time%");
         when(messages.getExpired()).thenReturn("Expired");
+    }
+
+    @Test
+    public void getPermissionReturnsCorrectPermission() {
+        when(commandsConfig.getGetAllPermission()).thenReturn("wlbytime.getall");
+        assertEquals("wlbytime.getall", getAllCommand.getPermission());
     }
 
     @Test

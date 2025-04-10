@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.command.commands;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 public class FreezeCommandTest {
 
+    private CommandsConfig commandsConfig;
     private FreezeCommand freezeCommand;
     private MessagesConfig messages;
     private EntryFinder finder;
@@ -31,6 +33,7 @@ public class FreezeCommandTest {
 
     @BeforeEach
     public void setUp() {
+        commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
         finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
@@ -38,11 +41,12 @@ public class FreezeCommandTest {
         service = mock(EntryService.class);
         issuer = mock(CommandIssuer.class);
 
-        freezeCommand = new FreezeCommand(messages, finder, convertor, timeRandom, service);
+        freezeCommand = new FreezeCommand(commandsConfig, messages, finder, convertor, timeRandom, service);
     }
 
     @Test
     public void getPermissionReturnsCorrectPermission() {
+        when(commandsConfig.getFreezePermission()).thenReturn("wlbytime.freeze");
         assertEquals("wlbytime.freeze", freezeCommand.getPermission());
     }
 
