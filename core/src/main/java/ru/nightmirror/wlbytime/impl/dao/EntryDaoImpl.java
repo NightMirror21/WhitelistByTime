@@ -161,43 +161,31 @@ public class EntryDaoImpl implements EntryDao {
 
             expirationDao.createOrUpdate(newExpirationTable);
         } else {
-            deleteExpiredTableEntry(entry);
+            deleteByEntryId(expirationDao, ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
         }
-    }
-
-
-    private void deleteExpiredTableEntry(EntryImpl entry) throws SQLException {
-        DeleteBuilder<ExpirationTable, Long> builder = expirationDao.deleteBuilder();
-        builder.where().eq(ExpirationTable.ENTRY_ID_COLUMN, entry.getId());
-        expirationDao.delete(builder.prepare());
     }
 
     private void updateFreezingTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getFreezing() != null) {
             freezingDao.createOrUpdate(getFreezingTable(entry, entryTable));
         } else {
-            deleteFreezingTableEntry(entry);
-        }
-    }
+            deleteByEntryId(freezingDao, FreezingTable.ENTRY_ID_COLUMN, entry.getId());
 
-    private void deleteFreezingTableEntry(EntryImpl entry) throws SQLException {
-        DeleteBuilder<FreezingTable, Long> builder = freezingDao.deleteBuilder();
-        builder.where().eq(FreezingTable.ENTRY_ID_COLUMN, entry.getId());
-        freezingDao.delete(builder.prepare());
+        }
     }
 
     private void updateLastJoinTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getLastJoin() != null) {
             lastJoinDao.createOrUpdate(getLastJoinTable(entry, entryTable));
         } else {
-            deleteLastJoinTableEntry(entry);
+            deleteByEntryId(lastJoinDao, LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
         }
     }
 
-    private void deleteLastJoinTableEntry(EntryImpl entry) throws SQLException {
-        DeleteBuilder<LastJoinTable, Long> builder = lastJoinDao.deleteBuilder();
-        builder.where().eq(LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
-        lastJoinDao.delete(builder.prepare());
+    private static <T> void deleteByEntryId(Dao<T, Long> dao, String entryIdColumn, Long entryId) throws SQLException {
+        DeleteBuilder<T, Long> builder = dao.deleteBuilder();
+        builder.where().eq(entryIdColumn, entryId);
+        dao.delete(builder.prepare());
     }
 
     private static @NotNull LastJoinTable getLastJoinTable(EntryImpl entry, EntryTable entryTable) {
