@@ -8,11 +8,12 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
 
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Builder
 @AllArgsConstructor
 @Getter
-@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public final class TimeUnitsConvertorSettings {
+
     Set<String> year;
     Set<String> month;
     Set<String> week;
@@ -23,30 +24,35 @@ public final class TimeUnitsConvertorSettings {
     String forever;
 
     public String getFirstYearOrDefault() {
-        return year.stream().findFirst().orElse("y");
+        return getFirstOrDefault(year, "y");
     }
 
     public String getFirstMonthOrDefault() {
-        return month.stream().findFirst().orElse("mo");
+        return getFirstOrDefault(month, "mo");
     }
 
     public String getFirstWeekOrDefault() {
-        return week.stream().findFirst().orElse("w");
+        return getFirstOrDefault(week, "w");
     }
 
     public String getFirstDayOrDefault() {
-        return day.stream().findFirst().orElse("d");
+        return getFirstOrDefault(day, "d");
     }
 
     public String getFirstHourOrDefault() {
-        return hour.stream().findFirst().orElse("h");
+        return getFirstOrDefault(hour, "h");
     }
 
     public String getFirstMinuteOrDefault() {
-        return minute.stream().findFirst().orElse("m");
+        return getFirstOrDefault(minute, "m");
     }
 
     public String getFirstSecondOrDefault() {
-        return second.stream().findFirst().orElse("s");
+        return getFirstOrDefault(second, "s");
+    }
+
+    private String getFirstOrDefault(Set<String> set, String defaultValue) {
+        return set.stream().findFirst().orElse(defaultValue);
     }
 }
+

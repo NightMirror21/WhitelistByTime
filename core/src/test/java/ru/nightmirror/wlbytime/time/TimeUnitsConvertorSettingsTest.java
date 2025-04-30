@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.time;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,13 +13,13 @@ public class TimeUnitsConvertorSettingsTest {
     @Test
     public void shouldReturnFirstValueFromSet() {
         TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
-                .year(Set.of("year", "y"))
-                .month(Set.of("month", "mo"))
-                .week(Set.of("week", "w"))
-                .day(Set.of("day", "d"))
-                .hour(Set.of("hour", "h"))
-                .minute(Set.of("minute", "m"))
-                .second(Set.of("second", "s"))
+                .year(new LinkedHashSet<>(Set.of("year", "y")))
+                .month(new LinkedHashSet<>(Set.of("month", "mo")))
+                .week(new LinkedHashSet<>(Set.of("week", "w")))
+                .day(new LinkedHashSet<>(Set.of("day", "d")))
+                .hour(new LinkedHashSet<>(Set.of("hour", "h")))
+                .minute(new LinkedHashSet<>(Set.of("minute", "m")))
+                .second(new LinkedHashSet<>(Set.of("second", "s")))
                 .forever("forever")
                 .build();
 
@@ -57,13 +58,13 @@ public class TimeUnitsConvertorSettingsTest {
 
     @Test
     public void shouldReturnCorrectValuesFromGetters() {
-        Set<String> yearSet = Set.of("year", "y");
-        Set<String> monthSet = Set.of("month", "mo");
-        Set<String> weekSet = Set.of("week", "w");
-        Set<String> daySet = Set.of("day", "d");
-        Set<String> hourSet = Set.of("hour", "h");
-        Set<String> minuteSet = Set.of("minute", "m");
-        Set<String> secondSet = Set.of("second", "s");
+        Set<String> yearSet = new LinkedHashSet<>(Set.of("year", "y"));
+        Set<String> monthSet = new LinkedHashSet<>(Set.of("month", "mo"));
+        Set<String> weekSet = new LinkedHashSet<>(Set.of("week", "w"));
+        Set<String> daySet = new LinkedHashSet<>(Set.of("day", "d"));
+        Set<String> hourSet = new LinkedHashSet<>(Set.of("hour", "h"));
+        Set<String> minuteSet = new LinkedHashSet<>(Set.of("minute", "m"));
+        Set<String> secondSet = new LinkedHashSet<>(Set.of("second", "s"));
         String forever = "forever";
 
         TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
