@@ -86,6 +86,10 @@ public class MessagesConfig extends YamlSerializable {
     String playerExpired = "Player %nickname% expired";
 
     @NewLine
+    String pluginSuccessfullyReloaded = "Plugin successfully reloaded";
+    String pluginReloadedWithErrors = "Plugin reloaded with errors";
+
+    @NewLine
     List<String> help = List.of(
             "> WhitelistByTime - Help",
             "| /whitelist add [nickname] (time)",
@@ -93,6 +97,7 @@ public class MessagesConfig extends YamlSerializable {
             "| /whitelist check [nickname]",
             "| /whitelist checkme",
             "| /whitelist getall",
+            "| /whitelist reload",
             "| /whitelist freeze [nickname] [time]",
             "| /whitelist time set/add/remove [nickname] [time]",
             "| (time) - time for which the player will be added to the whitelist",

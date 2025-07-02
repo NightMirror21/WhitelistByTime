@@ -7,6 +7,7 @@ import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.plugin.Reloadable;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -26,6 +27,7 @@ public class CommandsLoaderTest {
     private EntryService entryService;
     private TimeRandom random;
     private EntryTimeService entryTimeService;
+    private Reloadable reloadable;
 
     private CommandsLoader commandsLoader;
 
@@ -38,8 +40,10 @@ public class CommandsLoaderTest {
         entryService = mock(EntryService.class);
         random = mock(TimeRandom.class);
         entryTimeService = mock(EntryTimeService.class);
+        reloadable = mock(Reloadable.class);
 
         commandsLoader = new CommandsLoader(
+                reloadable,
                 commandsConfig,
                 messages,
                 finder,
@@ -54,7 +58,8 @@ public class CommandsLoaderTest {
     public void shouldLoadAllCommands() {
         Set<Command> commands = commandsLoader.load();
 
-        assertThat(commands).hasSize(7);
+        assertThat(commands).hasSize(8);
+        assertThat(commands).hasAtLeastOneElementOfType(ReloadCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(AddCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(CheckCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(CheckMeCommand.class);

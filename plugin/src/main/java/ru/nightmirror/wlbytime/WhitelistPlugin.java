@@ -20,6 +20,7 @@ import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.parser.PlaceholderParser;
+import ru.nightmirror.wlbytime.interfaces.plugin.Reloadable;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.monitor.Monitor;
@@ -36,7 +37,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class WhitelistPlugin extends JavaPlugin {
+public class WhitelistPlugin extends JavaPlugin implements Reloadable {
 
     static final Set<String> WHITELIST_COMMANDS = Set.of("whitelist", "wl", "wlbytime", "whitelistbytime");
 
@@ -100,7 +101,8 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Player login filter loaded");
 
         getLogger().info("Loading commands...");
-        CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getCommandsConfig(), configsContainer.getMessages(),
+        CommandsLoader commandsLoader = new CommandsLoader(this,
+                configsContainer.getCommandsConfig(), configsContainer.getMessages(),
                 entryFinder, timeConvertor,
                 entryService, timeRandom, entryTimeService);
         CommandDispatcher commandDispatcher = new CommandDispatcher(configsContainer.getMessages(), commandsLoader.load());
@@ -175,5 +177,11 @@ public class WhitelistPlugin extends JavaPlugin {
             lastJoinMonitor.shutdown();
         }
         getLogger().info("Plugin disabled");
+    }
+
+    @Override
+    public void reload() {
+        tryToDisable();
+        tryToEnable();
     }
 }

@@ -9,6 +9,7 @@ import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.plugin.Reloadable;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -20,6 +21,7 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommandsLoader {
 
+    Reloadable reloadable;
     CommandsConfig commandsConfig;
     MessagesConfig messages;
     EntryFinder finder;
@@ -36,7 +38,8 @@ public class CommandsLoader {
                 new FreezeCommand(commandsConfig, messages, finder, convertor, random, entryService),
                 new GetAllCommand(commandsConfig, messages, entryService, convertor),
                 new RemoveCommand(commandsConfig, messages, finder, entryService),
-                new TimeCommand(commandsConfig, messages, finder, convertor, random, entryTimeService)
+                new TimeCommand(commandsConfig, messages, finder, convertor, random, entryTimeService),
+                new ReloadCommand(messages, commandsConfig, reloadable)
         );
     }
 }

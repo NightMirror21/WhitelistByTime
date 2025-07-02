@@ -27,6 +27,7 @@ public class CommandsConfig extends YamlSerializable {
     String getAllPermission = "wlbytime.getall";
     String removePermission = "wlbytime.remove";
     String timePermission = "wlbytime.time";
+    String reloadPermission = "wlbytime.reload";
 
     public CommandsConfig() {
         super(CommandsConfig.CONFIG);
