@@ -1,6 +1,8 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.2'
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.17'
+    id 'xyz.jpenilla.run-paper' version '2.3.1'
 }
 
 def javaVersion = JavaVersion.VERSION_21;
@@ -34,7 +36,7 @@ repositories {
 dependencies {
     shadow project(path: ':core', configuration: 'default')
 
-    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
 
     implementation 'org.bstats:bstats-bukkit:3.0.1'
@@ -44,6 +46,12 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    paperweight.paperDevBundle("1.21.7-R0.1-SNAPSHOT")
+}
+
+tasks.assemble {
+    dependsOn(tasks.reobfJar)
 }
 
 shadowJar {
@@ -53,10 +61,6 @@ shadowJar {
     archiveFileName.set(project.description + '-' + rootProject.version + '.jar')
 }
 
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
-}
-
 processResources {
     def props = [version: rootProject.version]
     inputs.properties props
@@ -64,4 +68,9 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+tasks.runServer {
+    minecraftVersion("1.21.7")
+    jvmArgs("-Xms2G", "-Xmx2G")
 }
