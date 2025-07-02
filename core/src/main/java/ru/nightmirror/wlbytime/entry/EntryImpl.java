@@ -74,7 +74,7 @@ public class EntryImpl implements Entry {
 
     @Override
     public void freeze(Duration duration) {
-        if (isFrozen()) {
+        if (isFreezeActive()) {
             throw new IllegalStateException("Entry is already frozen.");
         }
 
