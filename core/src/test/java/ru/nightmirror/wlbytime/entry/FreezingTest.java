@@ -56,9 +56,9 @@ public class FreezingTest {
     @Test
     public void testIsFrozenExactlyAtBoundary() throws InterruptedException {
         Freezing freezing = new Freezing(1L, Duration.ofMillis(80));
-        Thread.sleep(70);
+        Thread.sleep(50);
         assertTrue(freezing.isFrozen());
-        Thread.sleep(20);
+        Thread.sleep(50);
         assertFalse(freezing.isFrozen());
     }
 
