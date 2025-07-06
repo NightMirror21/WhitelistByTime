@@ -13,13 +13,11 @@ public abstract class Monitor {
     private static final Logger LOGGER = Logger.getLogger(Monitor.class.getSimpleName());
 
     protected final EntryDaoImpl dao;
-    protected final SettingsConfig settings;
 
     private final ScheduledExecutorService executor;
 
-    public Monitor(EntryDaoImpl dao, SettingsConfig settings, boolean enabled, int intervalMs) {
+    public Monitor(EntryDaoImpl dao, boolean enabled, int intervalMs) {
         this.dao = dao;
-        this.settings = settings;
 
         if (enabled) {
             executor = Executors.newSingleThreadScheduledExecutor();

@@ -19,7 +19,7 @@ public class ExpireMonitor extends Monitor {
     boolean kickPlayerOnExpire;
 
     public ExpireMonitor(EntryDaoImpl dao, SettingsConfig settings, Consumer<String> playerKicker) {
-        super(dao, settings, settings.isExpireMonitorEnabled(), settings.getExpireMonitorIntervalMs());
+        super(dao, settings.isExpireMonitorEnabled(), settings.getExpireMonitorIntervalMs());
         this.playerKicker = playerKicker;
         this.kickPlayerOnExpire = settings.isKickPlayerOnTimeExpire();
     }
