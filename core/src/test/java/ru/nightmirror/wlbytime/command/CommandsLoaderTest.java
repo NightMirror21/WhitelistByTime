@@ -58,12 +58,13 @@ public class CommandsLoaderTest {
     public void shouldLoadAllCommands() {
         Set<Command> commands = commandsLoader.load();
 
-        assertThat(commands).hasSize(8);
+        assertThat(commands).hasSize(9);
         assertThat(commands).hasAtLeastOneElementOfType(ReloadCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(AddCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(CheckCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(CheckMeCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(FreezeCommand.class);
+        assertThat(commands).hasAtLeastOneElementOfType(UnfreezeCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(GetAllCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(RemoveCommand.class);
         assertThat(commands).hasAtLeastOneElementOfType(TimeCommand.class);

@@ -39,7 +39,8 @@ public class CommandsLoader {
                 new GetAllCommand(commandsConfig, messages, entryService, convertor),
                 new RemoveCommand(commandsConfig, messages, finder, entryService),
                 new TimeCommand(commandsConfig, messages, finder, convertor, random, entryTimeService),
-                new ReloadCommand(messages, commandsConfig, reloadable)
+                new ReloadCommand(messages, commandsConfig, reloadable),
+                new UnfreezeCommand(commandsConfig, messages, finder, entryService)
         );
     }
 }

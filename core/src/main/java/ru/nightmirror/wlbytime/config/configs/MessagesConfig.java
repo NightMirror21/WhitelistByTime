@@ -87,6 +87,11 @@ public class MessagesConfig extends YamlSerializable {
     String cantFreezeCausePlayerIsForever = "Can't freeze cause %nickname% is forever";
 
     @NewLine
+    String playerUnfrozen = "Player %nickname% unfrozen";
+    String playerNotFrozen = "Player %nickname% is not frozen";
+    String playerFreezeExpired = "Freeze of %nickname% already expired";
+
+    @NewLine
     String pluginSuccessfullyReloaded = "Plugin successfully reloaded";
     String pluginReloadedWithErrors = "Plugin reloaded with errors";
 
@@ -100,6 +105,7 @@ public class MessagesConfig extends YamlSerializable {
             "| /whitelist getall",
             "| /whitelist reload",
             "| /whitelist freeze [nickname] [time]",
+            "| /whitelist unfreeze [nickname]",
             "| /whitelist time set/add/remove [nickname] [time]",
             "| (time) - time for which the player will be added to the whitelist",
             "| Example: 2d 3h 10m",
