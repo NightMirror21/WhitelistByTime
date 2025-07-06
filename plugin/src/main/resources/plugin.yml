@@ -23,6 +23,10 @@ permissions:
     default: op
   whitelistbytime.freeze:
     default: op
+  whitelistbytime.unfreeze:
+    default: op
+  whitelistbytime.reload:
+    default: op
   whitelistbytime.getall:
     default: op
   whitelistbytime.remove:
