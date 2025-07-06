@@ -1,4 +1,4 @@
-package ru.nightmirror.wlbytime.consumer;
+package ru.nightmirror.wlbytime.consumers;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

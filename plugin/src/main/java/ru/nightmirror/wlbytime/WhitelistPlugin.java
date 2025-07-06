@@ -8,7 +8,8 @@ import ru.nightmirror.wlbytime.command.CommandDispatcher;
 import ru.nightmirror.wlbytime.command.CommandProxy;
 import ru.nightmirror.wlbytime.command.CommandsLoader;
 import ru.nightmirror.wlbytime.config.ConfigsContainer;
-import ru.nightmirror.wlbytime.consumer.PlayerKicker;
+import ru.nightmirror.wlbytime.consumers.MessageSender;
+import ru.nightmirror.wlbytime.consumers.PlayerKicker;
 import ru.nightmirror.wlbytime.filter.PlayerLoginFilter;
 import ru.nightmirror.wlbytime.impl.checker.AccessEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.checker.UnfreezeEntryCheckerImpl;
@@ -27,6 +28,7 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.monitor.Monitor;
 import ru.nightmirror.wlbytime.monitor.monitors.ExpireMonitor;
 import ru.nightmirror.wlbytime.monitor.monitors.LastJoinMonitor;
+import ru.nightmirror.wlbytime.monitor.monitors.NotifyMonitor;
 import ru.nightmirror.wlbytime.placeholder.PlaceholderHookProxy;
 import ru.nightmirror.wlbytime.syncer.MainThreadSync;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -46,6 +48,7 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
     EntryDaoImpl entryDao;
     Monitor expireMonitor;
     Monitor lastJoinMonitor;
+    Monitor notifyMonitor;
 
     String version;
     ConfigsContainer configsContainer;
@@ -88,6 +91,7 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
         PlayerKicker playerKicker = new PlayerKicker(configsContainer.getMessages(), mainThreadSync);
         expireMonitor = new ExpireMonitor(entryDao, configsContainer.getSettings(), playerKicker);
         lastJoinMonitor = new LastJoinMonitor(entryDao, configsContainer.getSettings());
+        notifyMonitor = new NotifyMonitor(entryDao, configsContainer, new MessageSender());
         getLogger().info("Monitors started");
 
         getLogger().info("Loading time convertor");
@@ -179,6 +183,9 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
         }
         if (lastJoinMonitor != null) {
             lastJoinMonitor.shutdown();
+        }
+        if (notifyMonitor != null) {
+            notifyMonitor.shutdown();
         }
         getLogger().info("Plugin disabled");
     }

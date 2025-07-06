@@ -96,6 +96,9 @@ public class MessagesConfig extends YamlSerializable {
     String pluginReloadedWithErrors = "Plugin reloaded with errors";
 
     @NewLine
+    String timeLeftInWhitelistNotify = "Left %time% in whitelist";
+
+    @NewLine
     List<String> help = List.of(
             "> WhitelistByTime - Help",
             "| /whitelist add [nickname] (time)",
