@@ -84,6 +84,7 @@ public class MessagesConfig extends YamlSerializable {
     String playerFrozen = "Player %nickname% frozen for %time%";
     String playerAlreadyFrozen = "Player %nickname% already frozen";
     String playerExpired = "Player %nickname% expired";
+    String cantFreezeCausePlayerIsForever = "Can't freeze cause %nickname% is forever";
 
     @NewLine
     String pluginSuccessfullyReloaded = "Plugin successfully reloaded";
