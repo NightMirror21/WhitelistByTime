@@ -63,6 +63,12 @@ public class SettingsConfig extends YamlSerializable {
 
     @NewLine
     @Comment(value = {
+            @CommentValue("Kick player from server when his time is expired")
+    }, at = Comment.At.PREPEND)
+    boolean kickPlayerOnTimeExpire = true;
+
+    @NewLine
+    @Comment(value = {
             @CommentValue("Symbols representing time units for years")
     }, at = Comment.At.PREPEND)
     Set<String> yearTimeUnits = Set.of("y");

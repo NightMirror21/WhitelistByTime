@@ -8,6 +8,7 @@ import ru.nightmirror.wlbytime.command.CommandDispatcher;
 import ru.nightmirror.wlbytime.command.CommandProxy;
 import ru.nightmirror.wlbytime.command.CommandsLoader;
 import ru.nightmirror.wlbytime.config.ConfigsContainer;
+import ru.nightmirror.wlbytime.consumer.PlayerKicker;
 import ru.nightmirror.wlbytime.filter.PlayerLoginFilter;
 import ru.nightmirror.wlbytime.impl.checker.AccessEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.checker.UnfreezeEntryCheckerImpl;
@@ -27,6 +28,7 @@ import ru.nightmirror.wlbytime.monitor.Monitor;
 import ru.nightmirror.wlbytime.monitor.monitors.ExpireMonitor;
 import ru.nightmirror.wlbytime.monitor.monitors.LastJoinMonitor;
 import ru.nightmirror.wlbytime.placeholder.PlaceholderHookProxy;
+import ru.nightmirror.wlbytime.syncer.MainThreadSync;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
@@ -82,7 +84,9 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
         getLogger().info("Services initialized");
 
         getLogger().info("Starting monitors...");
-        expireMonitor = new ExpireMonitor(entryDao, configsContainer.getSettings());
+        MainThreadSync mainThreadSync = new MainThreadSync(this);
+        PlayerKicker playerKicker = new PlayerKicker(configsContainer.getMessages(), mainThreadSync);
+        expireMonitor = new ExpireMonitor(entryDao, configsContainer.getSettings(), playerKicker);
         lastJoinMonitor = new LastJoinMonitor(entryDao, configsContainer.getSettings());
         getLogger().info("Monitors started");
 
