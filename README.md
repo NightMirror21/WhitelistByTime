@@ -32,7 +32,7 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 | /whitelist getall (page)                               | wlbytime.getall  |
 | /whitelist freeze [nickname] [time]                    | wlbytime.freeze  |
 | /whitelist unfreeze [nickname]                         | wlbytime.unfreeze|
-| /whitelist relaod                                      | wlbytime.relaod  |
+| /whitelist reload                                      | wlbytime.reload  |
 
 **Permissions can be configured in the `commands.yml` config!**
 
