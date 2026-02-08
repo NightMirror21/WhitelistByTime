@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.config.configs;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import net.elytrium.serializer.SerializerConfig;
 import net.elytrium.serializer.annotations.Comment;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 @SuppressWarnings("FieldMayBeFinal")
 public class SettingsConfig extends YamlSerializable {
 
@@ -27,6 +29,12 @@ public class SettingsConfig extends YamlSerializable {
             @CommentValue("Automatically unfreeze player time when they join the server if their time is frozen")
     }, at = Comment.At.PREPEND)
     boolean unfreezeTimeOnPlayerJoin = false;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("Enable whitelist checks for player login")
+    }, at = Comment.At.PREPEND)
+    boolean whitelistEnabled = true;
 
     @NewLine
     @Comment(value = {

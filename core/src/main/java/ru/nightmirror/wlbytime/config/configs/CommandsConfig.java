@@ -25,6 +25,7 @@ public class CommandsConfig extends YamlSerializable {
     String checkMePermission = "wlbytime.checkme";
     String freezePermission = "wlbytime.freeze";
     String getAllPermission = "wlbytime.getall";
+    String togglePermission = "wlbytime.toggle";
     String removePermission = "wlbytime.remove";
     String timePermission = "wlbytime.time";
 

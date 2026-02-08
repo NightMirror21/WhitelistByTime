@@ -29,6 +29,7 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 | /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time    |
 | /whitelist getall (page)                               | whitelistbytime.getall  |
 | /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze  |
+| /whitelist on/off/status                               | whitelistbytime.toggle  |
 
 ### Notes:
 - `[nickname]` - required argument.
@@ -58,6 +59,9 @@ All output messages can be customized in the configuration.
 ```yaml
 #Automatically unfreeze player time when they join the server if their time is frozen
 unfreeze-time-on-player-join: false
+
+#Enable whitelist checks for player login
+whitelist-enabled: true
 
 #Enable the expiration monitor, which checks players' expiration status
 expire-monitor-enabled: true
@@ -179,6 +183,13 @@ player-frozen: "Player %nickname% frozen for %time%"
 player-already-frozen: "Player %nickname% already frozen"
 player-expired: "Player %nickname% expired"
 
+whitelist-enabled: "Whitelist enabled"
+whitelist-disabled: "Whitelist disabled"
+whitelist-already-enabled: "Whitelist already enabled"
+whitelist-already-disabled: "Whitelist already disabled"
+whitelist-status-enabled: "Whitelist is enabled"
+whitelist-status-disabled: "Whitelist is disabled"
+
 help:
   - "> WhitelistByTime - Help"
   - "| /whitelist add [nickname] (time)"
@@ -188,6 +199,9 @@ help:
   - "| /whitelist getall"
   - "| /whitelist freeze [nickname] [time]"
   - "| /whitelist time set/add/remove [nickname] [time]"
+  - "| /whitelist on"
+  - "| /whitelist off"
+  - "| /whitelist status"
   - "| (time) - time for which the player will be added to the whitelist"
   - "| Example: 2d 3h 10m"
   - "| Leave this value empty if you want to add player forever"
@@ -201,6 +215,7 @@ check-permission: "wlbytime.check"
 check-me-permission: "wlbytime.checkme"
 freeze-permission: "wlbytime.freeze"
 get-all-permission: "wlbytime.getall"
+toggle-permission: "wlbytime.toggle"
 remove-permission: "wlbytime.remove"
 time-permission: "wlbytime.time"
 ```

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import ru.nightmirror.wlbytime.command.commands.*;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
+import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
@@ -14,6 +15,7 @@ import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
 
+import java.nio.file.Path;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -22,6 +24,8 @@ public class CommandsLoader {
 
     CommandsConfig commandsConfig;
     MessagesConfig messages;
+    SettingsConfig settings;
+    Path settingsPath;
     EntryFinder finder;
     TimeConvertor convertor;
     EntryService entryService;
@@ -35,7 +39,10 @@ public class CommandsLoader {
                 new CheckMeCommand(commandsConfig, messages, finder, convertor),
                 new FreezeCommand(commandsConfig, messages, finder, convertor, random, entryService),
                 new GetAllCommand(commandsConfig, messages, entryService, convertor),
+                new OffCommand(commandsConfig, messages, settings, settingsPath),
+                new OnCommand(commandsConfig, messages, settings, settingsPath),
                 new RemoveCommand(commandsConfig, messages, finder, entryService),
+                new StatusCommand(commandsConfig, messages, settings),
                 new TimeCommand(commandsConfig, messages, finder, convertor, random, entryService, entryTimeService)
         );
     }

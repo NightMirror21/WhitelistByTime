@@ -94,13 +94,14 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Loading player login filter...");
         UnfreezeEntryChecker unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(configsContainer.getSettings().isUnfreezeTimeOnPlayerJoin(), entryService);
         AccessEntryChecker accessEntryChecker = new AccessEntryCheckerImpl();
-        playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), entryFinder,
+        playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), configsContainer.getSettings(), entryFinder,
                 unfreezeEntryChecker, accessEntryChecker);
         getServer().getPluginManager().registerEvents(playerLoginFilter, this);
         getLogger().info("Player login filter loaded");
 
         getLogger().info("Loading commands...");
         CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getCommandsConfig(), configsContainer.getMessages(),
+                configsContainer.getSettings(), getDataFolder().toPath().resolve("settings.yml"),
                 entryFinder, timeConvertor,
                 entryService, timeRandom, entryTimeService);
         CommandDispatcher commandDispatcher = new CommandDispatcher(configsContainer.getMessages(), commandsLoader.load());
