@@ -36,7 +36,7 @@ public class CommandsLoader {
                 new FreezeCommand(commandsConfig, messages, finder, convertor, random, entryService),
                 new GetAllCommand(commandsConfig, messages, entryService, convertor),
                 new RemoveCommand(commandsConfig, messages, finder, entryService),
-                new TimeCommand(commandsConfig, messages, finder, convertor, random, entryTimeService)
+                new TimeCommand(commandsConfig, messages, finder, convertor, random, entryService, entryTimeService)
         );
     }
 }

@@ -9,6 +9,7 @@ import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
@@ -29,6 +30,7 @@ public class TimeCommand implements Command {
     EntryFinder finder;
     TimeConvertor convertor;
     TimeRandom timeRandom;
+    EntryService entryService;
     EntryTimeService timeService;
 
     @Override
@@ -46,19 +48,13 @@ public class TimeCommand implements Command {
         if (!areArgsValid(args, issuer)) return;
 
         String operation = args[0].toLowerCase();
-        String nickname = args[1];
-        String timeArgument = concatenateArgs(args);
-
-        Optional<EntryImpl> entry = finder.find(nickname);
-        if (entry.isEmpty()) {
-            issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
-            return;
-        }
         if (!OPERATIONS.contains(operation)) {
             issuer.sendMessage(messages.getIncorrectArguments());
             return;
         }
 
+        String nickname = args[1];
+        String timeArgument = concatenateArgs(args);
         Duration duration = convertor.getTime(timeArgument);
         if (duration.isNegative() || duration.isZero()) {
             issuer.sendMessage(messages.getTimeIsIncorrect());
@@ -66,7 +62,9 @@ public class TimeCommand implements Command {
         }
 
         String timeAsString = convertor.getTimeLine(duration);
-        processOperation(issuer, entry.get(), operation, nickname, duration, timeAsString);
+
+        Optional<EntryImpl> entry = finder.find(nickname);
+        processOperation(issuer, entry, operation, nickname, duration, timeAsString);
     }
 
     private boolean areArgsValid(String[] args, CommandIssuer issuer) {
@@ -85,30 +83,43 @@ public class TimeCommand implements Command {
         return timeArgument.toString().trim();
     }
 
-    private void processOperation(CommandIssuer issuer, EntryImpl entry, String operation, String nickname, Duration duration, String timeAsString) {
+    private void processOperation(CommandIssuer issuer, Optional<EntryImpl> entry, String operation, String nickname, Duration duration, String timeAsString) {
+        if (entry.isEmpty()) {
+            if (!operation.equals("add")) {
+                issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
+                return;
+            }
+
+            entryService.create(nickname, Instant.now().plus(duration));
+            issuer.sendMessage(messages.getSuccessfullyAddedForTime()
+                    .replace("%nickname%", nickname)
+                    .replace("%time%", timeAsString));
+            return;
+        }
+
         switch (operation) {
             case "add" -> {
-                if (entry.isForever()) {
+                if (entry.get().isForever()) {
                     issuer.sendMessage(messages.getCantAddTimeCausePlayerIsForever());
-                } else if (timeService.canAdd(entry, duration)) {
-                    timeService.add(entry, duration);
+                } else if (timeService.canAdd(entry.get(), duration)) {
+                    timeService.add(entry.get(), duration);
                     issuer.sendMessage(messages.getAddTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
                 } else {
                     issuer.sendMessage(messages.getCantAddTime());
                 }
             }
             case "remove" -> {
-                if (entry.isForever()) {
+                if (entry.get().isForever()) {
                     issuer.sendMessage(messages.getCantRemoveTimeCausePlayerIsForever());
-                } else if (timeService.canRemove(entry, duration)) {
-                    timeService.remove(entry, duration);
+                } else if (timeService.canRemove(entry.get(), duration)) {
+                    timeService.remove(entry.get(), duration);
                     issuer.sendMessage(messages.getRemoveTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
                 } else {
                     issuer.sendMessage(messages.getCantRemoveTime());
                 }
             }
             case "set" -> {
-                timeService.set(entry, Instant.now().plus(duration));
+                timeService.set(entry.get(), Instant.now().plus(duration));
                 issuer.sendMessage(messages.getSetTime().replace("%nickname%", nickname).replace("%time%", timeAsString));
             }
             default -> issuer.sendMessage(messages.getIncorrectArguments());

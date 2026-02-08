@@ -13,13 +13,13 @@ public class TimeUnitsConvertorSettingsTest {
     @Test
     public void shouldReturnFirstValueFromSet() {
         TimeUnitsConvertorSettings settings = TimeUnitsConvertorSettings.builder()
-                .year(new LinkedHashSet<>(Set.of("year", "y")))
-                .month(new LinkedHashSet<>(Set.of("month", "mo")))
-                .week(new LinkedHashSet<>(Set.of("week", "w")))
-                .day(new LinkedHashSet<>(Set.of("day", "d")))
-                .hour(new LinkedHashSet<>(Set.of("hour", "h")))
-                .minute(new LinkedHashSet<>(Set.of("minute", "m")))
-                .second(new LinkedHashSet<>(Set.of("second", "s")))
+                .year(new LinkedHashSet<>(java.util.List.of("year", "y")))
+                .month(new LinkedHashSet<>(java.util.List.of("month", "mo")))
+                .week(new LinkedHashSet<>(java.util.List.of("week", "w")))
+                .day(new LinkedHashSet<>(java.util.List.of("day", "d")))
+                .hour(new LinkedHashSet<>(java.util.List.of("hour", "h")))
+                .minute(new LinkedHashSet<>(java.util.List.of("minute", "m")))
+                .second(new LinkedHashSet<>(java.util.List.of("second", "s")))
                 .forever("forever")
                 .build();
 
