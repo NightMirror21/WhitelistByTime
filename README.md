@@ -1,9 +1,7 @@
 <img src="./images/header.svg">
 
 ## Links
-[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 5200 downloads (10/04/2025).\
-[Modrinth](https://modrinth.com/plugin/whitelistbytime) - 250 downloads (10/04/2025).\
-[GitHub](https://github.com/NightMirror21/WhitelistByTime) - 9 stars (10/04/2025).
+[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) [Modrinth](https://modrinth.com/plugin/whitelistbytime) [GitHub](https://github.com/NightMirror21/WhitelistByTime)
 
 ## About
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
