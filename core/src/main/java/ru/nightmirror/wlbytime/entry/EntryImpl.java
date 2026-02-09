@@ -18,6 +18,7 @@ import java.time.Instant;
 public class EntryImpl implements Entry {
     long id;
     String nickname;
+    String uuid;
     @Builder.Default
     Expiration expiration = null;
     @Builder.Default

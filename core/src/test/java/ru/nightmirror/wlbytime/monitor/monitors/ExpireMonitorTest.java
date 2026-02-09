@@ -78,6 +78,5 @@ public class ExpireMonitorTest {
     @Test
     public void shouldShutdownCorrectly() {
         expireMonitor.shutdown();
-        // No exceptions should be thrown
     }
 }

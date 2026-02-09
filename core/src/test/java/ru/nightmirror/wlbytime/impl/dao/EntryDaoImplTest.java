@@ -9,9 +9,16 @@ import ru.nightmirror.wlbytime.entry.Freezing;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -359,5 +366,128 @@ public class EntryDaoImplTest {
         Method method = EntryDaoImpl.class.getDeclaredMethod("getDatabaseUrl", DatabaseConfig.class);
         method.setAccessible(true);
         assertThrows(Exception.class, () -> method.invoke(entryDao, config));
+    }
+
+    @Test
+    public void migrateEntryTableIfRequiredMigratesWhenUuidMissing() throws Exception {
+        Path tempDir = Files.createTempDirectory("wlbytime_migrate_uuid_missing");
+        String dbName = "migration_uuid_missing";
+        Path dbPath = tempDir.resolve(dbName + ".db");
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath())) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("CREATE TABLE wlbytime_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT NOT NULL)");
+                statement.execute("CREATE UNIQUE INDEX wlbytime_entries_nickname_uq ON wlbytime_entries(nickname)");
+                statement.execute("INSERT INTO wlbytime_entries (nickname) VALUES ('user1')");
+            }
+        }
+
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("sqlite");
+        config.setName(dbName);
+        EntryDaoImpl dao = new EntryDaoImpl(tempDir.toFile(), config);
+        try {
+            Set<String> columns = getEntryColumns(dbPath);
+            assertTrue(columns.contains("uuid"));
+            assertFalse(hasUniqueNicknameIndex(dbPath));
+            Optional<EntryImpl> entry = dao.get("user1");
+            assertTrue(entry.isPresent());
+            assertNull(entry.get().getUuid());
+        } finally {
+            dao.close();
+        }
+    }
+
+    @Test
+    public void migrateEntryTableIfRequiredDoesNotRunWhenSchemaIsOk() throws Exception {
+        Path tempDir = Files.createTempDirectory("wlbytime_migrate_noop");
+        String dbName = "migration_noop";
+        Path dbPath = tempDir.resolve(dbName + ".db");
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath())) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("CREATE TABLE wlbytime_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT NOT NULL, uuid TEXT, legacy TEXT)");
+                statement.execute("INSERT INTO wlbytime_entries (nickname, uuid, legacy) VALUES ('user2', NULL, 'legacy_value')");
+            }
+        }
+
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("sqlite");
+        config.setName(dbName);
+        EntryDaoImpl dao = new EntryDaoImpl(tempDir.toFile(), config);
+        try {
+            Set<String> columns = getEntryColumns(dbPath);
+            assertTrue(columns.contains("uuid"));
+            assertTrue(columns.contains("legacy"));
+            assertFalse(hasUniqueNicknameIndex(dbPath));
+            Optional<EntryImpl> entry = dao.get("user2");
+            assertTrue(entry.isPresent());
+        } finally {
+            dao.close();
+        }
+    }
+
+    @Test
+    public void migrateEntryTableIfRequiredMigratesWhenUniqueNicknameIndexPresent() throws Exception {
+        Path tempDir = Files.createTempDirectory("wlbytime_migrate_unique");
+        String dbName = "migration_unique_index";
+        Path dbPath = tempDir.resolve(dbName + ".db");
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath())) {
+            try (Statement statement = connection.createStatement()) {
+                statement.execute("CREATE TABLE wlbytime_entries (id INTEGER PRIMARY KEY AUTOINCREMENT, nickname TEXT NOT NULL, uuid TEXT)");
+                statement.execute("CREATE UNIQUE INDEX wlbytime_entries_nickname_uq ON wlbytime_entries(nickname)");
+                statement.execute("INSERT INTO wlbytime_entries (nickname, uuid) VALUES ('user3', NULL)");
+            }
+        }
+
+        DatabaseConfig config = new DatabaseConfig();
+        config.setType("sqlite");
+        config.setName(dbName);
+        EntryDaoImpl dao = new EntryDaoImpl(tempDir.toFile(), config);
+        try {
+            Set<String> columns = getEntryColumns(dbPath);
+            assertTrue(columns.contains("uuid"));
+            assertFalse(hasUniqueNicknameIndex(dbPath));
+            Optional<EntryImpl> entry = dao.get("user3");
+            assertTrue(entry.isPresent());
+        } finally {
+            dao.close();
+        }
+    }
+
+    private static Set<String> getEntryColumns(Path dbPath) throws Exception {
+        Set<String> columns = new HashSet<>();
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath())) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet results = statement.executeQuery("PRAGMA table_info(wlbytime_entries)")) {
+                    while (results.next()) {
+                        columns.add(results.getString("name").toLowerCase());
+                    }
+                }
+            }
+        }
+        return columns;
+    }
+
+    private static boolean hasUniqueNicknameIndex(Path dbPath) throws Exception {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath.toAbsolutePath())) {
+            try (Statement statement = connection.createStatement()) {
+                try (ResultSet indexes = statement.executeQuery("PRAGMA index_list(wlbytime_entries)")) {
+                    while (indexes.next()) {
+                        boolean unique = indexes.getInt("unique") == 1;
+                        if (!unique) {
+                            continue;
+                        }
+                        String indexName = indexes.getString("name");
+                        try (ResultSet columns = statement.executeQuery("PRAGMA index_info(" + indexName + ")")) {
+                            while (columns.next()) {
+                                if ("nickname".equalsIgnoreCase(columns.getString("name"))) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

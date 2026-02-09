@@ -2,13 +2,16 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.ResolvedPlayer;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
@@ -19,14 +22,16 @@ import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class FreezeCommand implements Command {
 
     CommandsConfig commandsConfig;
     MessagesConfig messages;
-    EntryFinder finder;
     TimeConvertor convertor;
     TimeRandom timeRandom;
     EntryService service;
+    PlayerIdentityResolver identityResolver;
+    EntryIdentityService identityService;
 
     @Override
     public String getPermission() {
@@ -42,13 +47,15 @@ public class FreezeCommand implements Command {
     public void execute(CommandIssuer issuer, String[] args) {
         if (args.length < 2) {
             issuer.sendMessage(messages.getIncorrectArguments());
+            log.info("FreezeCommand: insufficient args");
             return;
         }
 
         String nickname = args[0];
         String timeString = concatenateArgs(args);
 
-        Optional<EntryImpl> entry = finder.find(nickname);
+        ResolvedPlayer resolved = identityResolver.resolveByNickname(nickname);
+        Optional<EntryImpl> entry = identityService.findOrMigrate(resolved, nickname);
         if (entry.isEmpty()) {
             issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
             return;
@@ -66,6 +73,7 @@ public class FreezeCommand implements Command {
             Duration duration = convertor.getTime(timeString);
             if (duration.isNegative() || duration.isZero()) {
                 issuer.sendMessage(messages.getTimeIsIncorrect());
+                log.info("FreezeCommand: invalid time '{}'", timeString);
                 return;
             }
             freezePlayer(issuer, userEntry, duration, nickname);

@@ -2,6 +2,7 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class StatusCommand implements Command {
 
     CommandsConfig commandsConfig;
@@ -33,6 +35,7 @@ public class StatusCommand implements Command {
     public void execute(CommandIssuer issuer, String[] args) {
         if (args.length > 0) {
             issuer.sendMessage(messages.getIncorrectArguments());
+            log.info("StatusCommand: invalid args length {} from {}", args.length, issuer.getNickname());
             return;
         }
 

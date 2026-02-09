@@ -2,13 +2,16 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.ResolvedPlayer;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 
 import java.util.Optional;
@@ -16,12 +19,14 @@ import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class CheckMeCommand implements Command {
 
     CommandsConfig commandsConfig;
     MessagesConfig messages;
-    EntryFinder finder;
     TimeConvertor convertor;
+    PlayerIdentityResolver identityResolver;
+    EntryIdentityService identityService;
 
     @Override
     public String getPermission() {
@@ -35,7 +40,8 @@ public class CheckMeCommand implements Command {
 
     @Override
     public void execute(CommandIssuer issuer, String[] args) {
-        Optional<EntryImpl> entry = finder.find(issuer.getNickname());
+        ResolvedPlayer resolved = identityResolver.resolveByIssuer(issuer);
+        Optional<EntryImpl> entry = identityService.findOrMigrate(resolved, issuer.getNickname());
         if (entry.isEmpty() || entry.get().isInactive()) {
             issuer.sendMessage(messages.getCheckMeNotInWhitelist());
         } else {

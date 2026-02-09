@@ -7,7 +7,8 @@ import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -25,7 +26,8 @@ public class CommandsLoaderTest {
     private MessagesConfig messages;
     private SettingsConfig settings;
     private Path settingsPath;
-    private EntryFinder finder;
+    private PlayerIdentityResolver identityResolver;
+    private EntryIdentityService identityService;
     private TimeConvertor convertor;
     private EntryService entryService;
     private TimeRandom random;
@@ -39,7 +41,8 @@ public class CommandsLoaderTest {
         messages = mock(MessagesConfig.class);
         settings = mock(SettingsConfig.class);
         settingsPath = Path.of("settings.yml");
-        finder = mock(EntryFinder.class);
+        identityResolver = mock(PlayerIdentityResolver.class);
+        identityService = mock(EntryIdentityService.class);
         convertor = mock(TimeConvertor.class);
         entryService = mock(EntryService.class);
         random = mock(TimeRandom.class);
@@ -50,7 +53,8 @@ public class CommandsLoaderTest {
                 messages,
                 settings,
                 settingsPath,
-                finder,
+                identityResolver,
+                identityService,
                 convertor,
                 entryService,
                 random,

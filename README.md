@@ -18,6 +18,7 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 - **Lightweight**: minimal load on the **main thread**.
 - **Multi-server** support: utilizes **SQL transactions**.
 - **Safe**: the code is extensively covered by **automated tests**.
+- **UUID support**: stores UUIDs in online/floodgate modes to handle nickname changes.
 
 ## Commands and Permissions
 | Command                                                | Permission              |
@@ -59,6 +60,17 @@ All output messages can be customized in the configuration.
 ```yaml
 #Automatically unfreeze player time when they join the server if their time is frozen
 unfreeze-time-on-player-join: false
+
+#How to identify players in whitelist: OFFLINE, ONLINE, FLOODGATE, AUTO
+player-id-mode: OFFLINE
+#Use Mojang API to resolve UUID when adding by nickname in ONLINE/AUTO mode
+mojang-lookup-enabled: true
+#Timeout for Mojang API requests in milliseconds
+mojang-timeout-ms: 5000
+#Enable in-memory cache for Mojang API UUID lookups
+mojang-cache-enabled: true
+#Mojang API cache TTL in milliseconds
+mojang-cache-ttl-ms: 3600000
 
 #Enable whitelist checks for player login
 whitelist-enabled: true

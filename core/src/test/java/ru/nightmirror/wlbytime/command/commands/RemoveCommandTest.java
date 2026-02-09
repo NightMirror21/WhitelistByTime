@@ -5,14 +5,18 @@ import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.PlayerKey;
+import ru.nightmirror.wlbytime.identity.ResolvedPlayer;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class RemoveCommandTest {
@@ -20,18 +24,20 @@ public class RemoveCommandTest {
     private CommandsConfig commandsConfig;
     private RemoveCommand removeCommand;
     private MessagesConfig messages;
-    private EntryFinder finder;
     private EntryService service;
     private CommandIssuer issuer;
+    private PlayerIdentityResolver identityResolver;
+    private EntryIdentityService identityService;
 
     @BeforeEach
     public void setUp() {
         commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
-        finder = mock(EntryFinder.class);
         service = mock(EntryService.class);
         issuer = mock(CommandIssuer.class);
-        removeCommand = new RemoveCommand(commandsConfig, messages, finder, service);
+        identityResolver = mock(PlayerIdentityResolver.class);
+        identityService = mock(EntryIdentityService.class);
+        removeCommand = new RemoveCommand(commandsConfig, messages, service, identityResolver, identityService);
 
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments provided.");
         when(messages.getPlayerRemovedFromWhitelist()).thenReturn("Player %nickname% has been removed from the whitelist.");
@@ -63,7 +69,10 @@ public class RemoveCommandTest {
     @Test
     public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonexistentPlayer";
-        when(finder.find(nickname)).thenReturn(Optional.empty());
+        when(identityResolver.resolveByNickname(nickname))
+                .thenReturn(new ResolvedPlayer(
+                        PlayerKey.nickname(nickname), nickname, null));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.empty());
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
 
         removeCommand.execute(issuer, new String[]{nickname});
@@ -76,7 +85,10 @@ public class RemoveCommandTest {
     public void executePlayerInWhitelistRemovesPlayerAndSendsSuccessMessage() {
         String nickname = "existingPlayer";
         EntryImpl entry = mock(EntryImpl.class);
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityResolver.resolveByNickname(nickname))
+                .thenReturn(new ResolvedPlayer(
+                        PlayerKey.nickname(nickname), nickname, null));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(messages.getPlayerRemovedFromWhitelist()).thenReturn("Player %nickname% has been removed from the whitelist.");
 
         removeCommand.execute(issuer, new String[]{nickname});

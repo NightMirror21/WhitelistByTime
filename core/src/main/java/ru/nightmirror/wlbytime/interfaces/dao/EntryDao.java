@@ -13,9 +13,15 @@ public interface EntryDao {
 
     Optional<EntryImpl> get(String nickname);
 
+    Optional<EntryImpl> getByUuid(String uuid);
+
     EntryImpl create(String nickname, Instant until);
 
     EntryImpl create(String nickname);
+
+    EntryImpl create(String nickname, String uuid, Instant until);
+
+    EntryImpl create(String nickname, String uuid);
 
     void remove(EntryImpl entry);
 

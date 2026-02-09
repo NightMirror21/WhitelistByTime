@@ -41,7 +41,7 @@ public class TimeRandomTest {
 
         assertThat(times).isNotNull();
         assertThat(times).isNotEmpty();
-        assertThat(times).hasSize(21); // 20 predefined + 1 random
+        assertThat(times).hasSize(21);
     }
 
     @Test

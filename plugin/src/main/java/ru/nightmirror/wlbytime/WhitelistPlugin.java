@@ -14,12 +14,16 @@ import ru.nightmirror.wlbytime.impl.checker.UnfreezeEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.dao.EntryDaoImpl;
 import ru.nightmirror.wlbytime.impl.finder.EntryFinderImpl;
 import ru.nightmirror.wlbytime.impl.parser.PlaceholderParserImpl;
+import ru.nightmirror.wlbytime.impl.service.EntryIdentityServiceImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryServiceImpl;
 import ru.nightmirror.wlbytime.impl.service.EntryTimeServiceImpl;
+import ru.nightmirror.wlbytime.identity.PlayerIdentityResolverImpl;
 import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 import ru.nightmirror.wlbytime.interfaces.parser.PlaceholderParser;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.monitor.Monitor;
@@ -78,6 +82,7 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Initializing services...");
         EntryService entryService = new EntryServiceImpl(entryDao);
         EntryTimeService entryTimeService = new EntryTimeServiceImpl(entryDao);
+        EntryIdentityService identityService = new EntryIdentityServiceImpl(entryFinder, entryService);
         getLogger().info("Services initialized");
 
         getLogger().info("Starting monitors...");
@@ -92,17 +97,19 @@ public class WhitelistPlugin extends JavaPlugin {
         getLogger().info("Time convertor loaded");
 
         getLogger().info("Loading player login filter...");
+        PlayerIdentityResolver identityResolver = new PlayerIdentityResolverImpl(configsContainer.getSettings(), getServer(), getLogger());
         UnfreezeEntryChecker unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(configsContainer.getSettings().isUnfreezeTimeOnPlayerJoin(), entryService);
         AccessEntryChecker accessEntryChecker = new AccessEntryCheckerImpl();
-        playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), configsContainer.getSettings(), entryFinder,
-                unfreezeEntryChecker, accessEntryChecker);
+        playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), configsContainer.getSettings(),
+                unfreezeEntryChecker, accessEntryChecker, identityResolver, identityService);
         getServer().getPluginManager().registerEvents(playerLoginFilter, this);
         getLogger().info("Player login filter loaded");
 
         getLogger().info("Loading commands...");
         CommandsLoader commandsLoader = new CommandsLoader(configsContainer.getCommandsConfig(), configsContainer.getMessages(),
                 configsContainer.getSettings(), getDataFolder().toPath().resolve("settings.yml"),
-                entryFinder, timeConvertor,
+                identityResolver, identityService,
+                timeConvertor,
                 entryService, timeRandom, entryTimeService);
         CommandDispatcher commandDispatcher = new CommandDispatcher(configsContainer.getMessages(), commandsLoader.load());
         CommandProxy commandProxy = new CommandProxy(configsContainer.getMessages(), commandDispatcher);

@@ -6,8 +6,11 @@ import org.mockito.ArgumentCaptor;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.PlayerKey;
+import ru.nightmirror.wlbytime.identity.ResolvedPlayer;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
 import ru.nightmirror.wlbytime.time.TimeRandom;
@@ -18,6 +21,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 public class FreezeCommandTest {
@@ -25,23 +29,29 @@ public class FreezeCommandTest {
     private CommandsConfig commandsConfig;
     private FreezeCommand freezeCommand;
     private MessagesConfig messages;
-    private EntryFinder finder;
     private TimeConvertor convertor;
     private TimeRandom timeRandom;
     private EntryService service;
     private CommandIssuer issuer;
+    private PlayerIdentityResolver identityResolver;
+    private EntryIdentityService identityService;
 
     @BeforeEach
     public void setUp() {
         commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
-        finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
         timeRandom = mock(TimeRandom.class);
         service = mock(EntryService.class);
         issuer = mock(CommandIssuer.class);
+        identityResolver = mock(PlayerIdentityResolver.class);
+        identityService = mock(EntryIdentityService.class);
 
-        freezeCommand = new FreezeCommand(commandsConfig, messages, finder, convertor, timeRandom, service);
+        freezeCommand = new FreezeCommand(commandsConfig, messages, convertor, timeRandom, service, identityResolver, identityService);
+
+        when(identityResolver.resolveByNickname(anyString()))
+                .thenAnswer(invocation -> new ResolvedPlayer(
+                        PlayerKey.nickname(invocation.getArgument(0)), invocation.getArgument(0), null));
     }
 
     @Test
@@ -63,21 +73,21 @@ public class FreezeCommandTest {
 
         verify(issuer).sendMessage("Incorrect arguments provided!");
         verifyNoMoreInteractions(issuer);
-        verifyNoInteractions(finder, convertor, service);
+        verifyNoInteractions(convertor, service);
     }
 
     @Test
     public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonExistentPlayer";
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.empty());
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.empty());
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist!");
 
         freezeCommand.execute(issuer, new String[]{nickname, "1h"});
 
         verify(issuer).sendMessage("Player nonExistentPlayer is not in the whitelist!");
         verifyNoMoreInteractions(issuer);
-        verify(finder).find(nickname);
+        ;
         verifyNoInteractions(convertor, service);
     }
 
@@ -87,7 +97,7 @@ public class FreezeCommandTest {
         String timeString = "invalidTime";
         EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(timeString)).thenReturn(Duration.ZERO);
@@ -96,7 +106,7 @@ public class FreezeCommandTest {
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(issuer).sendMessage("The provided time is incorrect!");
-        verify(finder).find(nickname);
+        ;
         verify(convertor).getTime(timeString);
         verifyNoMoreInteractions(issuer);
         verifyNoInteractions(service);
@@ -107,7 +117,7 @@ public class FreezeCommandTest {
         String nickname = "expiredPlayer";
         EntryImpl expiredEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(expiredEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(expiredEntry));
         when(expiredEntry.isActive()).thenReturn(false);
         when(messages.getPlayerExpired()).thenReturn("Player %nickname% has expired!");
 
@@ -115,7 +125,7 @@ public class FreezeCommandTest {
 
         verify(issuer).sendMessage("Player expiredPlayer has expired!");
         verifyNoMoreInteractions(issuer);
-        verify(finder).find(nickname);
+        ;
         verifyNoInteractions(convertor, service);
     }
 
@@ -124,7 +134,7 @@ public class FreezeCommandTest {
         String nickname = "frozenPlayer";
         EntryImpl frozenEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(frozenEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(frozenEntry));
         when(frozenEntry.isActive()).thenReturn(true);
         when(frozenEntry.isFreezeActive()).thenReturn(true);
         when(messages.getPlayerAlreadyFrozen()).thenReturn("Player %nickname% is already frozen!");
@@ -135,7 +145,7 @@ public class FreezeCommandTest {
         verify(frozenEntry).isFreezeActive();
         verify(issuer).sendMessage("Player frozenPlayer is already frozen!");
         verifyNoMoreInteractions(issuer);
-        verify(finder).find(nickname);
+        ;
         verifyNoInteractions(convertor, service);
     }
 
@@ -145,7 +155,7 @@ public class FreezeCommandTest {
         String timeString = "3h";
         EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(timeString)).thenReturn(Duration.ofHours(3));
@@ -174,7 +184,7 @@ public class FreezeCommandTest {
         Duration duration = Duration.ofDays(1).plusHours(2);
 
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(concatenatedTime)).thenReturn(duration);
@@ -183,7 +193,7 @@ public class FreezeCommandTest {
 
         freezeCommand.execute(issuer, args);
 
-        verify(finder).find(nickname);
+        ;
         verify(convertor).getTime(concatenatedTime);
         verify(convertor).getTimeLine(duration);
         verify(activeEntry).isActive();
@@ -222,7 +232,7 @@ public class FreezeCommandTest {
         String formattedTime = "30 minutes";
 
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(timeString)).thenReturn(duration);
@@ -260,7 +270,7 @@ public class FreezeCommandTest {
 
         EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(timeString)).thenReturn(duration);
@@ -269,7 +279,7 @@ public class FreezeCommandTest {
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(issuer).sendMessage("The provided time is incorrect!");
-        verify(finder).find(nickname);
+        ;
         verify(convertor).getTime(timeString);
         verifyNoMoreInteractions(issuer);
         verifyNoInteractions(service);
@@ -283,7 +293,7 @@ public class FreezeCommandTest {
 
         EntryImpl activeEntry = mock(EntryImpl.class);
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(timeString)).thenReturn(duration);
@@ -292,7 +302,7 @@ public class FreezeCommandTest {
         freezeCommand.execute(issuer, new String[]{nickname, timeString});
 
         verify(issuer).sendMessage("The provided time is incorrect!");
-        verify(finder).find(nickname);
+        ;
         verify(convertor).getTime(timeString);
         verifyNoMoreInteractions(issuer);
         verifyNoInteractions(service);
@@ -307,7 +317,7 @@ public class FreezeCommandTest {
         String formattedTime = "15 minutes";
 
         when(issuer.getNickname()).thenReturn(nickname);
-        when(finder.find(nickname)).thenReturn(Optional.of(activeEntry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
         when(activeEntry.isActive()).thenReturn(true);
         when(activeEntry.isFreezeActive()).thenReturn(false);
         when(convertor.getTime(timeString)).thenReturn(duration);

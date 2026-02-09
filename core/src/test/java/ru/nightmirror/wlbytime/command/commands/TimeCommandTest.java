@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Test;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.PlayerKey;
+import ru.nightmirror.wlbytime.identity.ResolvedPlayer;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -18,6 +21,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -27,27 +31,33 @@ public class TimeCommandTest {
     private CommandsConfig commandsConfig;
     private TimeCommand timeCommand;
     private MessagesConfig messages;
-    private EntryFinder finder;
     private TimeConvertor convertor;
     private TimeRandom timeRandom;
     private EntryService entryService;
     private EntryTimeService timeService;
     private CommandIssuer issuer;
     private EntryImpl entry;
+    private PlayerIdentityResolver identityResolver;
+    private EntryIdentityService identityService;
 
     @BeforeEach
     public void setUp() {
         commandsConfig = mock(CommandsConfig.class);
         messages = mock(MessagesConfig.class);
-        finder = mock(EntryFinder.class);
         convertor = mock(TimeConvertor.class);
         timeRandom = mock(TimeRandom.class);
         entryService = mock(EntryService.class);
         timeService = mock(EntryTimeService.class);
         issuer = mock(CommandIssuer.class);
         entry = mock(EntryImpl.class);
+        identityResolver = mock(PlayerIdentityResolver.class);
+        identityService = mock(EntryIdentityService.class);
 
-        timeCommand = new TimeCommand(commandsConfig, messages, finder, convertor, timeRandom, entryService, timeService);
+        timeCommand = new TimeCommand(commandsConfig, messages, convertor, timeRandom, entryService, timeService, identityResolver, identityService);
+
+        when(identityResolver.resolveByNickname(anyString()))
+                .thenAnswer(invocation -> new ResolvedPlayer(
+                        PlayerKey.nickname(invocation.getArgument(0)), invocation.getArgument(0), null));
 
         when(commandsConfig.getTimePermission()).thenReturn("wlbytime.time");
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments.");
@@ -79,7 +89,7 @@ public class TimeCommandTest {
     @Test
     public void executePlayerNotInWhitelistSendsPlayerNotInWhitelistMessage() {
         String nickname = "nonexistentPlayer";
-        when(finder.find(nickname)).thenReturn(Optional.empty());
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.empty());
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
 
         timeCommand.execute(issuer, new String[]{"remove", nickname, "1h"});
@@ -90,14 +100,14 @@ public class TimeCommandTest {
     @Test
     public void executeAddOperationPlayerNotInWhitelistCreatesEntry() {
         String nickname = "nonexistentPlayer";
-        when(finder.find(nickname)).thenReturn(Optional.empty());
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.empty());
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
         when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
 
         Instant now = Instant.now();
         timeCommand.execute(issuer, new String[]{"add", nickname, "1h"});
 
-        verify(entryService).create(eq(nickname), argThat(instant ->
+        verify(entryService).create(eq(nickname), argThat((Instant instant) ->
                 instant.isAfter(now.plus(Duration.ofHours(1)).minusMillis(1)) &&
                         instant.isBefore(now.plus(Duration.ofHours(1)).plusMillis(1000))
         ));
@@ -108,7 +118,7 @@ public class TimeCommandTest {
     @Test
     public void executeWithInvalidOperationSendsIncorrectArgumentsMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
 
         timeCommand.execute(issuer, new String[]{"invalidOp", nickname, "1h"});
 
@@ -118,7 +128,7 @@ public class TimeCommandTest {
     @Test
     public void executeWithInvalidTimeSendsTimeIsIncorrectMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(convertor.getTime("1x")).thenReturn(Duration.ZERO);
 
         timeCommand.execute(issuer, new String[]{"add", nickname, "1x"});
@@ -129,7 +139,7 @@ public class TimeCommandTest {
     @Test
     public void executeAddOperationEntryIsForeverSendsCantAddTimeForeverMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(true);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
 
@@ -143,7 +153,7 @@ public class TimeCommandTest {
     @Test
     public void executeRemoveOperationEntryIsForeverSendsCantRemoveTimeForeverMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(true);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
 
@@ -157,7 +167,7 @@ public class TimeCommandTest {
     @Test
     public void executeAddOperationCanAddSendsAddTimeMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
         when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
@@ -172,7 +182,7 @@ public class TimeCommandTest {
     @Test
     public void executeAddOperationCannotAddSendsCantAddTimeMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
         when(timeService.canAdd(entry, Duration.ofHours(1))).thenReturn(false);
@@ -185,7 +195,7 @@ public class TimeCommandTest {
     @Test
     public void executeRemoveOperationCanRemoveSendsRemoveTimeMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
         when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");
@@ -200,7 +210,7 @@ public class TimeCommandTest {
     @Test
     public void executeRemoveOperationCannotRemoveSendsCantRemoveTimeMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
         when(timeService.canRemove(entry, Duration.ofHours(1))).thenReturn(false);
@@ -213,7 +223,7 @@ public class TimeCommandTest {
     @Test
     public void executeSetOperationSendsSetTimeMessage() {
         String nickname = "somePlayer";
-        when(finder.find(nickname)).thenReturn(Optional.of(entry));
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(entry));
         when(entry.isForever()).thenReturn(false);
         when(convertor.getTime("1h")).thenReturn(Duration.ofHours(1));
         when(convertor.getTimeLine(Duration.ofHours(1))).thenReturn("1 hour");

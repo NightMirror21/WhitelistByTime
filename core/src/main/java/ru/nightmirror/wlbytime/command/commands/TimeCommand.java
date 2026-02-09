@@ -2,13 +2,16 @@ package ru.nightmirror.wlbytime.command.commands;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.experimental.FieldDefaults;
 import ru.nightmirror.wlbytime.config.configs.CommandsConfig;
 import ru.nightmirror.wlbytime.config.configs.MessagesConfig;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.ResolvedPlayer;
 import ru.nightmirror.wlbytime.interfaces.command.Command;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
-import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
+import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
+import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
 import ru.nightmirror.wlbytime.time.TimeConvertor;
@@ -21,17 +24,19 @@ import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class TimeCommand implements Command {
 
     static Set<String> OPERATIONS = Set.of("add", "remove", "set");
 
     CommandsConfig commandsConfig;
     MessagesConfig messages;
-    EntryFinder finder;
     TimeConvertor convertor;
     TimeRandom timeRandom;
     EntryService entryService;
     EntryTimeService timeService;
+    PlayerIdentityResolver identityResolver;
+    EntryIdentityService identityService;
 
     @Override
     public String getPermission() {
@@ -58,18 +63,21 @@ public class TimeCommand implements Command {
         Duration duration = convertor.getTime(timeArgument);
         if (duration.isNegative() || duration.isZero()) {
             issuer.sendMessage(messages.getTimeIsIncorrect());
+            log.info("TimeCommand: invalid time '{}'", timeArgument);
             return;
         }
 
         String timeAsString = convertor.getTimeLine(duration);
 
-        Optional<EntryImpl> entry = finder.find(nickname);
-        processOperation(issuer, entry, operation, nickname, duration, timeAsString);
+        ResolvedPlayer resolved = identityResolver.resolveByNickname(nickname);
+        Optional<EntryImpl> entry = identityService.findOrMigrate(resolved, nickname);
+        processOperation(issuer, entry, operation, nickname, duration, timeAsString, resolved);
     }
 
     private boolean areArgsValid(String[] args, CommandIssuer issuer) {
         if (args.length < 3) {
             issuer.sendMessage(messages.getIncorrectArguments());
+            log.info("TimeCommand: insufficient args");
             return false;
         }
         return true;
@@ -83,14 +91,18 @@ public class TimeCommand implements Command {
         return timeArgument.toString().trim();
     }
 
-    private void processOperation(CommandIssuer issuer, Optional<EntryImpl> entry, String operation, String nickname, Duration duration, String timeAsString) {
+    private void processOperation(CommandIssuer issuer, Optional<EntryImpl> entry, String operation, String nickname, Duration duration, String timeAsString, ResolvedPlayer resolved) {
         if (entry.isEmpty()) {
             if (!operation.equals("add")) {
                 issuer.sendMessage(messages.getPlayerNotInWhitelist().replace("%nickname%", nickname));
                 return;
             }
 
-            entryService.create(nickname, Instant.now().plus(duration));
+            if (resolved.uuid() != null) {
+                entryService.create(resolved.nickname(), resolved.uuid().toString(), Instant.now().plus(duration));
+            } else {
+                entryService.create(nickname, Instant.now().plus(duration));
+            }
             issuer.sendMessage(messages.getSuccessfullyAddedForTime()
                     .replace("%nickname%", nickname)
                     .replace("%time%", timeAsString));
