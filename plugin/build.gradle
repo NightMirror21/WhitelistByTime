@@ -38,7 +38,7 @@ repositories {
 dependencies {
     shadow project(path: ':core', configuration: 'default')
 
-    compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
 
     implementation 'org.bstats:bstats-bukkit:3.0.1'
@@ -51,7 +51,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    testImplementation 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testImplementation 'net.kyori:adventure-text-minimessage:4.14.0'
     testImplementation 'me.clip:placeholderapi:2.11.6'
     testImplementation 'org.geysermc.floodgate:api:2.2.4-SNAPSHOT'
