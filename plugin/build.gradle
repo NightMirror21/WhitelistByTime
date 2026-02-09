@@ -29,6 +29,10 @@ repositories {
     maven {
         url = uri('https://repo.maven.apache.org/maven2/')
     }
+
+    maven {
+        url = 'https://repo.opencollab.dev/main/'
+    }
 }
 
 dependencies {
@@ -38,12 +42,26 @@ dependencies {
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
 
     implementation 'org.bstats:bstats-bukkit:3.0.1'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly 'org.geysermc.floodgate:api:2.2.4-SNAPSHOT'
 
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    testImplementation 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
+    testImplementation 'net.kyori:adventure-text-minimessage:4.14.0'
+    testImplementation 'me.clip:placeholderapi:2.11.6'
+    testImplementation 'org.geysermc.floodgate:api:2.2.4-SNAPSHOT'
+    testImplementation project(path: ':core', configuration: 'default')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.assertj:assertj-core:3.24.0'
 }
 
 shadowJar {
@@ -55,6 +73,12 @@ shadowJar {
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 }
 
 processResources {
