@@ -31,6 +31,12 @@ tasks.register('buildAll') {
     finalizedBy 'shadowJarAll'
 }
 
+tasks.register('testAll') {
+    dependsOn([":core", ":plugin"].stream()
+            .map { project(it).tasks.getByName('test') }
+            .toArray())
+}
+
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
