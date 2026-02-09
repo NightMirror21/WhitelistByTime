@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 public class VersionUtilsTest {
 
     @Test
+    @SuppressWarnings("deprecation")
     public void getVersionFallsBackToDescription() {
         JavaPlugin plugin = mock(JavaPlugin.class);
         PluginDescriptionFile description = mock(PluginDescriptionFile.class);

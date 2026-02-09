@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.identity;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.net.URI;
 import java.net.Authenticator;
 import java.net.CookieHandler;
@@ -11,12 +12,16 @@ import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodySubscriber;
 import java.time.Duration;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.Flow;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLParameters;
@@ -117,7 +122,40 @@ public class MojangApiClientTest {
         @Override
         public <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
             HttpResponse<String> response = supplier.get();
-            return (HttpResponse<T>) response;
+            HttpResponse.ResponseInfo info = new HttpResponse.ResponseInfo() {
+                @Override
+                public int statusCode() {
+                    return response.statusCode();
+                }
+
+                @Override
+                public HttpHeaders headers() {
+                    return response.headers();
+                }
+
+                @Override
+                public Version version() {
+                    return response.version();
+                }
+            };
+
+            BodySubscriber<T> subscriber = responseBodyHandler.apply(info);
+            subscriber.onSubscribe(new Flow.Subscription() {
+                @Override
+                public void request(long n) {
+                    // no backpressure needed for single payload
+                }
+
+                @Override
+                public void cancel() {
+                    // no-op
+                }
+            });
+            List<ByteBuffer> payload = List.of(ByteBuffer.wrap(response.body().getBytes(StandardCharsets.UTF_8)));
+            subscriber.onNext(payload);
+            subscriber.onComplete();
+            T body = subscriber.getBody().toCompletableFuture().join();
+            return new FakeHttpResponseGeneric<>(response, body);
         }
 
         @Override
@@ -182,6 +220,56 @@ public class MojangApiClientTest {
         @Override
         public HttpClient.Version version() {
             return HttpClient.Version.HTTP_1_1;
+        }
+    }
+
+    private static final class FakeHttpResponseGeneric<T> implements HttpResponse<T> {
+        private final HttpResponse<String> delegate;
+        private final T body;
+
+        private FakeHttpResponseGeneric(HttpResponse<String> delegate, T body) {
+            this.delegate = delegate;
+            this.body = body;
+        }
+
+        @Override
+        public int statusCode() {
+            return delegate.statusCode();
+        }
+
+        @Override
+        public HttpRequest request() {
+            return delegate.request();
+        }
+
+        @Override
+        public Optional<HttpResponse<T>> previousResponse() {
+            return Optional.empty();
+        }
+
+        @Override
+        public HttpHeaders headers() {
+            return delegate.headers();
+        }
+
+        @Override
+        public T body() {
+            return body;
+        }
+
+        @Override
+        public Optional<SSLSession> sslSession() {
+            return delegate.sslSession();
+        }
+
+        @Override
+        public URI uri() {
+            return delegate.uri();
+        }
+
+        @Override
+        public HttpClient.Version version() {
+            return delegate.version();
         }
     }
 }

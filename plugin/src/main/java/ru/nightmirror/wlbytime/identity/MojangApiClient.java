@@ -1,6 +1,8 @@
 package ru.nightmirror.wlbytime.identity;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.Nullable;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -34,7 +36,7 @@ public class MojangApiClient {
         if (cacheEnabled) {
             CacheEntry cached = cache.get(key);
             if (cached != null && !cached.isExpired()) {
-                return cached.uuid;
+                return Optional.ofNullable(cached.uuid);
             }
         }
         try {
@@ -46,23 +48,23 @@ public class MojangApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 log.debug("Mojang API returned status={} for nickname={}", response.statusCode(), nickname);
-                putCache(key, Optional.empty());
+                putCache(key, null);
                 return Optional.empty();
             }
             String rawId = extractId(response.body());
             if (rawId == null || rawId.length() != 32) {
                 log.debug("Mojang API response did not contain a valid id for nickname={}", nickname);
-                putCache(key, Optional.empty());
+                putCache(key, null);
                 return Optional.empty();
             }
             String dashed = rawId.substring(0, 8) + "-" + rawId.substring(8, 12) + "-" + rawId.substring(12, 16) + "-"
                     + rawId.substring(16, 20) + "-" + rawId.substring(20);
-            Optional<UUID> uuid = Optional.of(UUID.fromString(dashed.toLowerCase(Locale.ROOT)));
+            UUID uuid = UUID.fromString(dashed.toLowerCase(Locale.ROOT));
             putCache(key, uuid);
-            return uuid;
+            return Optional.of(uuid);
         } catch (Exception exception) {
             log.debug("Mojang API lookup failed for nickname={}", nickname, exception);
-            putCache(key, Optional.empty());
+            putCache(key, null);
             return Optional.empty();
         }
     }
@@ -87,7 +89,7 @@ public class MojangApiClient {
         return body.substring(quote1 + 1, quote2);
     }
 
-    private void putCache(String key, Optional<UUID> uuid) {
+    private void putCache(String key, @Nullable UUID uuid) {
         if (!cacheEnabled) {
             return;
         }
@@ -95,10 +97,10 @@ public class MojangApiClient {
     }
 
     private static class CacheEntry {
-        private final Optional<UUID> uuid;
+        private final UUID uuid;
         private final Instant expiresAt;
 
-        private CacheEntry(Optional<UUID> uuid, Instant expiresAt) {
+        private CacheEntry(UUID uuid, Instant expiresAt) {
             this.uuid = uuid;
             this.expiresAt = expiresAt;
         }
