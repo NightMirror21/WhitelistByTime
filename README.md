@@ -21,16 +21,18 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 - **UUID support**: stores UUIDs in online/floodgate modes to handle nickname changes.
 
 ## Commands and Permissions
-| Command                                                | Permission                                |
-|--------------------------------------------------------|-------------------------------------------|
-| /whitelist add [nickname] (time)                       | whitelistbytime.add, wlbytime.add         |
-| /whitelist remove [nickname]                           | whitelistbytime.remove, wlbytime.remove   |
-| /whitelist check [nickname]                            | whitelistbytime.check, wlbytime.check     |
-| /whitelist checkme                                     | whitelistbytime.checkme, wlbytime.checkme |
-| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time, wlbytime.time       |
-| /whitelist getall (page)                               | whitelistbytime.getall, wlbytime.getall   |
-| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze, wlbytime.freeze   |
-| /whitelist on/off/status                               | whitelistbytime.toggle, wlbytime.toggle   |
+| Command                                                | Permission                                        |
+|--------------------------------------------------------|---------------------------------------------------|
+| /whitelist add [nickname] (time)                       | whitelistbytime.add, wlbytime.add                 |
+| /whitelist remove [nickname]                           | whitelistbytime.remove, wlbytime.remove           |
+| /whitelist check [nickname]                            | whitelistbytime.check, wlbytime.check             |
+| /whitelist checkme                                     | whitelistbytime.checkme, wlbytime.checkme         |
+| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time, wlbytime.time               |
+| /whitelist getall (page)                               | whitelistbytime.getall, wlbytime.getall           |
+| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze, wlbytime.freeze           |
+| /whitelist unfreeze [nickname]                         | whitelistbytime.unfreeze, wlbytime.unfreeze       |
+| /whitelist reload                                      | whitelistbytime.reload, wlbytime.reload           |
+| /whitelist on/off/status                               | whitelistbytime.toggle, wlbytime.toggle           |
 
 Each subcommand can have multiple permissions. If any permission matches, access is granted. You can change these lists in `commands.yml`.
 
@@ -80,7 +82,7 @@ whitelist-enabled: true
 #Enable the expiration monitor, which checks players' expiration status
 expire-monitor-enabled: true
 #Interval in milliseconds for the expiration monitor to check players and remove them from the database if expired
-expire-monitor-interval-ms: 5000
+expire-monitor-interval-ms: 1000
 
 #Enable the last join monitor, which checks players' last join timestamps
 last-join-monitor-enabled: false
@@ -91,6 +93,18 @@ last-join-monitor-interval-ms: 3600000
 
 #Enable case-sensitive nickname checking
 nickname-case-sensitive: true
+
+#Kick player from server when his time is expired
+kick-player-on-time-expire: true
+
+#Remind players how much time they have left on the whitelist. Doesn't work if the player is permanently whitelisted or frozen.
+notify-players-how-much-left: false
+#Interval in milliseconds for the plugin to send reminders to players how much time they have left on the whitelist.
+notify-player-monitor-interval-ms: 1000
+#Time-left threshold (in seconds).
+#If a player has less time than this before their whitelist entry expires,
+#the plugin will start sending reminders. Example: 3600 = remind when < 1 hour left.
+notify-player-time-left-threshold-seconds: 5
 
 #Symbols representing time units for years
 year-time-units:
@@ -196,6 +210,16 @@ cant-remove-time: "Can't remove time"
 player-frozen: "Player %nickname% frozen for %time%"
 player-already-frozen: "Player %nickname% already frozen"
 player-expired: "Player %nickname% expired"
+cant-freeze-cause-player-is-forever: "Can't freeze cause %nickname% is forever"
+
+player-unfrozen: "Player %nickname% unfrozen"
+player-not-frozen: "Player %nickname% is not frozen"
+player-freeze-expired: "Freeze of %nickname% already expired"
+
+plugin-successfully-reloaded: "Plugin successfully reloaded"
+plugin-reloaded-with-errors: "Plugin reloaded with errors"
+
+time-left-in-whitelist-notify: "Left %time% in whitelist"
 
 whitelist-enabled: "Whitelist enabled"
 whitelist-disabled: "Whitelist disabled"
@@ -211,6 +235,7 @@ help:
   - "| /whitelist check [nickname]"
   - "| /whitelist checkme"
   - "| /whitelist getall"
+  - "| /whitelist reload"
   - "| /whitelist freeze [nickname] [time]"
   - "| /whitelist time set/add/remove [nickname] [time]"
   - "| /whitelist on"
@@ -236,6 +261,9 @@ check-me-permission:
 freeze-permission:
   - "whitelistbytime.freeze"
   - "wlbytime.freeze"
+unfreeze-permission:
+  - "whitelistbytime.unfreeze"
+  - "wlbytime.unfreeze"
 get-all-permission:
   - "whitelistbytime.getall"
   - "wlbytime.getall"
@@ -248,6 +276,9 @@ remove-permission:
 time-permission:
   - "whitelistbytime.time"
   - "wlbytime.time"
+reload-permission:
+  - "whitelistbytime.reload"
+  - "wlbytime.reload"
 ```
 
 ## Stats

@@ -67,6 +67,11 @@ public class FreezeCommand implements Command {
             return;
         }
 
+        if (userEntry.isForever()) {
+            issuer.sendMessage(messages.getCantFreezeCausePlayerIsForever().replace("%nickname%", nickname));
+            return;
+        }
+
         if (userEntry.isFreezeActive()) {
             issuer.sendMessage(messages.getPlayerAlreadyFrozen().replace("%nickname%", nickname));
         } else {

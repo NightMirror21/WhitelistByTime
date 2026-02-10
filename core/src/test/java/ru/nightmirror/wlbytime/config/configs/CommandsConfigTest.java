@@ -18,7 +18,9 @@ public class CommandsConfigTest {
         assertEquals(Set.of("whitelistbytime.check", "wlbytime.check"), config.getCheckPermission());
         assertEquals(Set.of("whitelistbytime.checkme", "wlbytime.checkme"), config.getCheckMePermission());
         assertEquals(Set.of("whitelistbytime.freeze", "wlbytime.freeze"), config.getFreezePermission());
+        assertEquals(Set.of("whitelistbytime.unfreeze", "wlbytime.unfreeze"), config.getUnfreezePermission());
         assertEquals(Set.of("whitelistbytime.getall", "wlbytime.getall"), config.getGetAllPermission());
+        assertEquals(Set.of("whitelistbytime.reload", "wlbytime.reload"), config.getReloadPermission());
         assertEquals(Set.of("whitelistbytime.toggle", "wlbytime.toggle"), config.getTogglePermission());
         assertEquals(Set.of("whitelistbytime.remove", "wlbytime.remove"), config.getRemovePermission());
         assertEquals(Set.of("whitelistbytime.time", "wlbytime.time"), config.getTimePermission());

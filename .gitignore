@@ -3,3 +3,5 @@
 build/
 htmlReport/
 run/
+plugin/run/
+plugin/logs/

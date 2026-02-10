@@ -1,7 +1,8 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.2'
-    id 'xyz.jpenilla.run-paper' version '2.3.0'
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.17'
+    id 'xyz.jpenilla.run-paper' version '2.3.1'
 }
 
 def javaVersion = JavaVersion.VERSION_21;
@@ -60,6 +61,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+
     testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     testImplementation 'net.kyori:adventure-text-minimessage:4.14.0'
     testImplementation 'me.clip:placeholderapi:2.11.6'
@@ -73,15 +76,15 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.24.0'
 }
 
+tasks.assemble {
+    dependsOn(tasks.reobfJar)
+}
+
 shadowJar {
     relocate 'org.bstats', 'ru.nightmirror.wlbytime'
     archiveClassifier.set(null)
     configurations = [project.configurations.runtimeClasspath, project.configurations.shadow]
     archiveFileName.set(project.description + '-' + rootProject.version + '.jar')
-}
-
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 tasks {

@@ -26,7 +26,9 @@ public class CommandsConfig extends YamlSerializable {
     Set<String> checkPermission = Set.of("whitelistbytime.check", "wlbytime.check");
     Set<String> checkMePermission = Set.of("whitelistbytime.checkme", "wlbytime.checkme");
     Set<String> freezePermission = Set.of("whitelistbytime.freeze", "wlbytime.freeze");
+    Set<String> unfreezePermission = Set.of("whitelistbytime.unfreeze", "wlbytime.unfreeze");
     Set<String> getAllPermission = Set.of("whitelistbytime.getall", "wlbytime.getall");
+    Set<String> reloadPermission = Set.of("whitelistbytime.reload", "wlbytime.reload");
     Set<String> togglePermission = Set.of("whitelistbytime.toggle", "wlbytime.toggle");
     Set<String> removePermission = Set.of("whitelistbytime.remove", "wlbytime.remove");
     Set<String> timePermission = Set.of("whitelistbytime.time", "wlbytime.time");

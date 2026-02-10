@@ -92,6 +92,24 @@ public class FreezeCommandTest {
     }
 
     @Test
+    public void executePlayerWithForeverSendsCantFreezePlayerForeverMessage() {
+        String nickname = "activePlayer";
+        String timeString = "3h";
+        EntryImpl activeEntry = mock(EntryImpl.class);
+        when(issuer.getNickname()).thenReturn(nickname);
+        when(identityService.findOrMigrate(any(), anyString())).thenReturn(Optional.of(activeEntry));
+        when(activeEntry.isActive()).thenReturn(true);
+        when(activeEntry.isForever()).thenReturn(true);
+        when(activeEntry.isFreezeActive()).thenReturn(false);
+        when(messages.getCantFreezeCausePlayerIsForever()).thenReturn("Can't freeze cause %nickname% is forever");
+
+        freezeCommand.execute(issuer, new String[]{nickname, timeString});
+
+        verify(issuer).sendMessage("Can't freeze cause activePlayer is forever");
+        verifyNoMoreInteractions(issuer);
+    }
+
+    @Test
     public void executeWithInvalidTimeSendsTimeIsIncorrectMessage() {
         String nickname = "validPlayer";
         String timeString = "invalidTime";

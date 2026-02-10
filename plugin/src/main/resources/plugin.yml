@@ -24,6 +24,10 @@ permissions:
     default: op
   whitelistbytime.freeze:
     default: op
+  whitelistbytime.unfreeze:
+    default: op
+  whitelistbytime.reload:
+    default: op
   whitelistbytime.getall:
     default: op
   whitelistbytime.toggle:
@@ -40,7 +44,11 @@ permissions:
     default: op
   wlbytime.freeze:
     default: op
+  wlbytime.unfreeze:
+    default: op
   wlbytime.getall:
+    default: op
+  wlbytime.reload:
     default: op
   wlbytime.toggle:
     default: op

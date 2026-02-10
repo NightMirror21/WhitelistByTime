@@ -98,6 +98,31 @@ public class SettingsConfig extends YamlSerializable {
 
     @NewLine
     @Comment(value = {
+            @CommentValue("Kick player from server when his time is expired")
+    }, at = Comment.At.PREPEND)
+    boolean kickPlayerOnTimeExpire = true;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("Remind players how much time they have left on the whitelist. Doesn't work if the player is permanently whitelisted or frozen.")
+    }, at = Comment.At.PREPEND)
+    boolean notifyPlayersHowMuchLeft = false;
+
+    @Comment(value = {
+            @CommentValue("Interval in milliseconds for the plugin to send reminders to players how much time they have left on the whitelist.")
+    })
+    int notifyPlayerMonitorIntervalMs = 900 * 1000;
+
+    @Comment(value = {
+            @CommentValue("Time-left threshold (in seconds)."),
+            @CommentValue("If a player has less time than this before their whitelist entry expires,"),
+            @CommentValue("the plugin will start sending reminders. Example: 3600 = remind when < 1 hour left.")
+    }, at = Comment.At.PREPEND)
+    int notifyPlayerTimeLeftThresholdSeconds = 3600;
+
+
+    @NewLine
+    @Comment(value = {
             @CommentValue("Symbols representing time units for years")
     }, at = Comment.At.PREPEND)
     Set<String> yearTimeUnits = Set.of("y");

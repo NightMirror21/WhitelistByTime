@@ -17,7 +17,7 @@ public class LastJoinMonitor extends Monitor {
     long lastJoinThresholdMs;
 
     public LastJoinMonitor(EntryDaoImpl dao, SettingsConfig settings) {
-        super(dao, settings, settings.isLastJoinMonitorEnabled(), settings.getLastJoinMonitorIntervalMs());
+        super(dao, settings.isLastJoinMonitorEnabled(), settings.getLastJoinMonitorIntervalMs());
         lastJoinThresholdMs = settings.getLastJoinExpirationThresholdSeconds() * 1000L;
     }
 

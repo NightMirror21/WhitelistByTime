@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.entry;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -41,5 +42,46 @@ public class FreezingTest {
         Freezing freezing = new Freezing(123L, duration);
         Duration freezeDuration = freezing.getDurationOfFreeze();
         assertTrue(Math.abs(freezeDuration.toMillis() - duration.toMillis()) < 50);
+    }
+
+    @Test
+    public void testLeftTimeDecreasesOverTime() throws InterruptedException {
+        Freezing freezing = new Freezing(1L, Duration.ofMillis(120));
+        Duration leftAtStart = freezing.getLeftTime();
+        Thread.sleep(60);
+        Duration leftAfter60ms = freezing.getLeftTime();
+        assertTrue(leftAfter60ms.compareTo(leftAtStart) < 0);
+    }
+
+    @Test
+    public void testIsFrozenExactlyAtBoundary() throws InterruptedException {
+        Freezing freezing = new Freezing(1L, Duration.ofMillis(80));
+        Thread.sleep(50);
+        assertTrue(freezing.isFrozen());
+        Thread.sleep(50);
+        assertFalse(freezing.isFrozen());
+    }
+
+    @Test
+    public void testGetLeftTimeNegativeAfterExpired() throws InterruptedException {
+        Freezing freezing = new Freezing(1L, Duration.ofMillis(40));
+        Thread.sleep(60);
+        assertTrue(freezing.getLeftTime().isZero() || freezing.getLeftTime().isNegative());
+    }
+
+    @Test
+    public void testFreezeAgainAfterPreviousFreezeExpired() throws InterruptedException {
+        EntryImpl entry = EntryImpl.builder()
+                .id(1L)
+                .nickname("player")
+                .build();
+        entry.setExpiration(Instant.now().plusSeconds(2));
+
+        entry.freeze(Duration.ofMillis(30));
+        Thread.sleep(40);
+        assertTrue(entry.isFreezeInactive());
+
+        entry.freeze(Duration.ofMillis(50));
+        assertTrue(entry.isFreezeActive());
     }
 }
