@@ -237,6 +237,7 @@ help:
   - "| /whitelist getall"
   - "| /whitelist reload"
   - "| /whitelist freeze [nickname] [time]"
+  - "| /whitelist unfreeze [nickname]"
   - "| /whitelist time set/add/remove [nickname] [time]"
   - "| /whitelist on"
   - "| /whitelist off"
