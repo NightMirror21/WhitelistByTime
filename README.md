@@ -18,7 +18,7 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 - **Lightweight**: minimal load on the **main thread**.
 - **Multi-server** support: utilizes **SQL transactions**.
 - **Safe**: the code is extensively covered by **automated tests**.
-- **UUID support**: stores UUIDs in online/floodgate modes to handle nickname changes.
+- **UUID support**: stores UUIDs in online/floodgate (GeyserMC) modes to handle nickname changes.
 
 ## Commands and Permissions
 | Command                                                | Permission                                        |
