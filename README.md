@@ -6,7 +6,7 @@
 ## About
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
 
-**The plugin is developed and tested for Paper 1.20.x-1.21.x. It also supports Folia and Paper forks.**
+**The plugin is developed and tested for Paper and Folia 1.20.x-1.21.x. It also supports forks of Paper and Folia.**
 
 ## Features
 - Fully **customizable**.
@@ -21,16 +21,18 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 - **UUID support**: stores UUIDs in online/floodgate modes to handle nickname changes.
 
 ## Commands and Permissions
-| Command                                                | Permission              |
-|--------------------------------------------------------|-------------------------|
-| /whitelist add [nickname] (time)                       | whitelistbytime.add     |
-| /whitelist remove [nickname]                           | whitelistbytime.remove  |
-| /whitelist check [nickname]                            | whitelistbytime.check   |
-| /whitelist checkme                                     | whitelistbytime.checkme |
-| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time    |
-| /whitelist getall (page)                               | whitelistbytime.getall  |
-| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze  |
-| /whitelist on/off/status                               | whitelistbytime.toggle  |
+| Command                                                | Permission                                |
+|--------------------------------------------------------|-------------------------------------------|
+| /whitelist add [nickname] (time)                       | whitelistbytime.add, wlbytime.add         |
+| /whitelist remove [nickname]                           | whitelistbytime.remove, wlbytime.remove   |
+| /whitelist check [nickname]                            | whitelistbytime.check, wlbytime.check     |
+| /whitelist checkme                                     | whitelistbytime.checkme, wlbytime.checkme |
+| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time, wlbytime.time       |
+| /whitelist getall (page)                               | whitelistbytime.getall, wlbytime.getall   |
+| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze, wlbytime.freeze   |
+| /whitelist on/off/status                               | whitelistbytime.toggle, wlbytime.toggle   |
+
+Each subcommand can have multiple permissions. If any permission matches, access is granted. You can change these lists in `commands.yml`.
 
 ### Notes:
 - `[nickname]` - required argument.
