@@ -31,9 +31,9 @@ public class ReloadCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getReloadPermission()).thenReturn("wlbytime.reload");
-        assertEquals("wlbytime.reload", reloadCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getReloadPermission()).thenReturn(Set.of("whitelistbytime.reload", "wlbytime.reload"));
+        assertEquals(Set.of("whitelistbytime.reload", "wlbytime.reload"), reloadCommand.getPermissions());
     }
 
     @Test

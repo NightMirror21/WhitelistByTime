@@ -7,6 +7,7 @@ import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.support.DatabaseConnection;
 import com.j256.ormlite.table.DatabaseTable;
 import com.j256.ormlite.table.TableUtils;
 import lombok.AllArgsConstructor;
@@ -23,10 +24,14 @@ import ru.nightmirror.wlbytime.entry.LastJoin;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 
 import java.io.File;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Level;
@@ -108,6 +113,147 @@ public class EntryDaoImpl implements EntryDao {
         TableUtils.createTableIfNotExists(connectionSource, LastJoinTable.class);
         TableUtils.createTableIfNotExists(connectionSource, FreezingTable.class);
         TableUtils.createTableIfNotExists(connectionSource, ExpirationTable.class);
+        migrateEntryTableIfRequired();
+    }
+
+    private void migrateEntryTableIfRequired() {
+        try {
+            if (!entryTableNeedsMigration()) {
+                return;
+            }
+
+            String entriesTable = EntryTable.TABLE_NAME;
+            String newTable = entriesTable + "_new";
+
+            String createSql = SQLITE.equalsIgnoreCase(getDatabaseType())
+                    ? String.format("CREATE TABLE %s (%s INTEGER PRIMARY KEY AUTOINCREMENT, %s TEXT NOT NULL, %s TEXT UNIQUE)",
+                    newTable, EntryTable.ID_COLUMN, EntryTable.NICKNAME_COLUMN, EntryTable.UUID_COLUMN)
+                    : String.format("CREATE TABLE %s (%s BIGINT AUTO_INCREMENT PRIMARY KEY, %s VARCHAR(255) NOT NULL, %s VARCHAR(36) UNIQUE)",
+                    newTable, EntryTable.ID_COLUMN, EntryTable.NICKNAME_COLUMN, EntryTable.UUID_COLUMN);
+
+            String insertSql = String.format("INSERT INTO %s (%s, %s, %s) SELECT %s, %s, NULL FROM %s",
+                    newTable, EntryTable.ID_COLUMN, EntryTable.NICKNAME_COLUMN, EntryTable.UUID_COLUMN,
+                    EntryTable.ID_COLUMN, EntryTable.NICKNAME_COLUMN, entriesTable);
+
+            String dropSql = String.format("DROP TABLE %s", entriesTable);
+            String renameSql = SQLITE.equalsIgnoreCase(getDatabaseType())
+                    ? String.format("ALTER TABLE %s RENAME TO %s", newTable, entriesTable)
+                    : String.format("RENAME TABLE %s TO %s", newTable, entriesTable);
+
+            try (Statement statement = connectionSource.getReadWriteConnection(null).getUnderlyingConnection().createStatement()) {
+                if (MYSQL.equalsIgnoreCase(getDatabaseType())) {
+                    statement.execute("SET FOREIGN_KEY_CHECKS=0");
+                } else {
+                    statement.execute("PRAGMA foreign_keys=OFF");
+                }
+
+                statement.execute(createSql);
+                statement.execute(insertSql);
+                statement.execute(dropSql);
+                statement.execute(renameSql);
+
+                if (MYSQL.equalsIgnoreCase(getDatabaseType())) {
+                    statement.execute("SET FOREIGN_KEY_CHECKS=1");
+                } else {
+                    statement.execute("PRAGMA foreign_keys=ON");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error migrating entries table", e);
+            throw new DatabaseInitializationException("Failed to migrate entries table", e);
+        }
+    }
+
+    private boolean entryTableNeedsMigration() throws SQLException {
+        List<String> columns = getEntryTableColumns();
+        if (!columns.contains(EntryTable.UUID_COLUMN)) {
+            return true;
+        }
+
+        return hasUniqueNicknameIndex();
+    }
+
+    private List<String> getEntryTableColumns() throws SQLException {
+        List<String> columns = new ArrayList<>();
+        String table = EntryTable.TABLE_NAME;
+        DatabaseConnection connection = connectionSource.getReadOnlyConnection(null);
+        try {
+            if (SQLITE.equalsIgnoreCase(getDatabaseType())) {
+                String query = String.format("PRAGMA table_info(%s)", table);
+                try (Statement statement = connection.getUnderlyingConnection().createStatement();
+                     ResultSet results = statement.executeQuery(query)) {
+                    while (results.next()) {
+                        columns.add(results.getString("name"));
+                    }
+                }
+            } else {
+                String query = String.format("SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s'", table);
+                try (Statement statement = connection.getUnderlyingConnection().createStatement();
+                     ResultSet results = statement.executeQuery(query)) {
+                    while (results.next()) {
+                        columns.add(results.getString("COLUMN_NAME"));
+                    }
+                }
+            }
+        } finally {
+            connectionSource.releaseConnection(connection);
+        }
+        return columns;
+    }
+
+    private boolean hasUniqueNicknameIndex() throws SQLException {
+        String table = EntryTable.TABLE_NAME;
+        DatabaseConnection connection = connectionSource.getReadOnlyConnection(null);
+        try {
+            if (SQLITE.equalsIgnoreCase(getDatabaseType())) {
+                String indexQuery = String.format("PRAGMA index_list(%s)", table);
+                try (Statement statement = connection.getUnderlyingConnection().createStatement();
+                     ResultSet indexes = statement.executeQuery(indexQuery)) {
+                    while (indexes.next()) {
+                        boolean unique = indexes.getInt("unique") == 1;
+                        if (!unique) {
+                            continue;
+                        }
+                        String indexName = indexes.getString("name");
+                        String columnsQuery = String.format("PRAGMA index_info(%s)", indexName);
+                        try (Statement columnsStatement = connection.getUnderlyingConnection().createStatement();
+                             ResultSet columns = columnsStatement.executeQuery(columnsQuery)) {
+                            while (columns.next()) {
+                                if (EntryTable.NICKNAME_COLUMN.equalsIgnoreCase(columns.getString("name"))) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+            String query = String.format(
+                    "SELECT NON_UNIQUE, COLUMN_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '%s'",
+                    table);
+            try (Statement statement = connection.getUnderlyingConnection().createStatement();
+                 ResultSet results = statement.executeQuery(query)) {
+                while (results.next()) {
+                    boolean unique = results.getInt("NON_UNIQUE") == 0;
+                    if (unique && EntryTable.NICKNAME_COLUMN.equalsIgnoreCase(results.getString("COLUMN_NAME"))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        } finally {
+            connectionSource.releaseConnection(connection);
+        }
+    }
+
+    private String getDatabaseType() {
+        try {
+            String url = connectionSource.getReadOnlyConnection(null).getUnderlyingConnection().getMetaData().getURL();
+            return url != null && url.startsWith("jdbc:mysql") ? MYSQL : SQLITE;
+        } catch (SQLException e) {
+            return SQLITE;
+        }
     }
 
     public synchronized void reopenConnection(DatabaseConfig newConfig) {
@@ -120,7 +266,6 @@ public class EntryDaoImpl implements EntryDao {
         }
     }
 
-    // FIXME move synchronized over connectionSource
     public synchronized void close() {
         try {
             connectionSource.close();
@@ -133,7 +278,7 @@ public class EntryDaoImpl implements EntryDao {
     public void update(EntryImpl entry) {
         try {
             transactionManager.callInTransaction(() -> {
-                EntryTable entryTable = new EntryTable(entry.getId(), entry.getNickname());
+                EntryTable entryTable = new EntryTable(entry.getId(), entry.getNickname(), entry.getUuid());
                 entryDao.createOrUpdate(entryTable);
                 updateExpirationTable(entry, entryTable);
                 updateFreezingTable(entry, entryTable);
@@ -215,6 +360,20 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     @Override
+    public Optional<EntryImpl> getByUuid(String uuid) {
+        try {
+            EntryTable entryTable = entryDao.queryBuilder()
+                    .where()
+                    .eq(EntryTable.UUID_COLUMN, uuid)
+                    .queryForFirst();
+            return getEntry(entryTable);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error querying by uuid", e);
+            throw new DataAccessException("Failed to query entry by uuid", e);
+        }
+    }
+
+    @Override
     public Optional<EntryImpl> getLike(String nickname) {
         try {
             EntryTable entryTable = entryDao.queryBuilder()
@@ -252,7 +411,10 @@ public class EntryDaoImpl implements EntryDao {
     public EntryImpl create(String nickname, Instant until) {
         try {
             return transactionManager.callInTransaction(() -> {
-                EntryTable entryTable = new EntryTable(null, nickname);
+                if (get(nickname).isPresent()) {
+                    throw new DataAccessException("Entry with nickname already exists", null);
+                }
+                EntryTable entryTable = new EntryTable(null, nickname, null);
                 entryDao.create(entryTable);
                 ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until));
                 expirationDao.create(expirationTable);
@@ -294,9 +456,40 @@ public class EntryDaoImpl implements EntryDao {
     @Override
     public EntryImpl create(String nickname) {
         try {
-            EntryTable entryTable = new EntryTable(null, nickname);
+            if (get(nickname).isPresent()) {
+                throw new DataAccessException("Entry with nickname already exists", null);
+            }
+            EntryTable entryTable = new EntryTable(null, nickname, null);
             entryDao.create(entryTable);
             return get(nickname).orElseThrow();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error creating entry", e);
+            throw new DataAccessException("Failed to create entry", e);
+        }
+    }
+
+    @Override
+    public EntryImpl create(String nickname, String uuid, Instant until) {
+        try {
+            return transactionManager.callInTransaction(() -> {
+                EntryTable entryTable = new EntryTable(null, nickname, uuid);
+                entryDao.create(entryTable);
+                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until));
+                expirationDao.create(expirationTable);
+                return getByUuid(uuid).orElseGet(() -> get(nickname).orElseThrow());
+            });
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error creating entry", e);
+            throw new DataAccessException("Failed to create entry", e);
+        }
+    }
+
+    @Override
+    public EntryImpl create(String nickname, String uuid) {
+        try {
+            EntryTable entryTable = new EntryTable(null, nickname, uuid);
+            entryDao.create(entryTable);
+            return getByUuid(uuid).orElseGet(() -> get(nickname).orElseThrow());
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Error creating entry", e);
             throw new DataAccessException("Failed to create entry", e);
@@ -347,6 +540,7 @@ public class EntryDaoImpl implements EntryDao {
         return EntryImpl.builder()
                 .id(entryTable.getId())
                 .nickname(entryTable.getNickname())
+                .uuid(entryTable.getUuid())
                 .lastJoin(lastJoin)
                 .freezing(freezing)
                 .expiration(expiration)
@@ -359,14 +553,19 @@ public class EntryDaoImpl implements EntryDao {
     @AllArgsConstructor
     @ToString
     public static class EntryTable {
+        public static final String TABLE_NAME = "wlbytime_entries";
         public static final String ID_COLUMN = "id";
         public static final String NICKNAME_COLUMN = "nickname";
+        public static final String UUID_COLUMN = "uuid";
 
         @DatabaseField(generatedId = true, columnName = ID_COLUMN, canBeNull = false)
         private Long id;
 
-        @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false, unique = true)
+        @DatabaseField(columnName = NICKNAME_COLUMN, canBeNull = false)
         private String nickname;
+
+        @DatabaseField(columnName = UUID_COLUMN, canBeNull = true, unique = true)
+        private String uuid;
     }
 
     @DatabaseTable(tableName = "wlbytime_lastjoins")

@@ -31,23 +31,49 @@ repositories {
     maven {
         url = uri('https://repo.maven.apache.org/maven2/')
     }
+
+    maven {
+        url = 'https://repo.opencollab.dev/main/'
+    }
+
+    maven {
+        url = 'https://repo.opencollab.dev/maven-releases/'
+    }
+
+    maven {
+        url = 'https://repo.opencollab.dev/maven-snapshots/'
+    }
 }
 
 dependencies {
     shadow project(path: ':core', configuration: 'default')
 
-    compileOnly 'io.papermc.paper:paper-api:1.21.7-R0.1-SNAPSHOT'
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
     compileOnly 'net.kyori:adventure-text-minimessage:4.14.0'
 
     implementation 'org.bstats:bstats-bukkit:3.0.1'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
 
     compileOnly 'me.clip:placeholderapi:2.11.6'
+    compileOnly 'org.geysermc.floodgate:api:2.2.4-SNAPSHOT'
 
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    paperweight.paperDevBundle("1.21.7-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    testImplementation 'net.kyori:adventure-text-minimessage:4.14.0'
+    testImplementation 'me.clip:placeholderapi:2.11.6'
+    testImplementation 'org.geysermc.floodgate:api:2.2.4-SNAPSHOT'
+    testImplementation project(path: ':core', configuration: 'default')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
+    testImplementation 'org.mockito:mockito-core:5.14.2'
+    testImplementation 'org.assertj:assertj-core:3.24.0'
 }
 
 tasks.assemble {
@@ -61,6 +87,12 @@ shadowJar {
     archiveFileName.set(project.description + '-' + rootProject.version + '.jar')
 }
 
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+}
+
 processResources {
     def props = [version: rootProject.version]
     inputs.properties props
@@ -70,7 +102,53 @@ processResources {
     }
 }
 
-tasks.runServer {
-    minecraftVersion("1.21.7")
-    jvmArgs("-Xms2G", "-Xmx2G")
+tasks {
+    runServer {
+        minecraftVersion("1.21.11")
+        runDirectory = file("run")
+        jvmArgs = ["-Xms1G", "-Xmx2G"]
+        pluginJars.from(tasks.shadowJar)
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath + sourceSets.main.output
+    }
+}
+
+dependencies {
+    integrationTestImplementation 'org.testcontainers:testcontainers:1.20.6'
+    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.6'
+    integrationTestImplementation 'org.xerial:sqlite-jdbc:3.45.3.0'
+    integrationTestImplementation 'org.geysermc.mcprotocollib:protocol:1.21.11-SNAPSHOT'
+    integrationTestImplementation 'net.kyori:adventure-text-serializer-plain:4.25.0'
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests against a real Paper server in Docker'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    dependsOn tasks.shadowJar
+    shouldRunAfter tasks.test
+    systemProperty 'pluginJar', tasks.shadowJar.archiveFile.get().asFile.absolutePath
+    systemProperty 'paperVersion', '1.21.11'
+    def runId = System.currentTimeMillis()
+    binaryResultsDirectory = layout.buildDirectory.dir("test-results/integrationTest-${runId}/binary").get().asFile
+    reports.junitXml.outputLocation = layout.buildDirectory.dir("test-results/integrationTest-${runId}/xml")
+    reports.html.outputLocation = layout.buildDirectory.dir("reports/integrationTest-${runId}")
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('integrationTest')
 }

@@ -7,6 +7,7 @@ api-version: 1.16
 folia-supported: true
 softdepend:
   - PlaceholderAPI
+  - floodgate
 commands:
   whitelist:
     usage: /wl
@@ -29,7 +30,29 @@ permissions:
     default: op
   whitelistbytime.getall:
     default: op
+  whitelistbytime.toggle:
+    default: op
   whitelistbytime.remove:
     default: op
   whitelistbytime.time:
+    default: op
+  wlbytime.add:
+    default: op
+  wlbytime.check:
+    default: op
+  wlbytime.checkme:
+    default: op
+  wlbytime.freeze:
+    default: op
+  wlbytime.unfreeze:
+    default: op
+  wlbytime.getall:
+    default: op
+  wlbytime.reload:
+    default: op
+  wlbytime.toggle:
+    default: op
+  wlbytime.remove:
+    default: op
+  wlbytime.time:
     default: op

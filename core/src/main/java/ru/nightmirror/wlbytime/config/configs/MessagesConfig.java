@@ -99,6 +99,14 @@ public class MessagesConfig extends YamlSerializable {
     String timeLeftInWhitelistNotify = "Left %time% in whitelist";
 
     @NewLine
+    String whitelistEnabled = "Whitelist enabled";
+    String whitelistDisabled = "Whitelist disabled";
+    String whitelistAlreadyEnabled = "Whitelist already enabled";
+    String whitelistAlreadyDisabled = "Whitelist already disabled";
+    String whitelistStatusEnabled = "Whitelist is enabled";
+    String whitelistStatusDisabled = "Whitelist is disabled";
+
+    @NewLine
     List<String> help = List.of(
             "> WhitelistByTime - Help",
             "| /whitelist add [nickname] (time)",
@@ -110,6 +118,9 @@ public class MessagesConfig extends YamlSerializable {
             "| /whitelist freeze [nickname] [time]",
             "| /whitelist unfreeze [nickname]",
             "| /whitelist time set/add/remove [nickname] [time]",
+            "| /whitelist on",
+            "| /whitelist off",
+            "| /whitelist status",
             "| (time) - time for which the player will be added to the whitelist",
             "| Example: 2d 3h 10m",
             "| Leave this value empty if you want to add player forever"

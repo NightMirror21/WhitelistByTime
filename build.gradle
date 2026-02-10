@@ -7,7 +7,7 @@ sourceCompatibility = javaVersion;
 targetCompatibility = javaVersion;
 
 group = 'ru.nightmirror'
-version = '2.3.0'
+version = '2.4.0'
 description = 'WhitelistByTime'
 
 repositories {
@@ -29,6 +29,12 @@ tasks.register('cleanAll') {
 tasks.register('buildAll') {
     dependsOn 'cleanAll'
     finalizedBy 'shadowJarAll'
+}
+
+tasks.register('testAll') {
+    dependsOn([":core", ":plugin"].stream()
+            .map { project(it).tasks.getByName('test') }
+            .toArray())
 }
 
 java {

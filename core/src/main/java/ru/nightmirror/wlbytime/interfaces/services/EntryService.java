@@ -15,9 +15,15 @@ public interface EntryService {
 
     @NotNull EntryImpl create(String nickname, Instant until);
 
+    @NotNull EntryImpl create(String nickname, String uuid);
+
+    @NotNull EntryImpl create(String nickname, String uuid, Instant until);
+
     void freeze(EntryImpl entry, Duration duration);
 
     void unfreeze(EntryImpl entry);
+
+    void update(EntryImpl entry);
 
     @UnmodifiableView Set<EntryImpl> getEntries();
 }

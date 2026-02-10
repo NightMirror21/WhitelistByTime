@@ -2,17 +2,20 @@ package ru.nightmirror.wlbytime.config.configs;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import net.elytrium.serializer.SerializerConfig;
 import net.elytrium.serializer.annotations.Comment;
 import net.elytrium.serializer.annotations.CommentValue;
 import net.elytrium.serializer.annotations.NewLine;
 import net.elytrium.serializer.language.object.YamlSerializable;
+import ru.nightmirror.wlbytime.identity.PlayerIdMode;
 
 import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
 @SuppressWarnings("FieldMayBeFinal")
 public class SettingsConfig extends YamlSerializable {
 
@@ -27,6 +30,38 @@ public class SettingsConfig extends YamlSerializable {
             @CommentValue("Automatically unfreeze player time when they join the server if their time is frozen")
     }, at = Comment.At.PREPEND)
     boolean unfreezeTimeOnPlayerJoin = false;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("How to identify players in whitelist: OFFLINE, ONLINE, FLOODGATE, AUTO")
+    }, at = Comment.At.PREPEND)
+    PlayerIdMode playerIdMode = PlayerIdMode.OFFLINE;
+
+    @Comment(value = {
+            @CommentValue("Use Mojang API to resolve UUID when adding by nickname in ONLINE/AUTO mode")
+    }, at = Comment.At.PREPEND)
+    boolean mojangLookupEnabled = true;
+
+    @Comment(value = {
+            @CommentValue("Timeout for Mojang API requests in milliseconds")
+    }, at = Comment.At.PREPEND)
+    int mojangTimeoutMs = 5000;
+
+    @Comment(value = {
+            @CommentValue("Enable in-memory cache for Mojang API UUID lookups")
+    }, at = Comment.At.PREPEND)
+    boolean mojangCacheEnabled = true;
+
+    @Comment(value = {
+            @CommentValue("Mojang API cache TTL in milliseconds")
+    }, at = Comment.At.PREPEND)
+    int mojangCacheTtlMs = 3600000;
+
+    @NewLine
+    @Comment(value = {
+            @CommentValue("Enable whitelist checks for player login")
+    }, at = Comment.At.PREPEND)
+    boolean whitelistEnabled = true;
 
     @NewLine
     @Comment(value = {

@@ -24,7 +24,7 @@ public class ReloadCommand implements Command {
     Reloadable reloadable;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getReloadPermission();
     }
 

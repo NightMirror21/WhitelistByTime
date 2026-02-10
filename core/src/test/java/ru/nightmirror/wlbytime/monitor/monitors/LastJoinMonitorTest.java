@@ -37,14 +37,14 @@ public class LastJoinMonitorTest {
 
         when(settings.isLastJoinMonitorEnabled()).thenReturn(true);
         when(settings.getLastJoinMonitorIntervalMs()).thenReturn(1000);
-        when(settings.getLastJoinExpirationThresholdSeconds()).thenReturn(86400); // 1 day
+        when(settings.getLastJoinExpirationThresholdSeconds()).thenReturn(86400);
 
-        when(recentLastJoin.getLastJoinTime()).thenReturn(Instant.now().minusSeconds(3600)); // 1 hour ago
+        when(recentLastJoin.getLastJoinTime()).thenReturn(Instant.now().minusSeconds(3600));
         when(entryWithRecentJoin.getLastJoin()).thenReturn(recentLastJoin);
         when(entryWithRecentJoin.getId()).thenReturn(1L);
         when(entryWithRecentJoin.getNickname()).thenReturn("recentUser");
 
-        when(oldLastJoin.getLastJoinTime()).thenReturn(Instant.now().minusSeconds(172800)); // 2 days ago
+        when(oldLastJoin.getLastJoinTime()).thenReturn(Instant.now().minusSeconds(172800));
         when(entryWithOldJoin.getLastJoin()).thenReturn(oldLastJoin);
         when(entryWithOldJoin.getId()).thenReturn(2L);
         when(entryWithOldJoin.getNickname()).thenReturn("oldUser");
@@ -104,6 +104,5 @@ public class LastJoinMonitorTest {
     @Test
     public void shouldShutdownCorrectly() {
         lastJoinMonitor.shutdown();
-        // No exceptions should be thrown
     }
 }

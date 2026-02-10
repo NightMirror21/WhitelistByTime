@@ -36,9 +36,9 @@ public class UnfreezeCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getUnfreezePermission()).thenReturn("wlbytime.unfreeze");
-        assertEquals("wlbytime.unfreeze", unfreezeCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getUnfreezePermission()).thenReturn(Set.of("whitelistbytime.unfreeze", "wlbytime.unfreeze"));
+        assertEquals(Set.of("whitelistbytime.unfreeze", "wlbytime.unfreeze"), unfreezeCommand.getPermissions());
     }
 
     @Test

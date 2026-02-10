@@ -3,7 +3,7 @@ package ru.nightmirror.wlbytime.interfaces.command;
 import java.util.Set;
 
 public interface Command {
-    String getPermission();
+    Set<String> getPermissions();
 
     String getName();
 

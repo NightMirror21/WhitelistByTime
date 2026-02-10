@@ -3,6 +3,7 @@ package ru.nightmirror.wlbytime.impl.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.services.EntryTimeService;
@@ -12,6 +13,7 @@ import java.time.Instant;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@Slf4j
 public class EntryTimeServiceImpl implements EntryTimeService {
 
     EntryDao entryDao;
@@ -19,6 +21,7 @@ public class EntryTimeServiceImpl implements EntryTimeService {
     @Override
     public void add(EntryImpl entry, Duration duration) {
         if (entry.isForever()) {
+            log.warn("Rejecting add time for forever entry id={} nickname={}", entry.getId(), entry.getNickname());
             throw new IllegalArgumentException("Entry is forever");
         }
 
@@ -34,6 +37,7 @@ public class EntryTimeServiceImpl implements EntryTimeService {
     @Override
     public void remove(EntryImpl entry, Duration duration) {
         if (entry.isForever()) {
+            log.warn("Rejecting remove time for forever entry id={} nickname={}", entry.getId(), entry.getNickname());
             throw new IllegalArgumentException("Entry is forever");
         }
         entry.getExpiration().remove(duration);

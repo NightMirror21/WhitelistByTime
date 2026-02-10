@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.jetbrains.annotations.NotNull;
 import ru.nightmirror.wlbytime.entry.EntryImpl;
+import ru.nightmirror.wlbytime.identity.PlayerKey;
 import ru.nightmirror.wlbytime.interfaces.dao.EntryDao;
 import ru.nightmirror.wlbytime.interfaces.finder.EntryFinder;
 
@@ -19,14 +20,23 @@ public class EntryFinderImpl implements EntryFinder {
 
     @Override
     public Optional<EntryImpl> find(@NotNull String nickname) {
-        if (nickname.isEmpty()) {
+        return find(PlayerKey.nickname(nickname));
+    }
+
+    @Override
+    public Optional<EntryImpl> find(@NotNull PlayerKey key) {
+        if (key.value().isEmpty()) {
             return Optional.empty();
         }
 
+        if (key.uuid()) {
+            return dao.getByUuid(key.value());
+        }
+
         if (caseSensitive) {
-            return dao.get(nickname);
+            return dao.get(key.value());
         } else {
-            return dao.getLike(nickname);
+            return dao.getLike(key.value());
         }
     }
 }

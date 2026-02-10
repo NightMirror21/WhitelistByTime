@@ -26,6 +26,7 @@ dependencies {
     implementation 'com.j256.ormlite:ormlite-core:6.1'
     implementation 'com.j256.ormlite:ormlite-jdbc:6.1'
     implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
+    implementation 'org.slf4j:slf4j-api:2.0.16'
 
     compileOnly 'org.jetbrains:annotations:24.0.1'
     compileOnly 'org.projectlombok:lombok:1.18.30'

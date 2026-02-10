@@ -24,7 +24,7 @@ public class UnfreezeCommand implements Command {
     EntryService service;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getUnfreezePermission();
     }
 

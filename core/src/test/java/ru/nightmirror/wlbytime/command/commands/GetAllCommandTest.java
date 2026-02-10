@@ -49,9 +49,9 @@ public class GetAllCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getGetAllPermission()).thenReturn("wlbytime.getall");
-        assertEquals("wlbytime.getall", getAllCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getGetAllPermission()).thenReturn(Set.of("whitelistbytime.getall", "wlbytime.getall"));
+        assertEquals(Set.of("whitelistbytime.getall", "wlbytime.getall"), getAllCommand.getPermissions());
     }
 
     @Test

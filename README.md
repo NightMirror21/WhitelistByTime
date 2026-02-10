@@ -1,14 +1,12 @@
 <img src="./images/header.svg">
 
 ## Links
-[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) - over 5200 downloads (10/04/2025).\
-[Modrinth](https://modrinth.com/plugin/whitelistbytime) - 250 downloads (10/04/2025).\
-[GitHub](https://github.com/NightMirror21/WhitelistByTime) - 9 stars (10/04/2025).
+[SpigotMC](https://www.spigotmc.org/resources/whitelistbytime-1-21-4.98946/) [Modrinth](https://modrinth.com/plugin/whitelistbytime) [GitHub](https://github.com/NightMirror21/WhitelistByTime)
 
 ## About
 This is a plugin for a minecraft server. It allows you to add players for a certain time or permanently.
 
-**The plugin is developed and tested for Paper 1.20.x-1.21.x. It also supports Folia and Paper forks.**
+**The plugin is developed and tested for Paper and Folia 1.20.x-1.21.x. It also supports forks of Paper and Folia.**
 
 ## Features
 - Fully **customizable**.
@@ -20,21 +18,23 @@ This is a plugin for a minecraft server. It allows you to add players for a cert
 - **Lightweight**: minimal load on the **main thread**.
 - **Multi-server** support: utilizes **SQL transactions**.
 - **Safe**: the code is extensively covered by **automated tests**.
+- **UUID support**: stores UUIDs in online/floodgate modes to handle nickname changes.
 
 ## Commands and Permissions
-| Command                                                | Permission              |
-|--------------------------------------------------------|-------------------------|
-| /whitelist add [nickname] (time)                       | wlbytime.add     |
-| /whitelist remove [nickname]                           | wlbytime.remove  |
-| /whitelist check [nickname]                            | wlbytime.check   |
-| /whitelist checkme                                     | wlbytime.checkme |
-| /whitelist time set/add/remove [nickname] [time]       | wlbytime.time    |
-| /whitelist getall (page)                               | wlbytime.getall  |
-| /whitelist freeze [nickname] [time]                    | wlbytime.freeze  |
-| /whitelist unfreeze [nickname]                         | wlbytime.unfreeze|
-| /whitelist reload                                      | wlbytime.reload  |
+| Command                                                | Permission                                        |
+|--------------------------------------------------------|---------------------------------------------------|
+| /whitelist add [nickname] (time)                       | whitelistbytime.add, wlbytime.add                 |
+| /whitelist remove [nickname]                           | whitelistbytime.remove, wlbytime.remove           |
+| /whitelist check [nickname]                            | whitelistbytime.check, wlbytime.check             |
+| /whitelist checkme                                     | whitelistbytime.checkme, wlbytime.checkme         |
+| /whitelist time set/add/remove [nickname] [time]       | whitelistbytime.time, wlbytime.time               |
+| /whitelist getall (page)                               | whitelistbytime.getall, wlbytime.getall           |
+| /whitelist freeze [nickname] [time]                    | whitelistbytime.freeze, wlbytime.freeze           |
+| /whitelist unfreeze [nickname]                         | whitelistbytime.unfreeze, wlbytime.unfreeze       |
+| /whitelist reload                                      | whitelistbytime.reload, wlbytime.reload           |
+| /whitelist on/off/status                               | whitelistbytime.toggle, wlbytime.toggle           |
 
-**Permissions can be configured in the `commands.yml` config!**
+Each subcommand can have multiple permissions. If any permission matches, access is granted. You can change these lists in `commands.yml`.
 
 ### Notes:
 - `[nickname]` - required argument.
@@ -64,6 +64,20 @@ All output messages can be customized in the configuration.
 ```yaml
 #Automatically unfreeze player time when they join the server if their time is frozen
 unfreeze-time-on-player-join: false
+
+#How to identify players in whitelist: OFFLINE, ONLINE, FLOODGATE, AUTO
+player-id-mode: OFFLINE
+#Use Mojang API to resolve UUID when adding by nickname in ONLINE/AUTO mode
+mojang-lookup-enabled: true
+#Timeout for Mojang API requests in milliseconds
+mojang-timeout-ms: 5000
+#Enable in-memory cache for Mojang API UUID lookups
+mojang-cache-enabled: true
+#Mojang API cache TTL in milliseconds
+mojang-cache-ttl-ms: 3600000
+
+#Enable whitelist checks for player login
+whitelist-enabled: true
 
 #Enable the expiration monitor, which checks players' expiration status
 expire-monitor-enabled: true
@@ -207,6 +221,13 @@ plugin-reloaded-with-errors: "Plugin reloaded with errors"
 
 time-left-in-whitelist-notify: "Left %time% in whitelist"
 
+whitelist-enabled: "Whitelist enabled"
+whitelist-disabled: "Whitelist disabled"
+whitelist-already-enabled: "Whitelist already enabled"
+whitelist-already-disabled: "Whitelist already disabled"
+whitelist-status-enabled: "Whitelist is enabled"
+whitelist-status-disabled: "Whitelist is disabled"
+
 help:
   - "> WhitelistByTime - Help"
   - "| /whitelist add [nickname] (time)"
@@ -216,7 +237,11 @@ help:
   - "| /whitelist getall"
   - "| /whitelist reload"
   - "| /whitelist freeze [nickname] [time]"
+  - "| /whitelist unfreeze [nickname]"
   - "| /whitelist time set/add/remove [nickname] [time]"
+  - "| /whitelist on"
+  - "| /whitelist off"
+  - "| /whitelist status"
   - "| (time) - time for which the player will be added to the whitelist"
   - "| Example: 2d 3h 10m"
   - "| Leave this value empty if you want to add player forever"
@@ -225,15 +250,36 @@ help:
 ### `commands.yml`
 ```yaml
 #Permissions for whitelist subcommands
-add-permission: "wlbytime.add"
-check-permission: "wlbytime.check"
-check-me-permission: "wlbytime.checkme"
-freeze-permission: "wlbytime.freeze"
-unfreeze-permission: "wlbytime.unfreeze"
-get-all-permission: "wlbytime.getall"
-remove-permission: "wlbytime.remove"
-time-permission: "wlbytime.time"
-reload-permission: "wlbytime.reload"
+add-permission:
+  - "whitelistbytime.add"
+  - "wlbytime.add"
+check-permission:
+  - "whitelistbytime.check"
+  - "wlbytime.check"
+check-me-permission:
+  - "whitelistbytime.checkme"
+  - "wlbytime.checkme"
+freeze-permission:
+  - "whitelistbytime.freeze"
+  - "wlbytime.freeze"
+unfreeze-permission:
+  - "whitelistbytime.unfreeze"
+  - "wlbytime.unfreeze"
+get-all-permission:
+  - "whitelistbytime.getall"
+  - "wlbytime.getall"
+toggle-permission:
+  - "whitelistbytime.toggle"
+  - "wlbytime.toggle"
+remove-permission:
+  - "whitelistbytime.remove"
+  - "wlbytime.remove"
+time-permission:
+  - "whitelistbytime.time"
+  - "wlbytime.time"
+reload-permission:
+  - "whitelistbytime.reload"
+  - "wlbytime.reload"
 ```
 
 ## Stats
