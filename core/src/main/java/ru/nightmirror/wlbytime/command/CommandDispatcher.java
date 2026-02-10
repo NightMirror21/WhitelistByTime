@@ -25,7 +25,7 @@ public class CommandDispatcher {
                 continue;
             }
 
-            if (!issuer.hasPermission(command.getPermission())) {
+            if (!hasAnyPermission(issuer, command.getPermissions())) {
                 log.debug("Permission denied for command={} issuer={}", commandName, issuer.getNickname());
                 issuer.sendMessage(messagesConfig.getNotPermission());
             } else {
@@ -42,7 +42,7 @@ public class CommandDispatcher {
                 continue;
             }
 
-            if (issuer.hasPermission(command.getPermission())) {
+            if (hasAnyPermission(issuer, command.getPermissions())) {
                 return command.getTabulate(issuer, args);
             } else {
                 log.debug("Permission denied for tab completion command={} issuer={}", commandName, issuer.getNickname());
@@ -51,6 +51,21 @@ public class CommandDispatcher {
         }
         log.debug("Tab completion command not found: {}", commandName);
         return Set.of();
+    }
+
+    private boolean hasAnyPermission(CommandIssuer issuer, Set<String> permissions) {
+        if (permissions == null || permissions.isEmpty()) {
+            return true;
+        }
+        for (String permission : permissions) {
+            if (permission == null || permission.isBlank()) {
+                continue;
+            }
+            if (issuer.hasPermission(permission)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Set<String> getCommands() {

@@ -59,7 +59,7 @@ public class TimeCommandTest {
                 .thenAnswer(invocation -> new ResolvedPlayer(
                         PlayerKey.nickname(invocation.getArgument(0)), invocation.getArgument(0), null));
 
-        when(commandsConfig.getTimePermission()).thenReturn("wlbytime.time");
+        when(commandsConfig.getTimePermission()).thenReturn(Set.of("whitelistbytime.time", "wlbytime.time"));
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments.");
         when(messages.getPlayerNotInWhitelist()).thenReturn("Player %nickname% is not in the whitelist.");
         when(messages.getTimeIsIncorrect()).thenReturn("Time provided is incorrect.");
@@ -74,9 +74,9 @@ public class TimeCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getTimePermission()).thenReturn("wlbytime.time");
-        assertEquals("wlbytime.time", timeCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getTimePermission()).thenReturn(Set.of("whitelistbytime.time", "wlbytime.time"));
+        assertEquals(Set.of("whitelistbytime.time", "wlbytime.time"), timeCommand.getPermissions());
     }
 
     @Test

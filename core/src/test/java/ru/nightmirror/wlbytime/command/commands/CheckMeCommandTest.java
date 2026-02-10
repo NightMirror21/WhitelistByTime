@@ -44,9 +44,9 @@ public class CheckMeCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getCheckMePermission()).thenReturn("wlbytime.checkme");
-        assertEquals("wlbytime.checkme", checkMeCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getCheckMePermission()).thenReturn(Set.of("whitelistbytime.checkme", "wlbytime.checkme"));
+        assertEquals(Set.of("whitelistbytime.checkme", "wlbytime.checkme"), checkMeCommand.getPermissions());
     }
 
     @Test

@@ -45,9 +45,9 @@ public class RemoveCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getRemovePermission()).thenReturn("wlbytime.remove");
-        assertEquals("wlbytime.remove", removeCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getRemovePermission()).thenReturn(Set.of("whitelistbytime.remove", "wlbytime.remove"));
+        assertEquals(Set.of("whitelistbytime.remove", "wlbytime.remove"), removeCommand.getPermissions());
     }
 
     @Test

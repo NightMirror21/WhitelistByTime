@@ -25,7 +25,7 @@ public class GetAllCommand implements Command {
     TimeConvertor convertor;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getGetAllPermission();
     }
 

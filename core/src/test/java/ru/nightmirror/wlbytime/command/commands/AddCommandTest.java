@@ -52,9 +52,9 @@ public class AddCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getAddPermission()).thenReturn("wlbytime.add");
-        assertEquals("wlbytime.add", addCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getAddPermission()).thenReturn(Set.of("whitelistbytime.add", "wlbytime.add"));
+        assertEquals(Set.of("whitelistbytime.add", "wlbytime.add"), addCommand.getPermissions());
     }
 
     @Test

@@ -55,9 +55,9 @@ public class FreezeCommandTest {
     }
 
     @Test
-    public void getPermissionReturnsCorrectPermission() {
-        when(commandsConfig.getFreezePermission()).thenReturn("wlbytime.freeze");
-        assertEquals("wlbytime.freeze", freezeCommand.getPermission());
+    public void getPermissionsReturnsConfiguredPermissions() {
+        when(commandsConfig.getFreezePermission()).thenReturn(Set.of("whitelistbytime.freeze", "wlbytime.freeze"));
+        assertEquals(Set.of("whitelistbytime.freeze", "wlbytime.freeze"), freezeCommand.getPermissions());
     }
 
     @Test

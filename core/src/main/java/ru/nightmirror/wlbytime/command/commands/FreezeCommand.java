@@ -34,7 +34,7 @@ public class FreezeCommand implements Command {
     EntryIdentityService identityService;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getFreezePermission();
     }
 

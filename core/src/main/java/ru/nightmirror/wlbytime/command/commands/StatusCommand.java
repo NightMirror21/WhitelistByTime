@@ -22,7 +22,7 @@ public class StatusCommand implements Command {
     SettingsConfig settings;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getTogglePermission();
     }
 

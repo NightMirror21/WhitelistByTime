@@ -222,14 +222,30 @@ help:
 ### `commands.yml`
 ```yaml
 #Permissions for whitelist subcommands
-add-permission: "wlbytime.add"
-check-permission: "wlbytime.check"
-check-me-permission: "wlbytime.checkme"
-freeze-permission: "wlbytime.freeze"
-get-all-permission: "wlbytime.getall"
-toggle-permission: "wlbytime.toggle"
-remove-permission: "wlbytime.remove"
-time-permission: "wlbytime.time"
+add-permission:
+  - "whitelistbytime.add"
+  - "wlbytime.add"
+check-permission:
+  - "whitelistbytime.check"
+  - "wlbytime.check"
+check-me-permission:
+  - "whitelistbytime.checkme"
+  - "wlbytime.checkme"
+freeze-permission:
+  - "whitelistbytime.freeze"
+  - "wlbytime.freeze"
+get-all-permission:
+  - "whitelistbytime.getall"
+  - "wlbytime.getall"
+toggle-permission:
+  - "whitelistbytime.toggle"
+  - "wlbytime.toggle"
+remove-permission:
+  - "whitelistbytime.remove"
+  - "wlbytime.remove"
+time-permission:
+  - "whitelistbytime.time"
+  - "wlbytime.time"
 ```
 
 ## Stats

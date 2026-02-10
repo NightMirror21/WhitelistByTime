@@ -24,7 +24,7 @@ public class OnCommand implements Command {
     Path settingsPath;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getTogglePermission();
     }
 

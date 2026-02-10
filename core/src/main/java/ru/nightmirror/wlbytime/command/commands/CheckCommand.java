@@ -29,7 +29,7 @@ public class CheckCommand implements Command {
     EntryIdentityService identityService;
 
     @Override
-    public String getPermission() {
+    public Set<String> getPermissions() {
         return commandsConfig.getCheckPermission();
     }
 

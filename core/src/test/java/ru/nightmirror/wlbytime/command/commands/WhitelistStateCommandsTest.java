@@ -8,6 +8,7 @@ import ru.nightmirror.wlbytime.config.configs.SettingsConfig;
 import ru.nightmirror.wlbytime.interfaces.command.CommandIssuer;
 
 import java.nio.file.Path;
+import java.util.Set;
 
 import static org.mockito.Mockito.*;
 
@@ -31,7 +32,7 @@ public class WhitelistStateCommandsTest {
         issuer = mock(CommandIssuer.class);
         settingsPath = Path.of("settings.yml");
 
-        when(commandsConfig.getTogglePermission()).thenReturn("wlbytime.toggle");
+        when(commandsConfig.getTogglePermission()).thenReturn(Set.of("whitelistbytime.toggle", "wlbytime.toggle"));
         when(messages.getIncorrectArguments()).thenReturn("Incorrect arguments.");
         when(messages.getWhitelistEnabled()).thenReturn("Whitelist enabled");
         when(messages.getWhitelistDisabled()).thenReturn("Whitelist disabled");

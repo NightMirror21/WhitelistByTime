@@ -36,8 +36,9 @@ public class CommandDispatcherTest {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn(commandName);
-        when(command.getPermission()).thenReturn("permission.test");
-        when(issuer.hasPermission("permission.test")).thenReturn(true);
+        when(command.getPermissions()).thenReturn(Set.of("permission.test", "permission.alt"));
+        when(issuer.hasPermission("permission.test")).thenReturn(false);
+        when(issuer.hasPermission("permission.alt")).thenReturn(true);
 
         commandDispatcher.dispatchExecute(issuer, commandName, args);
 
@@ -50,8 +51,9 @@ public class CommandDispatcherTest {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn(commandName);
-        when(command.getPermission()).thenReturn("permission.test");
+        when(command.getPermissions()).thenReturn(Set.of("permission.test", "permission.alt"));
         when(issuer.hasPermission("permission.test")).thenReturn(false);
+        when(issuer.hasPermission("permission.alt")).thenReturn(false);
 
         commandDispatcher.dispatchExecute(issuer, commandName, args);
 
@@ -77,8 +79,9 @@ public class CommandDispatcherTest {
         String[] args = {"arg1", "arg2"};
         Set<String> expectedTabulatedResults = Set.of("tab1", "tab2");
         when(command.getName()).thenReturn(commandName);
-        when(command.getPermission()).thenReturn("permission.test");
-        when(issuer.hasPermission("permission.test")).thenReturn(true);
+        when(command.getPermissions()).thenReturn(Set.of("permission.test", "permission.alt"));
+        when(issuer.hasPermission("permission.test")).thenReturn(false);
+        when(issuer.hasPermission("permission.alt")).thenReturn(true);
         when(command.getTabulate(issuer, args)).thenReturn(expectedTabulatedResults);
 
         Set<String> result = commandDispatcher.dispatchTabulate(issuer, commandName, args);
@@ -92,8 +95,9 @@ public class CommandDispatcherTest {
         String commandName = "test";
         String[] args = {"arg1", "arg2"};
         when(command.getName()).thenReturn(commandName);
-        when(command.getPermission()).thenReturn("permission.test");
+        when(command.getPermissions()).thenReturn(Set.of("permission.test", "permission.alt"));
         when(issuer.hasPermission("permission.test")).thenReturn(false);
+        when(issuer.hasPermission("permission.alt")).thenReturn(false);
 
         Set<String> result = commandDispatcher.dispatchTabulate(issuer, commandName, args);
 
