@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'com.gradleup.shadow' version '8.3.2'
+    id 'xyz.jpenilla.run-paper' version '2.3.0'
 }
 
 def javaVersion = JavaVersion.VERSION_21;
@@ -32,6 +33,14 @@ repositories {
 
     maven {
         url = 'https://repo.opencollab.dev/main/'
+    }
+
+    maven {
+        url = 'https://repo.opencollab.dev/maven-releases/'
+    }
+
+    maven {
+        url = 'https://repo.opencollab.dev/maven-snapshots/'
     }
 }
 
@@ -88,4 +97,55 @@ processResources {
     filesMatching('plugin.yml') {
         expand props
     }
+}
+
+tasks {
+    runServer {
+        minecraftVersion("1.21.11")
+        runDirectory = file("run")
+        jvmArgs = ["-Xms1G", "-Xmx2G"]
+        pluginJars.from(tasks.shadowJar)
+    }
+}
+
+configurations {
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+sourceSets {
+    integrationTest {
+        java.srcDir 'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath + sourceSets.main.output
+    }
+}
+
+dependencies {
+    integrationTestImplementation 'org.testcontainers:testcontainers:1.20.6'
+    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.6'
+    integrationTestImplementation 'org.xerial:sqlite-jdbc:3.45.3.0'
+    integrationTestImplementation 'org.geysermc.mcprotocollib:protocol:1.21.11-SNAPSHOT'
+    integrationTestImplementation 'net.kyori:adventure-text-serializer-plain:4.25.0'
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests against a real Paper server in Docker'
+    group = 'verification'
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    useJUnitPlatform()
+    dependsOn tasks.shadowJar
+    shouldRunAfter tasks.test
+    systemProperty 'pluginJar', tasks.shadowJar.archiveFile.get().asFile.absolutePath
+    systemProperty 'paperVersion', '1.21.11'
+    def runId = System.currentTimeMillis()
+    binaryResultsDirectory = layout.buildDirectory.dir("test-results/integrationTest-${runId}/binary").get().asFile
+    reports.junitXml.outputLocation = layout.buildDirectory.dir("test-results/integrationTest-${runId}/xml")
+    reports.html.outputLocation = layout.buildDirectory.dir("reports/integrationTest-${runId}")
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('integrationTest')
 }
