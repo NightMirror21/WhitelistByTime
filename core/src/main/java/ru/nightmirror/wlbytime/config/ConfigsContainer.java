@@ -4,14 +4,17 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import ru.nightmirror.wlbytime.config.configs.*;
 import ru.nightmirror.wlbytime.time.TimeUnitsConvertorSettings;
 
 import java.io.File;
+import java.nio.file.Path;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 @Getter
+@Slf4j
 public class ConfigsContainer {
 
     @Getter(value = AccessLevel.NONE)
@@ -36,8 +39,25 @@ public class ConfigsContainer {
         settings = new SettingsConfig();
         settings.reload(new File(folder, "settings.yml").toPath());
 
+        Path commandsPath = new File(folder, "commands.yml").toPath();
         commandsConfig = new CommandsConfig();
-        commandsConfig.reload(new File(folder, "commands.yml").toPath());
+        try {
+            commandsConfig.reload(commandsPath);
+        } catch (RuntimeException currentFormatException) {
+            log.warn("Failed to load commands.yml in current format, trying legacy parser", currentFormatException);
+
+            LegacyCommandsConfig legacyCommandsConfig = new LegacyCommandsConfig();
+            try {
+                legacyCommandsConfig.reload(commandsPath);
+            } catch (RuntimeException legacyFormatException) {
+                currentFormatException.addSuppressed(legacyFormatException);
+                throw currentFormatException;
+            }
+
+            commandsConfig = CommandsConfig.fromLegacy(legacyCommandsConfig);
+            commandsConfig.save(commandsPath);
+            log.info("commands.yml was migrated from legacy string permissions to list format");
+        }
     }
 
     public TimeUnitsConvertorSettings getTimeUnitsConvertorSettings() {

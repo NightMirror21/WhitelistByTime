@@ -42,4 +42,16 @@ public class CommandsConfigTest {
         assertEquals(Set.of("perm.check", "perm.check.alt"), reloaded.getCheckPermission());
         assertEquals(Set.of("perm.toggle", "perm.toggle.alt"), reloaded.getTogglePermission());
     }
+
+    @Test
+    public void fromLegacyMapsStringPermissionsToSets() {
+        LegacyCommandsConfig legacyConfig = new LegacyCommandsConfig();
+        legacyConfig.setAddPermission("custom.add");
+
+        CommandsConfig converted = CommandsConfig.fromLegacy(legacyConfig);
+
+        assertEquals(Set.of("custom.add"), converted.getAddPermission());
+        assertEquals(Set.of("wlbytime.check", "whitelistbytime.check"), converted.getCheckPermission());
+        assertEquals(Set.of("wlbytime.toggle", "whitelistbytime.toggle"), converted.getTogglePermission());
+    }
 }

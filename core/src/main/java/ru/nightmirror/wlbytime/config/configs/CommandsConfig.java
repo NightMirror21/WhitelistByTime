@@ -9,6 +9,7 @@ import net.elytrium.serializer.annotations.Comment;
 import net.elytrium.serializer.annotations.CommentValue;
 import net.elytrium.serializer.language.object.YamlSerializable;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -35,5 +36,40 @@ public class CommandsConfig extends YamlSerializable {
 
     public CommandsConfig() {
         super(CommandsConfig.CONFIG);
+    }
+
+    public static CommandsConfig fromLegacy(LegacyCommandsConfig legacyConfig) {
+        CommandsConfig config = new CommandsConfig();
+
+        config.setAddPermission(toPermissions(legacyConfig.getAddPermission(), config.getAddPermission()));
+        config.setCheckPermission(toPermissions(legacyConfig.getCheckPermission(), config.getCheckPermission()));
+        config.setCheckMePermission(toPermissions(legacyConfig.getCheckMePermission(), config.getCheckMePermission()));
+        config.setFreezePermission(toPermissions(legacyConfig.getFreezePermission(), config.getFreezePermission()));
+        config.setUnfreezePermission(toPermissions(legacyConfig.getUnfreezePermission(), config.getUnfreezePermission()));
+        config.setGetAllPermission(toPermissions(legacyConfig.getGetAllPermission(), config.getGetAllPermission()));
+        config.setReloadPermission(toPermissions(legacyConfig.getReloadPermission(), config.getReloadPermission()));
+        config.setTogglePermission(toPermissions(legacyConfig.getTogglePermission(), config.getTogglePermission()));
+        config.setRemovePermission(toPermissions(legacyConfig.getRemovePermission(), config.getRemovePermission()));
+        config.setTimePermission(toPermissions(legacyConfig.getTimePermission(), config.getTimePermission()));
+
+        return config;
+    }
+
+    private static Set<String> toPermissions(String permission, Set<String> defaults) {
+        if (permission == null || permission.isBlank()) {
+            return defaults;
+        }
+
+        String trimmedPermission = permission.trim();
+        LinkedHashSet<String> permissions = new LinkedHashSet<>();
+        permissions.add(trimmedPermission);
+
+        if (trimmedPermission.startsWith("wlbytime.")) {
+            permissions.add("whitelistbytime." + trimmedPermission.substring("wlbytime.".length()));
+        } else if (trimmedPermission.startsWith("whitelistbytime.")) {
+            permissions.add("wlbytime." + trimmedPermission.substring("whitelistbytime.".length()));
+        }
+
+        return Set.copyOf(permissions);
     }
 }
