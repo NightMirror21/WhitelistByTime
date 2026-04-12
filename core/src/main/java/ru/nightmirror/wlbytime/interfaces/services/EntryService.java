@@ -23,6 +23,10 @@ public interface EntryService {
 
     void unfreeze(EntryImpl entry);
 
+    void pauseFreeze(EntryImpl entry);
+
+    void resumeFreeze(EntryImpl entry);
+
     void update(EntryImpl entry);
 
     @UnmodifiableView Set<EntryImpl> getEntries();

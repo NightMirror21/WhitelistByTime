@@ -31,6 +31,11 @@ public class SettingsConfig extends YamlSerializable {
     }, at = Comment.At.PREPEND)
     boolean unfreezeTimeOnPlayerJoin = false;
 
+    @Comment(value = {
+            @CommentValue("Freeze timer counts only while the player is online. When the player is offline, the freeze is paused and resumes when they rejoin.")
+    }, at = Comment.At.PREPEND)
+    boolean freezeCountsOnlyOnlineTime = false;
+
     @NewLine
     @Comment(value = {
             @CommentValue("How to identify players in whitelist: OFFLINE, ONLINE, FLOODGATE, AUTO")

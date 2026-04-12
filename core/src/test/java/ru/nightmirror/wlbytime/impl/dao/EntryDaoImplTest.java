@@ -120,6 +120,36 @@ public class EntryDaoImplTest {
     }
 
     @Test
+    public void updateEntryWithPausedFreezingPersistsPausedAt() {
+        EntryImpl entry = entryDao.create("paused_freeze_test", Instant.now().plusSeconds(60));
+        entry.freeze(Duration.ofSeconds(10));
+        entry.getFreezing().pause();
+        assertTrue(entry.getFreezing().isPaused());
+        entryDao.update(entry);
+        Optional<EntryImpl> retrieved = entryDao.get("paused_freeze_test");
+        assertTrue(retrieved.isPresent());
+        assertNotNull(retrieved.get().getFreezing());
+        assertTrue(retrieved.get().getFreezing().isPaused());
+        assertNotNull(retrieved.get().getFreezing().getPausedAt());
+    }
+
+    @Test
+    public void updateEntryAfterResumeFreezeClearsPausedAt() {
+        EntryImpl entry = entryDao.create("resume_freeze_test", Instant.now().plusSeconds(60));
+        entry.freeze(Duration.ofSeconds(10));
+        entry.getFreezing().pause();
+        entryDao.update(entry);
+        entry.getFreezing().resume();
+        assertFalse(entry.getFreezing().isPaused());
+        entryDao.update(entry);
+        Optional<EntryImpl> retrieved = entryDao.get("resume_freeze_test");
+        assertTrue(retrieved.isPresent());
+        assertNotNull(retrieved.get().getFreezing());
+        assertFalse(retrieved.get().getFreezing().isPaused());
+        assertNull(retrieved.get().getFreezing().getPausedAt());
+    }
+
+    @Test
     public void updateEntryWithLastJoinPersistsLastJoin() {
         EntryImpl entry = entryDao.create("lastjoin_test");
         entry.updateLastJoin();

@@ -17,6 +17,7 @@ import ru.nightmirror.wlbytime.interfaces.checker.AccessEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.checker.UnfreezeEntryChecker;
 import ru.nightmirror.wlbytime.interfaces.identity.PlayerIdentityResolver;
 import ru.nightmirror.wlbytime.interfaces.services.EntryIdentityService;
+import ru.nightmirror.wlbytime.interfaces.services.EntryService;
 import ru.nightmirror.wlbytime.utils.ColorsUtils;
 
 import java.util.Optional;
@@ -32,11 +33,19 @@ public class PlayerLoginFilter implements Listener {
     AccessEntryChecker accessEntryChecker;
     PlayerIdentityResolver identityResolver;
     EntryIdentityService identityService;
+    EntryService entryService;
 
     @EventHandler(priority = EventPriority.LOW)
     private void filter(AsyncPlayerPreLoginEvent event) {
         ResolvedPlayer resolved = identityResolver.resolveByLogin(event.getName(), event.getUniqueId());
         Optional<EntryImpl> entry = identityService.findOrMigrate(resolved, event.getName());
+        if (settingsConfig.isFreezeCountsOnlyOnlineTime()) {
+            entry.ifPresent(e -> {
+                if (e.isFrozen() && e.getFreezing().isPaused()) {
+                    entryService.resumeFreeze(e);
+                }
+            });
+        }
         entry.ifPresent(unfreezeEntryChecker::unfreezeIfRequired);
         if (!settingsConfig.isWhitelistEnabled()) {
             return;

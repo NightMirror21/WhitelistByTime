@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class FreezingTest {
 
@@ -67,6 +67,92 @@ public class FreezingTest {
         Freezing freezing = new Freezing(1L, Duration.ofMillis(40));
         Thread.sleep(60);
         assertTrue(freezing.getLeftTime().isZero() || freezing.getLeftTime().isNegative());
+    }
+
+    @Test
+    public void testIsPausedWhenNotPaused() {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        assertFalse(freezing.isPaused());
+    }
+
+    @Test
+    public void testIsPausedAfterPause() {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        freezing.pause();
+        assertTrue(freezing.isPaused());
+    }
+
+    @Test
+    public void testIsFrozenWhenPaused() {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        freezing.pause();
+        assertTrue(freezing.isFrozen());
+    }
+
+    @Test
+    public void testGetLeftTimeDoesNotDecreaseWhenPaused() throws InterruptedException {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        freezing.pause();
+        Duration leftAtPause = freezing.getLeftTime();
+        Thread.sleep(50);
+        Duration leftAfterSleep = freezing.getLeftTime();
+        assertEquals(leftAtPause, leftAfterSleep);
+    }
+
+    @Test
+    public void testResumeUnpausesFreezing() {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        freezing.pause();
+        assertTrue(freezing.isPaused());
+        freezing.resume();
+        assertFalse(freezing.isPaused());
+    }
+
+    @Test
+    public void testResumeShiftsEndTimeByOfflineDuration() throws InterruptedException {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        freezing.pause();
+        Thread.sleep(60);
+        Duration leftBeforeResume = freezing.getLeftTime();
+        freezing.resume();
+        Duration leftAfterResume = freezing.getLeftTime();
+        // After resume, endTime was shifted by offline duration, so leftTime should be close to leftBeforeResume
+        long diff = Math.abs(leftAfterResume.toMillis() - leftBeforeResume.toMillis());
+        assertTrue(diff < 50, "Left time after resume should be close to left time at pause moment");
+    }
+
+    @Test
+    public void testPauseIsIdempotent() throws InterruptedException {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        freezing.pause();
+        Duration leftFirst = freezing.getLeftTime();
+        Thread.sleep(20);
+        freezing.pause(); // second pause should be no-op
+        Duration leftSecond = freezing.getLeftTime();
+        assertEquals(leftFirst, leftSecond);
+    }
+
+    @Test
+    public void testResumeIsIdempotentWhenNotPaused() {
+        Freezing freezing = new Freezing(1L, Duration.ofSeconds(10));
+        Duration leftBefore = freezing.getLeftTime();
+        freezing.resume(); // should be no-op
+        Duration leftAfter = freezing.getLeftTime();
+        long diff = Math.abs(leftAfter.toMillis() - leftBefore.toMillis());
+        assertTrue(diff < 50);
+    }
+
+    @Test
+    public void testBuilderWithPausedAt() {
+        Instant pausedAt = Instant.now().minusSeconds(5);
+        Freezing freezing = Freezing.builder()
+                .entryId(1L)
+                .startTime(Instant.now().minusSeconds(10))
+                .endTime(Instant.now().plusSeconds(10))
+                .pausedAt(pausedAt)
+                .build();
+        assertTrue(freezing.isPaused());
+        assertEquals(pausedAt, freezing.getPausedAt());
     }
 
     @Test

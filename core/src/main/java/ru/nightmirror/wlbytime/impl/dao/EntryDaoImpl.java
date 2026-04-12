@@ -114,6 +114,7 @@ public class EntryDaoImpl implements EntryDao {
         TableUtils.createTableIfNotExists(connectionSource, FreezingTable.class);
         TableUtils.createTableIfNotExists(connectionSource, ExpirationTable.class);
         migrateEntryTableIfRequired();
+        migrateFreezingTableIfRequired();
     }
 
     private void migrateEntryTableIfRequired() {
@@ -164,6 +165,26 @@ public class EntryDaoImpl implements EntryDao {
         }
     }
 
+    private void migrateFreezingTableIfRequired() {
+        try {
+            List<String> columns = getTableColumns(FreezingTable.TABLE_NAME);
+            if (columns.contains(FreezingTable.PAUSED_AT_COLUMN)) {
+                return;
+            }
+
+            String alterSql = SQLITE.equalsIgnoreCase(getDatabaseType())
+                    ? String.format("ALTER TABLE %s ADD COLUMN %s TIMESTAMP NULL DEFAULT NULL", FreezingTable.TABLE_NAME, FreezingTable.PAUSED_AT_COLUMN)
+                    : String.format("ALTER TABLE %s ADD COLUMN %s DATETIME NULL DEFAULT NULL", FreezingTable.TABLE_NAME, FreezingTable.PAUSED_AT_COLUMN);
+
+            try (Statement statement = connectionSource.getReadWriteConnection(null).getUnderlyingConnection().createStatement()) {
+                statement.execute(alterSql);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error migrating freezings table", e);
+            throw new DatabaseInitializationException("Failed to migrate freezings table", e);
+        }
+    }
+
     private boolean entryTableNeedsMigration() throws SQLException {
         List<String> columns = getEntryTableColumns();
         if (!columns.contains(EntryTable.UUID_COLUMN)) {
@@ -174,8 +195,11 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     private List<String> getEntryTableColumns() throws SQLException {
+        return getTableColumns(EntryTable.TABLE_NAME);
+    }
+
+    private List<String> getTableColumns(String table) throws SQLException {
         List<String> columns = new ArrayList<>();
-        String table = EntryTable.TABLE_NAME;
         DatabaseConnection connection = connectionSource.getReadOnlyConnection(null);
         try {
             if (SQLITE.equalsIgnoreCase(getDatabaseType())) {
@@ -359,7 +383,10 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     private static @NotNull FreezingTable getFreezingTable(EntryImpl entry, EntryTable entryTable) {
-        return new FreezingTable(null, entryTable, Timestamp.from(entry.getFreezing().getStartTime()), Timestamp.from(entry.getFreezing().getEndTime()));
+        Timestamp pausedAt = entry.getFreezing().getPausedAt() != null
+                ? Timestamp.from(entry.getFreezing().getPausedAt())
+                : null;
+        return new FreezingTable(null, entryTable, Timestamp.from(entry.getFreezing().getStartTime()), Timestamp.from(entry.getFreezing().getEndTime()), pausedAt);
     }
 
     private static @NotNull ExpirationTable getExpirationTable(EntryImpl entry, EntryTable entryTable) {
@@ -553,6 +580,7 @@ public class EntryDaoImpl implements EntryDao {
                 .entryId(freezingTable.getId())
                 .startTime(freezingTable.getStartTime().toInstant())
                 .endTime(freezingTable.getEndTime().toInstant())
+                .pausedAt(freezingTable.getPausedAt() != null ? freezingTable.getPausedAt().toInstant() : null)
                 .build() : null;
         Expiration expiration = expirationTable != null ? Expiration.builder()
                 .entryId(expirationTable.getId())
@@ -614,9 +642,11 @@ public class EntryDaoImpl implements EntryDao {
     @AllArgsConstructor
     @ToString
     public static class FreezingTable {
+        public static final String TABLE_NAME = "wlbytime_freezings";
         public static final String ENTRY_ID_COLUMN = "entry_id";
         public static final String START_TIME_COLUMN = "start_time";
         public static final String END_TIME_COLUMN = "end_time";
+        public static final String PAUSED_AT_COLUMN = "paused_at";
 
         @DatabaseField(generatedId = true, columnName = "id", canBeNull = false)
         private Long id;
@@ -629,6 +659,9 @@ public class EntryDaoImpl implements EntryDao {
 
         @DatabaseField(columnName = END_TIME_COLUMN, canBeNull = false)
         private Timestamp endTime;
+
+        @DatabaseField(columnName = PAUSED_AT_COLUMN, canBeNull = true)
+        private Timestamp pausedAt;
     }
 
     @DatabaseTable(tableName = "wlbytime_expirations")

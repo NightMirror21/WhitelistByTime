@@ -11,6 +11,7 @@ import ru.nightmirror.wlbytime.config.ConfigsContainer;
 import ru.nightmirror.wlbytime.consumers.MessageSender;
 import ru.nightmirror.wlbytime.consumers.PlayerKicker;
 import ru.nightmirror.wlbytime.filter.PlayerLoginFilter;
+import ru.nightmirror.wlbytime.filter.PlayerQuitFreezeListener;
 import ru.nightmirror.wlbytime.impl.checker.AccessEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.checker.UnfreezeEntryCheckerImpl;
 import ru.nightmirror.wlbytime.impl.dao.EntryDaoImpl;
@@ -60,6 +61,7 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
     EntryFinder entryFinder;
 
     PlayerLoginFilter playerLoginFilter;
+    PlayerQuitFreezeListener playerQuitFreezeListener;
 
     @Override
     public void onEnable() {
@@ -110,8 +112,11 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
         UnfreezeEntryChecker unfreezeEntryChecker = new UnfreezeEntryCheckerImpl(configsContainer.getSettings().isUnfreezeTimeOnPlayerJoin(), entryService);
         AccessEntryChecker accessEntryChecker = new AccessEntryCheckerImpl();
         playerLoginFilter = new PlayerLoginFilter(configsContainer.getMessages(), configsContainer.getSettings(),
-                unfreezeEntryChecker, accessEntryChecker, identityResolver, identityService);
+                unfreezeEntryChecker, accessEntryChecker, identityResolver, identityService, entryService);
         getServer().getPluginManager().registerEvents(playerLoginFilter, this);
+
+        playerQuitFreezeListener = new PlayerQuitFreezeListener(configsContainer.getSettings(), entryFinder, entryService);
+        getServer().getPluginManager().registerEvents(playerQuitFreezeListener, this);
         getLogger().info("Player login filter loaded");
 
         getLogger().info("Loading commands...");
@@ -190,6 +195,9 @@ public class WhitelistPlugin extends JavaPlugin implements Reloadable {
         getLogger().info("Disabling plugin...");
         if (playerLoginFilter != null) {
             playerLoginFilter.unregister();
+        }
+        if (playerQuitFreezeListener != null) {
+            playerQuitFreezeListener.unregister();
         }
         if (entryDao != null) {
             entryDao.close();

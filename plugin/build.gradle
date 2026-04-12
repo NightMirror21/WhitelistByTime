@@ -74,6 +74,12 @@ dependencies {
     testImplementation 'org.mockito:mockito-junit-jupiter:5.14.2'
     testImplementation 'org.mockito:mockito-core:5.14.2'
     testImplementation 'org.assertj:assertj-core:3.24.0'
+
+    testImplementation 'org.testcontainers:testcontainers:1.20.6'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.6'
+    testImplementation 'org.xerial:sqlite-jdbc:3.45.3.0'
+    testImplementation 'org.geysermc.mcprotocollib:protocol:1.21.11-SNAPSHOT'
+    testImplementation 'net.kyori:adventure-text-serializer-plain:4.25.0'
 }
 
 tasks.assemble {
@@ -123,14 +129,6 @@ sourceSets {
         compileClasspath += sourceSets.main.output
         runtimeClasspath += output + compileClasspath + sourceSets.main.output
     }
-}
-
-dependencies {
-    integrationTestImplementation 'org.testcontainers:testcontainers:1.20.6'
-    integrationTestImplementation 'org.testcontainers:junit-jupiter:1.20.6'
-    integrationTestImplementation 'org.xerial:sqlite-jdbc:3.45.3.0'
-    integrationTestImplementation 'org.geysermc.mcprotocollib:protocol:1.21.11-SNAPSHOT'
-    integrationTestImplementation 'net.kyori:adventure-text-serializer-plain:4.25.0'
 }
 
 tasks.register('integrationTest', Test) {

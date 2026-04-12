@@ -82,6 +82,26 @@ public class EntryServiceImplTest {
     }
 
     @Test
+    public void pauseFreezeCallsFreezeingPauseAndDaoUpdate() {
+        EntryImpl entry = mock(EntryImpl.class);
+        ru.nightmirror.wlbytime.entry.Freezing freezing = mock(ru.nightmirror.wlbytime.entry.Freezing.class);
+        when(entry.getFreezing()).thenReturn(freezing);
+        entryService.pauseFreeze(entry);
+        verify(freezing).pause();
+        verify(entryDao).update(entry);
+    }
+
+    @Test
+    public void resumeFreezeCallsFreezingResumeAndDaoUpdate() {
+        EntryImpl entry = mock(EntryImpl.class);
+        ru.nightmirror.wlbytime.entry.Freezing freezing = mock(ru.nightmirror.wlbytime.entry.Freezing.class);
+        when(entry.getFreezing()).thenReturn(freezing);
+        entryService.resumeFreeze(entry);
+        verify(freezing).resume();
+        verify(entryDao).update(entry);
+    }
+
+    @Test
     public void getEntriesReturnsUnmodifiableSet() {
         Set<EntryImpl> entries = new HashSet<>();
         EntryImpl entry1 = EntryImpl.builder().nickname("user1").build();

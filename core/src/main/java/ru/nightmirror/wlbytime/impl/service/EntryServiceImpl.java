@@ -70,6 +70,18 @@ public class EntryServiceImpl implements EntryService {
     }
 
     @Override
+    public void pauseFreeze(EntryImpl entry) {
+        entry.getFreezing().pause();
+        entryDao.update(entry);
+    }
+
+    @Override
+    public void resumeFreeze(EntryImpl entry) {
+        entry.getFreezing().resume();
+        entryDao.update(entry);
+    }
+
+    @Override
     public void update(EntryImpl entry) {
         entryDao.update(entry);
     }
