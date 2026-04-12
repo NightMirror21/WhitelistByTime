@@ -312,16 +312,37 @@ public class EntryDaoImpl implements EntryDao {
 
     private void updateFreezingTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getFreezing() != null) {
-            freezingDao.createOrUpdate(getFreezingTable(entry, entryTable));
+            FreezingTable existing = freezingDao.queryBuilder()
+                    .where()
+                    .eq(FreezingTable.ENTRY_ID_COLUMN, entryTable.getId())
+                    .queryForFirst();
+
+            FreezingTable newFreezingTable = getFreezingTable(entry, entryTable);
+
+            if (existing != null) {
+                newFreezingTable.setId(existing.getId());
+            }
+
+            freezingDao.createOrUpdate(newFreezingTable);
         } else {
             deleteByEntryId(freezingDao, FreezingTable.ENTRY_ID_COLUMN, entry.getId());
-
         }
     }
 
     private void updateLastJoinTable(EntryImpl entry, EntryTable entryTable) throws SQLException {
         if (entry.getLastJoin() != null) {
-            lastJoinDao.createOrUpdate(getLastJoinTable(entry, entryTable));
+            LastJoinTable existing = lastJoinDao.queryBuilder()
+                    .where()
+                    .eq(LastJoinTable.ENTRY_ID_COLUMN, entryTable.getId())
+                    .queryForFirst();
+
+            LastJoinTable newLastJoinTable = getLastJoinTable(entry, entryTable);
+
+            if (existing != null) {
+                newLastJoinTable.setId(existing.getId());
+            }
+
+            lastJoinDao.createOrUpdate(newLastJoinTable);
         } else {
             deleteByEntryId(lastJoinDao, LastJoinTable.ENTRY_ID_COLUMN, entry.getId());
         }
