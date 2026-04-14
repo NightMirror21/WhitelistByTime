@@ -120,6 +120,34 @@ public class EntryDaoImplTest {
     }
 
     @Test
+    public void updateEntryWithPausedExpirationPersistsPausedAt() {
+        EntryImpl entry = entryDao.create("paused_expiration_test", Instant.now().plusSeconds(60));
+        entry.freeze(Duration.ofSeconds(10)); // freeze() calls expiration.pause()
+        assertTrue(entry.getExpiration().isPaused());
+        entryDao.update(entry);
+        Optional<EntryImpl> retrieved = entryDao.get("paused_expiration_test");
+        assertTrue(retrieved.isPresent());
+        assertNotNull(retrieved.get().getExpiration());
+        assertTrue(retrieved.get().getExpiration().isPaused());
+        assertNotNull(retrieved.get().getExpiration().getPausedAt());
+    }
+
+    @Test
+    public void updateEntryAfterUnfreezeResumesExpirationAndClearsPausedAt() {
+        EntryImpl entry = entryDao.create("resumed_expiration_test", Instant.now().plusSeconds(60));
+        entry.freeze(Duration.ofSeconds(10));
+        entryDao.update(entry);
+        entry.unfreeze(); // unfreeze() calls expiration.resume()
+        assertFalse(entry.getExpiration().isPaused());
+        entryDao.update(entry);
+        Optional<EntryImpl> retrieved = entryDao.get("resumed_expiration_test");
+        assertTrue(retrieved.isPresent());
+        assertNotNull(retrieved.get().getExpiration());
+        assertFalse(retrieved.get().getExpiration().isPaused());
+        assertNull(retrieved.get().getExpiration().getPausedAt());
+    }
+
+    @Test
     public void updateEntryWithPausedFreezingPersistsPausedAt() {
         EntryImpl entry = entryDao.create("paused_freeze_test", Instant.now().plusSeconds(60));
         entry.freeze(Duration.ofSeconds(10));

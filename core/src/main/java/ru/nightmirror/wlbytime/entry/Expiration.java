@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -16,6 +17,28 @@ import java.time.Instant;
 public class Expiration {
     final long entryId;
     Instant expirationTime;
+    @Nullable Instant pausedAt;
+
+    public Expiration(long entryId, Instant expirationTime) {
+        this.entryId = entryId;
+        this.expirationTime = expirationTime;
+        this.pausedAt = null;
+    }
+
+    public boolean isPaused() {
+        return pausedAt != null;
+    }
+
+    public void pause() {
+        if (isPaused()) return;
+        this.pausedAt = Instant.now();
+    }
+
+    public void resume() {
+        if (!isPaused()) return;
+        this.expirationTime = expirationTime.plus(Duration.between(pausedAt, Instant.now()));
+        this.pausedAt = null;
+    }
 
     public boolean canAdd(Duration duration) {
         Instant newTime = expirationTime.plus(duration);
@@ -51,11 +74,13 @@ public class Expiration {
     }
 
     public boolean isExpired() {
-        return expirationTime.isBefore(Instant.now());
+        Instant ref = isPaused() ? pausedAt : Instant.now();
+        return expirationTime.isBefore(ref);
     }
 
     public boolean isExpired(Duration offset) {
-        return expirationTime.plus(offset).isBefore(Instant.now());
+        Instant ref = isPaused() ? pausedAt : Instant.now();
+        return expirationTime.plus(offset).isBefore(ref);
     }
 
     public boolean isNotExpired() {

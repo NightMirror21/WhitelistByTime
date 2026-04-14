@@ -152,4 +152,66 @@ public class PlayerLoginFilterTest {
 
         verify(entryService, never()).resumeFreeze(any());
     }
+
+    @Test
+    public void unfreezesWhenFreezeInactiveOnLogin() throws Exception {
+        MessagesConfig messages = mock(MessagesConfig.class);
+        SettingsConfig settings = mock(SettingsConfig.class);
+        UnfreezeEntryChecker unfreezeChecker = mock(UnfreezeEntryChecker.class);
+        AccessEntryChecker accessChecker = mock(AccessEntryChecker.class);
+        PlayerIdentityResolver identityResolver = mock(PlayerIdentityResolver.class);
+        EntryIdentityService identityService = mock(EntryIdentityService.class);
+        EntryService entryService = mock(EntryService.class);
+        EntryImpl entry = mock(EntryImpl.class);
+
+        AsyncPlayerPreLoginEvent event = mock(AsyncPlayerPreLoginEvent.class);
+        UUID uuid = UUID.randomUUID();
+        when(event.getName()).thenReturn("Alex");
+        when(event.getUniqueId()).thenReturn(uuid);
+        when(settings.isWhitelistEnabled()).thenReturn(true);
+        when(messages.getYouNotInWhitelistOrFrozenKick()).thenReturn("nope");
+        ResolvedPlayer resolved = new ResolvedPlayer(PlayerKey.nickname("Alex"), "Alex", uuid);
+        when(identityResolver.resolveByLogin("Alex", uuid)).thenReturn(resolved);
+        when(identityService.findOrMigrate(resolved, "Alex")).thenReturn(Optional.of(entry));
+        when(entry.isFreezeInactive()).thenReturn(true);
+        when(accessChecker.isAllowed(entry)).thenReturn(true);
+
+        PlayerLoginFilter filter = createFilter(messages, settings, unfreezeChecker, accessChecker, identityResolver, identityService, entryService);
+        Method method = PlayerLoginFilter.class.getDeclaredMethod("filter", AsyncPlayerPreLoginEvent.class);
+        method.setAccessible(true);
+        method.invoke(filter, event);
+
+        verify(entryService).unfreeze(entry);
+    }
+
+    @Test
+    public void doesNotUnfreezeWhenFreezeNotInactiveOnLogin() throws Exception {
+        MessagesConfig messages = mock(MessagesConfig.class);
+        SettingsConfig settings = mock(SettingsConfig.class);
+        UnfreezeEntryChecker unfreezeChecker = mock(UnfreezeEntryChecker.class);
+        AccessEntryChecker accessChecker = mock(AccessEntryChecker.class);
+        PlayerIdentityResolver identityResolver = mock(PlayerIdentityResolver.class);
+        EntryIdentityService identityService = mock(EntryIdentityService.class);
+        EntryService entryService = mock(EntryService.class);
+        EntryImpl entry = mock(EntryImpl.class);
+
+        AsyncPlayerPreLoginEvent event = mock(AsyncPlayerPreLoginEvent.class);
+        UUID uuid = UUID.randomUUID();
+        when(event.getName()).thenReturn("Alex");
+        when(event.getUniqueId()).thenReturn(uuid);
+        when(settings.isWhitelistEnabled()).thenReturn(true);
+        when(messages.getYouNotInWhitelistOrFrozenKick()).thenReturn("nope");
+        ResolvedPlayer resolved = new ResolvedPlayer(PlayerKey.nickname("Alex"), "Alex", uuid);
+        when(identityResolver.resolveByLogin("Alex", uuid)).thenReturn(resolved);
+        when(identityService.findOrMigrate(resolved, "Alex")).thenReturn(Optional.of(entry));
+        when(entry.isFreezeInactive()).thenReturn(false);
+        when(accessChecker.isAllowed(entry)).thenReturn(true);
+
+        PlayerLoginFilter filter = createFilter(messages, settings, unfreezeChecker, accessChecker, identityResolver, identityService, entryService);
+        Method method = PlayerLoginFilter.class.getDeclaredMethod("filter", AsyncPlayerPreLoginEvent.class);
+        method.setAccessible(true);
+        method.invoke(filter, event);
+
+        verify(entryService, never()).unfreeze(entry);
+    }
 }

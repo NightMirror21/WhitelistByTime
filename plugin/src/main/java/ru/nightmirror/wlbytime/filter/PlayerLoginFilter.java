@@ -46,6 +46,11 @@ public class PlayerLoginFilter implements Listener {
                 }
             });
         }
+        entry.ifPresent(e -> {
+            if (e.isFreezeInactive()) {
+                entryService.unfreeze(e);
+            }
+        });
         entry.ifPresent(unfreezeEntryChecker::unfreezeIfRequired);
         if (!settingsConfig.isWhitelistEnabled()) {
             return;

@@ -98,13 +98,15 @@ public class EntryImplTest {
         Instant future = Instant.now().plus(Duration.ofSeconds(20));
         entry.setExpiration(future);
         entry.freeze(Duration.ofSeconds(10));
-        Instant oldExpiration = entry.getExpiration().getExpirationTime();
-        Duration freezeDuration = entry.getFreezing().getDurationOfFreeze();
+        Instant expirationAtFreeze = entry.getExpiration().getExpirationTime();
         entry.unfreeze();
         assertFalse(entry.isFrozen());
-        Instant expected = oldExpiration.plus(freezeDuration);
+        // After unfreeze, expirationTime shifts forward by elapsed time since freeze.
+        // Since freeze and unfreeze happen almost instantly, the new expiration should be
+        // approximately equal to (or very slightly after) the original expiration time.
         Instant actual = entry.getExpiration().getExpirationTime();
-        assertEquals(expected, actual);
+        assertTrue(!actual.isBefore(expirationAtFreeze),
+                "Expiration after unfreeze should not be before original expiration");
     }
 
     @Test
@@ -158,5 +160,64 @@ public class EntryImplTest {
         Thread.sleep(250);
         assertFalse(entry.isFreezeActive());
         assertTrue(entry.isFreezeInactive());
+    }
+
+    @Test
+    public void testFreezePausesExpiration() {
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
+        assertFalse(entry.getExpiration().isPaused());
+        entry.freeze(Duration.ofSeconds(5));
+        assertTrue(entry.getExpiration().isPaused());
+    }
+
+    @Test
+    public void testUnfreezeResumesExpiration() {
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
+        entry.freeze(Duration.ofSeconds(5));
+        assertTrue(entry.getExpiration().isPaused());
+        entry.unfreeze();
+        assertFalse(entry.getExpiration().isPaused());
+        assertNull(entry.getExpiration().getPausedAt());
+    }
+
+    @Test
+    public void testUnfreezeShiftsExpirationTimeForward() throws InterruptedException {
+        Instant originalExpiry = Instant.now().plus(Duration.ofSeconds(10));
+        entry.setExpiration(originalExpiry);
+        entry.freeze(Duration.ofSeconds(5));
+        Thread.sleep(50);
+        entry.unfreeze();
+        // expirationTime should have shifted forward by ~50ms
+        assertTrue(entry.getExpiration().getExpirationTime().isAfter(originalExpiry));
+    }
+
+    @Test
+    public void testSetExpirationDuringFreezePreservesPausedAt() {
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
+        entry.freeze(Duration.ofSeconds(5));
+        Instant pausedAtBeforeSet = entry.getExpiration().getPausedAt();
+        assertNotNull(pausedAtBeforeSet);
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(20)));
+        assertTrue(entry.getExpiration().isPaused());
+        assertEquals(pausedAtBeforeSet, entry.getExpiration().getPausedAt());
+    }
+
+    @Test
+    public void testGetLeftActiveDurationStableWhenExpirationPaused() throws InterruptedException {
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(10)));
+        entry.freeze(Duration.ofSeconds(5)); // this pauses expiration
+        Duration leftFirst = entry.getLeftActiveDuration();
+        Thread.sleep(50);
+        Duration leftSecond = entry.getLeftActiveDuration();
+        assertEquals(leftFirst, leftSecond);
+    }
+
+    @Test
+    public void testIsActiveWhenFrozenAndExpirationPaused() {
+        entry.setExpiration(Instant.now().plus(Duration.ofSeconds(5)));
+        entry.freeze(Duration.ofSeconds(10));
+        assertTrue(entry.isFreezeActive());
+        assertTrue(entry.getExpiration().isPaused());
+        assertTrue(entry.isActive());
     }
 }

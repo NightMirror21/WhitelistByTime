@@ -55,7 +55,12 @@ public class EntryImpl implements Entry {
 
     @Override
     public void setExpiration(@NotNull Instant instant) {
-        expiration = new Expiration(id, instant);
+        Instant preservedPausedAt = (isFreezeActive() && expiration != null) ? expiration.getPausedAt() : null;
+        expiration = Expiration.builder()
+                .entryId(id)
+                .expirationTime(instant)
+                .pausedAt(preservedPausedAt)
+                .build();
     }
 
     @Override
@@ -87,6 +92,9 @@ public class EntryImpl implements Entry {
             throw new IllegalArgumentException("Duration must be positive.");
         }
 
+        if (expiration != null) {
+            expiration.pause();
+        }
         freezing = new Freezing(id, duration);
     }
 
@@ -96,10 +104,9 @@ public class EntryImpl implements Entry {
             throw new IllegalStateException("Entry is not frozen.");
         }
 
-        Instant previousExpirationTime = expiration.getExpirationTime();
-        Duration durationOfFreeze = freezing.getDurationOfFreeze();
-        expiration = new Expiration(id, previousExpirationTime.plus(durationOfFreeze));
-
+        if (expiration != null) {
+            expiration.resume();
+        }
         freezing = null;
     }
 
@@ -115,14 +122,17 @@ public class EntryImpl implements Entry {
 
     @Override
     public Duration getLeftActiveDuration() {
-        Duration offset = Duration.ZERO;
-
-        if (isFreezeActive()) {
-            offset = freezing.getLeftTime();
-        }
-
         if (isForever()) {
             throw new IllegalStateException("Can't get left expiration time cause entry is forever");
+        }
+
+        if (expiration.isPaused()) {
+            return Duration.between(expiration.getPausedAt(), expiration.getExpirationTime());
+        }
+
+        Duration offset = Duration.ZERO;
+        if (isFreezeActive()) {
+            offset = freezing.getLeftTime();
         }
 
         return Duration.between(Instant.now(), expiration.getExpirationTime()).plus(offset);

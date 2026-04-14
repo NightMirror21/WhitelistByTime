@@ -115,6 +115,7 @@ public class EntryDaoImpl implements EntryDao {
         TableUtils.createTableIfNotExists(connectionSource, ExpirationTable.class);
         migrateEntryTableIfRequired();
         migrateFreezingTableIfRequired();
+        migrateExpirationTableIfRequired();
     }
 
     private void migrateEntryTableIfRequired() {
@@ -162,6 +163,26 @@ public class EntryDaoImpl implements EntryDao {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error migrating entries table", e);
             throw new DatabaseInitializationException("Failed to migrate entries table", e);
+        }
+    }
+
+    private void migrateExpirationTableIfRequired() {
+        try {
+            List<String> columns = getTableColumns(ExpirationTable.TABLE_NAME);
+            if (columns.contains(ExpirationTable.PAUSED_AT_COLUMN)) {
+                return;
+            }
+
+            String alterSql = SQLITE.equalsIgnoreCase(getDatabaseType())
+                    ? String.format("ALTER TABLE %s ADD COLUMN %s TIMESTAMP NULL DEFAULT NULL", ExpirationTable.TABLE_NAME, ExpirationTable.PAUSED_AT_COLUMN)
+                    : String.format("ALTER TABLE %s ADD COLUMN %s DATETIME NULL DEFAULT NULL", ExpirationTable.TABLE_NAME, ExpirationTable.PAUSED_AT_COLUMN);
+
+            try (Statement statement = connectionSource.getReadWriteConnection(null).getUnderlyingConnection().createStatement()) {
+                statement.execute(alterSql);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error migrating expirations table", e);
+            throw new DatabaseInitializationException("Failed to migrate expirations table", e);
         }
     }
 
@@ -390,7 +411,10 @@ public class EntryDaoImpl implements EntryDao {
     }
 
     private static @NotNull ExpirationTable getExpirationTable(EntryImpl entry, EntryTable entryTable) {
-        return new ExpirationTable(null, entryTable, Timestamp.from(entry.getExpiration().getExpirationTime()));
+        Timestamp pausedAt = entry.getExpiration().getPausedAt() != null
+                ? Timestamp.from(entry.getExpiration().getPausedAt())
+                : null;
+        return new ExpirationTable(null, entryTable, Timestamp.from(entry.getExpiration().getExpirationTime()), pausedAt);
     }
 
     @Override
@@ -464,7 +488,7 @@ public class EntryDaoImpl implements EntryDao {
                 }
                 EntryTable entryTable = new EntryTable(null, nickname, null);
                 entryDao.create(entryTable);
-                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until));
+                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until), null);
                 expirationDao.create(expirationTable);
                 return get(nickname).orElseThrow();
             });
@@ -522,7 +546,7 @@ public class EntryDaoImpl implements EntryDao {
             return transactionManager.callInTransaction(() -> {
                 EntryTable entryTable = new EntryTable(null, nickname, uuid);
                 entryDao.create(entryTable);
-                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until));
+                ExpirationTable expirationTable = new ExpirationTable(null, entryTable, Timestamp.from(until), null);
                 expirationDao.create(expirationTable);
                 return getByUuid(uuid).orElseGet(() -> get(nickname).orElseThrow());
             });
@@ -585,6 +609,7 @@ public class EntryDaoImpl implements EntryDao {
         Expiration expiration = expirationTable != null ? Expiration.builder()
                 .entryId(expirationTable.getId())
                 .expirationTime(expirationTable.getExpirationTime().toInstant())
+                .pausedAt(expirationTable.getPausedAt() != null ? expirationTable.getPausedAt().toInstant() : null)
                 .build() : null;
         return EntryImpl.builder()
                 .id(entryTable.getId())
@@ -670,8 +695,10 @@ public class EntryDaoImpl implements EntryDao {
     @AllArgsConstructor
     @ToString
     public static class ExpirationTable {
+        public static final String TABLE_NAME = "wlbytime_expirations";
         public static final String ENTRY_ID_COLUMN = "entry_id";
         public static final String EXPIRATION_TIME_COLUMN = "expiration_time";
+        public static final String PAUSED_AT_COLUMN = "paused_at";
 
         @DatabaseField(generatedId = true, columnName = "id", canBeNull = false)
         private Long id;
@@ -681,6 +708,9 @@ public class EntryDaoImpl implements EntryDao {
 
         @DatabaseField(columnName = EXPIRATION_TIME_COLUMN, canBeNull = false)
         private Timestamp expirationTime;
+
+        @DatabaseField(columnName = PAUSED_AT_COLUMN, canBeNull = true)
+        private Timestamp pausedAt;
     }
 
     public static class DataAccessException extends RuntimeException {
